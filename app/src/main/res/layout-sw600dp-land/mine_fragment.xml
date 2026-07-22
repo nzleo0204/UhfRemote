@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_page_bg"
+    android:fillViewport="true"
+    tools:context=".ui.fragment.home.MineFragment">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="@dimen/dp_18">
+        <TextView android:layout_width="match_parent" android:layout_height="@dimen/dp_56" android:background="@color/rfid_nav_bg" android:gravity="center" android:text="我的" android:textColor="@color/rfid_text" android:textSize="@dimen/sp_18" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:baselineAligned="false" android:orientation="horizontal" android:padding="@dimen/dp_16">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/rfid_card_bg" android:orientation="vertical" android:padding="@dimen/dp_20">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="@dimen/dp_52" android:gravity="center_vertical">
+                    <TextView android:layout_width="@dimen/dp_52" android:layout_height="@dimen/dp_52" android:background="@drawable/rfid_avatar_bg" android:gravity="center" android:text="人" android:textColor="@color/white" android:textSize="@dimen/sp_18" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="@dimen/dp_14" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="admin" android:textColor="@color/rfid_text" android:textSize="@dimen/sp_18" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/dp_4" android:text="管理员 · 已登录" android:textColor="@color/rfid_success" android:textSize="@dimen/sp_12" />
+                    </LinearLayout>
+                </LinearLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="@dimen/dp_16" android:background="@color/rfid_line" />
+                <EditText android:layout_width="match_parent" android:layout_height="@dimen/dp_44" android:autofillHints="username" android:background="@drawable/rfid_search_bg" android:hint="用户名" android:inputType="text" android:paddingHorizontal="@dimen/dp_14" android:singleLine="true" android:textColor="@color/rfid_text" android:textColorHint="@color/rfid_text_muted" android:textSize="@dimen/sp_14" />
+                <EditText android:layout_width="match_parent" android:layout_height="@dimen/dp_44" android:layout_marginTop="@dimen/dp_12" android:autofillHints="password" android:background="@drawable/rfid_search_bg" android:hint="••••••••" android:inputType="textPassword" android:paddingHorizontal="@dimen/dp_14" android:singleLine="true" android:textColor="@color/rfid_text" android:textColorHint="@color/rfid_text_muted" android:textSize="@dimen/sp_14" />
+                <TextView android:id="@+id/tv_mine_login" android:layout_width="match_parent" android:layout_height="@dimen/dp_44" android:layout_marginTop="@dimen/dp_16" android:background="@drawable/rfid_button_bg" android:gravity="center" android:text="登录" android:textColor="@color/white" android:textSize="@dimen/sp_16" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="@dimen/dp_16" android:layout_weight="1" android:background="@drawable/rfid_card_bg" android:orientation="vertical" android:padding="@dimen/dp_16">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="功能菜单" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+                <include layout="@layout/rfid_mine_menu_stock" />
+                <include layout="@layout/rfid_mine_menu_order" />
+                <include layout="@layout/rfid_mine_menu_shipment" />
+                <include layout="@layout/rfid_mine_menu_feedback" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

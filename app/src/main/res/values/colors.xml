@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rfid_page_bg">#0F172A</color>
+    <color name="rfid_panel_bg">#1E293B</color>
+    <color name="rfid_panel_bg_deep">#111827</color>
+    <color name="rfid_nav_bg">#1B2638</color>
+    <color name="rfid_primary">#2F5BEA</color>
+    <color name="rfid_primary_soft">#3B82F6</color>
+    <color name="rfid_success">#22C55E</color>
+    <color name="rfid_teal">#087A55</color>
+    <color name="rfid_warning">#FBBF24</color>
+    <color name="rfid_danger">#EF4444</color>
+    <color name="rfid_orange">#F97316</color>
+    <color name="rfid_text">#F8FAFC</color>
+    <color name="rfid_text_secondary">#CBD5E1</color>
+    <color name="rfid_text_muted">#64748B</color>
+    <color name="rfid_line">#334155</color>
+    <color name="launcher_ic_background">#FFFFFF</color>
+</resources>

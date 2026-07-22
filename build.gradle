@@ -1,0 +1,14 @@
+// AndroidProject 版本：v16.0
+plugins {
+    alias(libs.plugins.application) apply false
+    alias(libs.plugins.library) apply false
+    alias(libs.plugins.aop) apply false
+    alias(libs.plugins.easyLauncher) apply false
+}
+
+// 导入配置文件
+apply from: "${rootDir}/configs.gradle"
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

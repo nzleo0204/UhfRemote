@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_page_bg"
+    android:orientation="vertical"
+    tools:context=".ui.fragment.home.InventoryFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_nav_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_20">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="标签盘点"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_18" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_30"
+            android:background="@drawable/rfid_chip_blue_bg"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/dp_12"
+            android:text="128 条"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_12" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_64"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+
+        <TextView
+            android:id="@+id/tv_inventory_start"
+            android:layout_width="@dimen/dp_100"
+            android:layout_height="@dimen/dp_40"
+            android:background="@drawable/rfid_success_button_bg"
+            android:gravity="center"
+            android:text="开始盘点"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:id="@+id/tv_inventory_clear"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="@dimen/dp_10"
+            android:background="@drawable/rfid_field_bg"
+            android:gravity="center"
+            android:text="清除"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:id="@+id/tv_inventory_export"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="@dimen/dp_10"
+            android:background="@drawable/rfid_field_bg"
+            android:gravity="center"
+            android:text="导出"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_36"
+        android:background="@color/rfid_nav_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+
+        <TextView
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="wrap_content"
+            android:text="编号"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="EPC 号"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <TextView
+            android:layout_width="@dimen/dp_52"
+            android:layout_height="wrap_content"
+            android:text="次数"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <TextView
+            android:layout_width="@dimen/dp_52"
+            android:layout_height="wrap_content"
+            android:text="RSSI"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <TextView
+            android:layout_width="@dimen/dp_72"
+            android:layout_height="wrap_content"
+            android:text="芯片型号"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_panel_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_001" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_page_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_002" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_panel_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_003" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_page_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_004" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_panel_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_005" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_page_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_006" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_panel_bg"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/dp_16">
+        <include layout="@layout/rfid_inventory_row_007" />
+    </LinearLayout>
+</LinearLayout>

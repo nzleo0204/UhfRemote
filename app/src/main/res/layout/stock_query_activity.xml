@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_page_bg"
+    android:fillViewport="true"
+    tools:context=".ui.activity.StockQueryActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/dp_18">
+
+        <LinearLayout
+            android:id="@+id/ll_title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_56"
+            android:background="@color/rfid_nav_bg"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/dp_16">
+
+            <ImageView
+                android:id="@+id/iv_title_back"
+                android:layout_width="@dimen/dp_28"
+                android:layout_height="@dimen/dp_28"
+                android:src="@drawable/rfid_back_ic" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_4"
+                android:layout_weight="1"
+                android:text="@string/stock_query_title"
+                android:textColor="@color/rfid_text"
+                android:textSize="@dimen/sp_18" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_56"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/dp_16">
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dp_40"
+                android:layout_weight="1"
+                android:background="@drawable/rfid_search_bg"
+                android:hint="搜索标签型号、技术规格..."
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:paddingHorizontal="@dimen/dp_14"
+                android:singleLine="true"
+                android:textColor="@color/rfid_text"
+                android:textColorHint="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_13" />
+
+            <TextView
+                android:id="@+id/tv_stock_search"
+                android:layout_width="@dimen/dp_64"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginStart="@dimen/dp_10"
+                android:background="@drawable/rfid_button_bg"
+                android:gravity="center"
+                android:text="搜索"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_46"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/dp_16">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="共 24 种标签"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_13" />
+
+            <TextView
+                android:layout_width="@dimen/dp_32"
+                android:layout_height="@dimen/dp_32"
+                android:gravity="center"
+                android:text="☷"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_18" />
+        </LinearLayout>
+
+        <include layout="@layout/rfid_stock_item_one" />
+        <include layout="@layout/rfid_stock_item_two" />
+        <include layout="@layout/rfid_stock_item_three" />
+        <include layout="@layout/rfid_stock_item_four" />
+    </LinearLayout>
+</ScrollView>

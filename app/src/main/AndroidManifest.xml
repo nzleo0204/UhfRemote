@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 清单文件合并指引：https://developer.android.google.cn/studio/build/manifest-merge?hl=zh-cn -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 网络相关 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 发送通知权限（Android 13.0 新增的权限）-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Application 节点详解：https://developer.android.google.cn/guide/topics/manifest/application-element -->
+    <!-- Activity 节点详解：https://developer.android.google.cn/guide/topics/manifest/activity-element -->
+    <application
+        android:name="com.leo.remote.App"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/launcher_ic"
+        android:label="${app_name}"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:resizeableActivity="true"
+        android:roundIcon="@mipmap/launcher_ic_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false"
+        tools:ignore="AllowBackup,DiscouragedApi"
+        tools:targetApi="s">
+
+        <!-- 闪屏页 -->
+        <activity
+            android:name=".ui.activity.SplashActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/SplashTheme">
+
+            <!-- 程序入口 -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <!-- 首页 -->
+        <activity
+            android:name=".ui.activity.HomeActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".ui.activity.StockQueryActivity"
+            android:label="@string/stock_query_title"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".ui.activity.OrderProgressActivity"
+            android:label="@string/order_progress_title"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".ui.activity.ShipmentQueryActivity"
+            android:label="@string/shipment_query_title"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".ui.activity.FeedbackActivity"
+            android:label="@string/feedback_title"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- 崩溃展示（必须在独立进程） -->
+        <activity
+            android:name=".ui.activity.common.CrashActivity"
+            android:launchMode="singleTop"
+            android:process=":crash" />
+
+        <!-- 重启应用（必须在独立进程） -->
+        <activity
+            android:name=".ui.activity.common.RestartActivity"
+            android:launchMode="singleTop"
+            android:process=":restart" />
+
+    </application>
+
+</manifest>

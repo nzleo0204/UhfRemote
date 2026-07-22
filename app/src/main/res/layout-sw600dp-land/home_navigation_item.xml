@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_76"
+    android:layout_marginHorizontal="@dimen/dp_10"
+    android:layout_marginVertical="@dimen/dp_6"
+    android:background="@drawable/rfid_nav_item_selector"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_8"
+    tools:context=".ui.adapter.common.NavigationAdapter">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iv_home_navigation_icon"
+        android:layout_width="@dimen/dp_24"
+        android:layout_height="@dimen/dp_24"
+        tools:srcCompat="@drawable/rfid_nav_config_ic" />
+
+    <com.hjq.shape.view.ShapeTextView
+        android:id="@+id/tv_home_navigation_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_5"
+        android:singleLine="true"
+        android:textSize="@dimen/sp_12"
+        app:shape_textColor="@color/rfid_text_muted"
+        app:shape_textSelectedColor="@color/white"
+        tools:text="@string/home_nav_config" />
+</LinearLayout>

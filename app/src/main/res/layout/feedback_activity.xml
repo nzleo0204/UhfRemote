@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_page_bg"
+    android:fillViewport="true"
+    tools:context=".ui.activity.FeedbackActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/dp_18">
+
+        <LinearLayout
+            android:id="@+id/ll_title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_56"
+            android:background="@color/rfid_nav_bg"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/dp_16">
+
+            <ImageView
+                android:id="@+id/iv_title_back"
+                android:layout_width="@dimen/dp_28"
+                android:layout_height="@dimen/dp_28"
+                android:src="@drawable/rfid_back_ic" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_4"
+                android:layout_weight="1"
+                android:text="@string/feedback_title"
+                android:textColor="@color/rfid_text"
+                android:textSize="@dimen/sp_18" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_18"
+            android:text="问题类型"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_42"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/rfid_button_bg"
+                android:gravity="center"
+                android:text="产品问题"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_14" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp_8"
+                android:layout_weight="1"
+                android:background="@drawable/rfid_field_bg"
+                android:gravity="center"
+                android:text="订单问题"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_14" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp_8"
+                android:layout_weight="1"
+                android:background="@drawable/rfid_field_bg"
+                android:gravity="center"
+                android:text="新需求"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_18"
+            android:text="关联订单（选填）"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_44"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@drawable/rfid_field_bg"
+            android:hint="请输入关联订单号..."
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingHorizontal="@dimen/dp_14"
+            android:singleLine="true"
+            android:textColor="@color/rfid_text"
+            android:textColorHint="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_14"
+            android:text="问题标题"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_44"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@drawable/rfid_field_bg"
+            android:hint="请简要描述问题..."
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences"
+            android:paddingHorizontal="@dimen/dp_14"
+            android:singleLine="true"
+            android:textColor="@color/rfid_text"
+            android:textColorHint="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_14"
+            android:text="详细描述"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_120"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@drawable/rfid_text_area_bg"
+            android:gravity="top"
+            android:hint="请详细描述您遇到的问题或需求，包括使用场景、期望效果等信息，便于我们快速处理..."
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences|textMultiLine"
+            android:padding="@dimen/dp_14"
+            android:textColor="@color/rfid_text"
+            android:textColorHint="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_18"
+            android:text="上传图片（最多6张）"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_72"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="@dimen/dp_72"
+                android:layout_height="match_parent"
+                android:background="@drawable/rfid_field_bg"
+                android:drawablePadding="@dimen/dp_6"
+                android:gravity="center"
+                android:text="拍照"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_13"
+                app:drawableTint="@color/rfid_text_muted"
+                app:drawableTopCompat="@drawable/camera_ic" />
+
+            <TextView
+                android:layout_width="@dimen/dp_72"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp_10"
+                android:background="@drawable/rfid_thumb_bg"
+                android:gravity="center"
+                android:text="图"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_16" />
+
+            <TextView
+                android:layout_width="@dimen/dp_72"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp_10"
+                android:background="@drawable/rfid_field_bg"
+                android:gravity="center"
+                android:text="添加"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_13" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_feedback_submit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_16"
+            android:background="@drawable/rfid_button_bg"
+            android:gravity="center"
+            android:text="提交问题"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+</ScrollView>

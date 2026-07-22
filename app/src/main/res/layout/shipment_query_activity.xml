@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_page_bg"
+    android:fillViewport="true"
+    tools:context=".ui.activity.ShipmentQueryActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/dp_18">
+
+        <LinearLayout
+            android:id="@+id/ll_title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_56"
+            android:background="@color/rfid_nav_bg"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/dp_16">
+
+            <ImageView
+                android:id="@+id/iv_title_back"
+                android:layout_width="@dimen/dp_28"
+                android:layout_height="@dimen/dp_28"
+                android:src="@drawable/rfid_back_ic" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_4"
+                android:layout_weight="1"
+                android:text="@string/shipment_query_title"
+                android:textColor="@color/rfid_text"
+                android:textSize="@dimen/sp_18" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_12"
+            android:background="@drawable/rfid_card_bg"
+            android:orientation="vertical"
+            android:padding="@dimen/dp_16">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ORD-2024-0851"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_14" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dp_24"
+                    android:background="@drawable/rfid_chip_green_bg"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/dp_8"
+                    android:text="已发货"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_11" />
+            </LinearLayout>
+
+            <include layout="@layout/rfid_shipment_pair_one" />
+            <include layout="@layout/rfid_shipment_pair_two" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_58"
+                android:layout_marginTop="@dimen/dp_10"
+                android:background="@drawable/rfid_search_bg"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/dp_12">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="顺丰速运"
+                    android:textColor="@color/rfid_primary_soft"
+                    android:textSize="@dimen/sp_12" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_6"
+                    android:text="运单号: SF1234567890123"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_14" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_shipment_copy"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_36"
+                android:layout_marginTop="@dimen/dp_10"
+                android:background="@drawable/rfid_outline_button_bg"
+                android:gravity="center"
+                android:text="复制运单号"
+                android:textColor="@color/rfid_primary_soft"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_12"
+            android:background="@drawable/rfid_card_bg"
+            android:orientation="vertical"
+            android:padding="@dimen/dp_16">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ORD-2024-0732"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_14" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dp_24"
+                    android:background="@drawable/rfid_chip_warning_outline_bg"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/dp_8"
+                    android:text="分批发货"
+                    android:textColor="@color/rfid_warning"
+                    android:textSize="@dimen/sp_11" />
+            </LinearLayout>
+
+            <include layout="@layout/rfid_shipment_pair_three" />
+            <include layout="@layout/rfid_shipment_pair_four" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:layout_marginTop="@dimen/dp_12"
+                android:background="@drawable/rfid_search_bg"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/dp_12">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="● 第1批 · 6,000枚"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_13" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="已签收"
+                    android:textColor="@color/rfid_success"
+                    android:textSize="@dimen/sp_12" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/rfid_search_bg"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/dp_12">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="● 第2批 · 6,000枚"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_13" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="运输中"
+                    android:textColor="@color/rfid_warning"
+                    android:textSize="@dimen/sp_12" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
