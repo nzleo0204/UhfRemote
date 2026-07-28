@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rfid_panel_bg"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_16">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="选择蓝牙设备"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_18" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_ble_rescan"
+            style="@style/RfidTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_48"
+            android:text="重新扫描" />
+
+        <ImageButton
+            android:id="@+id/btn_ble_close"
+            android:layout_width="@dimen/dp_48"
+            android:layout_height="@dimen/dp_48"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="关闭蓝牙扫描"
+            android:padding="@dimen/dp_12"
+            android:src="@drawable/rfid_close_ic"
+            app:tint="@color/rfid_text_secondary" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_ble_scan_status"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:gravity="center_vertical"
+        android:text="正在扫描..."
+        android:textColor="@color/rfid_text_muted"
+        android:textSize="@dimen/sp_13" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_ble_devices"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/dp_8" />
+</LinearLayout>

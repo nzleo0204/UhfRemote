@@ -10,6 +10,9 @@
     <string name="app_name">&app_name;</string>
     <string name="app_name_debug">&app_name; Debug 版</string>
     <string name="app_name_preview">&app_name; Preview 版</string>
+    <string name="reader_ble_service_channel">读写器蓝牙连接</string>
+    <string name="reader_ble_service_title">RFID 读写器</string>
+    <string name="reader_ble_service_running">蓝牙透传服务运行中</string>
 
     <!-- 用户协议与隐私保护弹窗 -->
     <string name="privacy_agreement_title">用户协议与隐私保护</string>

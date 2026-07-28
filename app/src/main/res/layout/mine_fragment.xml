@@ -54,7 +54,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="admin"
+                        android:text="未登录"
                         android:textColor="@color/rfid_text"
                         android:textSize="@dimen/sp_18" />
 
@@ -62,8 +62,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/dp_4"
-                        android:text="管理员 · 已登录"
-                        android:textColor="@color/rfid_success"
+                        android:text="登录服务尚未接入"
+                        android:textColor="@color/rfid_text_muted"
                         android:textSize="@dimen/sp_12" />
                 </LinearLayout>
             </LinearLayout>

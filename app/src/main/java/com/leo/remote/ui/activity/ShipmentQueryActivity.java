@@ -11,11 +11,11 @@ public final class ShipmentQueryActivity extends RfidPageActivity {
 
     @Override
     protected void initPageView() {
-        findViewById(R.id.tv_shipment_copy).setOnClickListener(v -> toast("运单号已复制"));
+        // No shipment action is available until the backend is integrated.
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        // Backend integration is intentionally out of scope.
     }
 }

@@ -1,41 +1,140 @@
 package com.leo.remote.ui.fragment.home;
 
+import android.net.Uri;
+import android.view.View;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
 import com.leo.remote.app.AppFragment;
+import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.ReaderObserver;
+import com.leo.remote.reader.ReaderSessionManager;
+import com.leo.remote.reader.ReaderState;
 import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.ui.adapter.InventoryAdapter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-/**
- * RFID 标签盘点页。
- */
-public final class InventoryFragment extends AppFragment<HomeActivity> {
+/** Live RFID inventory page. */
+public final class InventoryFragment extends AppFragment<HomeActivity> implements ReaderObserver {
+    private ReaderSessionManager session;
+    private InventoryAdapter adapter;
+    private MaterialButton startButton;
+    private TextView totalView;
+    private TextView emptyView;
+    private List<InventoryItem> exportItems = List.of();
 
-    private boolean mRunning;
-    private TextView mStartView;
+    private final ActivityResultLauncher<String> createCsv = registerForActivityResult(
+            new ActivityResultContracts.CreateDocument("text/csv"), this::writeCsv);
 
-    public static InventoryFragment newInstance() {
-        return new InventoryFragment();
-    }
+    public static InventoryFragment newInstance() { return new InventoryFragment(); }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.inventory_fragment;
-    }
+    protected int getLayoutId() { return R.layout.inventory_fragment; }
 
     @Override
     protected void initView() {
-        mStartView = findViewById(R.id.tv_inventory_start);
-        mStartView.setOnClickListener(v -> {
-            mRunning = !mRunning;
-            mStartView.setText(mRunning ? "停止盘点" : "开始盘点");
-            mStartView.setBackgroundResource(mRunning ? R.drawable.rfid_danger_outline_bg : R.drawable.rfid_success_button_bg);
+        startButton = findViewById(R.id.btn_inventory_start);
+        totalView = findViewById(R.id.tv_inventory_total);
+        emptyView = findViewById(R.id.tv_inventory_empty);
+        RecyclerView recyclerView = findViewById(R.id.rv_inventory_items);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new InventoryAdapter();
+        recyclerView.setAdapter(adapter);
+
+        startButton.setOnClickListener(view -> toggleInventory());
+        findViewById(R.id.btn_inventory_clear).setOnClickListener(view -> session.clearInventory());
+        findViewById(R.id.btn_inventory_export).setOnClickListener(view -> {
+            exportItems = session.getInventorySnapshot();
+            String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+            createCsv.launch("uhf-inventory-" + date + ".csv");
         });
-        findViewById(R.id.tv_inventory_clear).setOnClickListener(v -> toast("已清除盘点列表"));
-        findViewById(R.id.tv_inventory_export).setOnClickListener(v -> toast("盘点数据已准备导出"));
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        session = ReaderSessionManager.getInstance(requireActivity().getApplication());
+        session.addObserver(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (session != null) {
+            if (session.getState().isInventoryRunning()) { session.stopInventory(); }
+            session.removeObserver(this);
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onReaderStateChanged(ReaderState state) {
+        boolean connected = state.isConnected();
+        startButton.setEnabled(connected);
+        startButton.setText(state.isInventoryRunning() ? "停止盘点" : "开始盘点");
+        startButton.setIconResource(state.isInventoryRunning()
+                ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
+    }
+
+    @Override
+    public void onInventoryChanged(List<InventoryItem> items, long totalReads) {
+        adapter.submitList(items);
+        totalView.setText(items.size() + " 标签 / " + totalReads + " 次");
+        emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void toggleInventory() {
+        ReaderState state = session.getState();
+        if (!state.isConnected()) {
+            toast("请先连接读写器");
+            return;
+        }
+        if (state.isInventoryRunning()) {
+            session.stopInventory().whenComplete((status, error) -> showResult(status, error, "停止盘点失败"));
+        } else {
+            session.startInventory().whenComplete((status, error) -> showResult(status, error, "开始盘点失败"));
+        }
+    }
+
+    private void showResult(Integer status, Throwable error, String message) {
+        requireActivity().runOnUiThread(() -> {
+            if (error != null) { toast(rootMessage(error)); }
+            else if (status != null && status != 0) { toast(message + "（错误码 " + status + "）"); }
+        });
+    }
+
+    private void writeCsv(Uri uri) {
+        if (uri == null) { return; }
+        StringBuilder csv = new StringBuilder("index,id,additional_data,count,rssi,chip_model\r\n");
+        for (int i = 0; i < exportItems.size(); i++) {
+            InventoryItem item = exportItems.get(i);
+            csv.append(i + 1).append(',').append(escape(item.getId())).append(',')
+                    .append(escape(item.getData())).append(',').append(item.getCount()).append(',')
+                    .append(item.getRssi()).append(',').append(escape(item.getChipModel())).append("\r\n");
+        }
+        try (OutputStream output = requireContext().getContentResolver().openOutputStream(uri)) {
+            if (output == null) { throw new IOException("Unable to open document"); }
+            output.write(csv.toString().getBytes(StandardCharsets.UTF_8));
+            toast("CSV 已导出");
+        } catch (IOException error) {
+            toast("导出失败：" + error.getMessage());
+        }
+    }
+
+    private static String escape(String value) {
+        String safe = value == null ? "" : value;
+        return '"' + safe.replace("\"", "\"\"") + '"';
+    }
+
+    private static String rootMessage(Throwable error) {
+        Throwable cause = error.getCause();
+        return cause == null ? error.getMessage() : cause.getMessage();
     }
 }

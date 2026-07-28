@@ -3,7 +3,6 @@ package com.leo.remote;
 import android.app.Application;
 import com.hjq.core.manager.ActivityManager;
 import com.leo.remote.aop.Log;
-import com.leo.remote.http.glide.GlideApp;
 import com.leo.remote.manager.InitManager;
 import com.leo.remote.manager.OrientationManager;
 
@@ -14,11 +13,15 @@ import com.leo.remote.manager.OrientationManager;
  *    desc   : 应用入口
  */
 public final class App extends Application {
+    private static volatile App instance;
+
+    public static App getInstance() { return instance; }
 
     @Log("启动耗时")
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
 
         OrientationManager.register(this);
 
@@ -28,22 +31,8 @@ public final class App extends Application {
         }
 
         InitManager.preInitSdk(this);
-        if (InitManager.isAgreePrivacy(this)) {
-            InitManager.initSdk(this);
-        }
+        // 创建全局读写器会话并初始化一次 JNI。连接页面只复用这个会话。
+        InitManager.initSdk(this);
     }
 
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        // 清理所有图片内存缓存
-        GlideApp.get(this).onLowMemory();
-    }
-
-    @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-        // 根据手机内存剩余情况清理图片内存缓存
-        GlideApp.get(this).onTrimMemory(level);
-    }
 }

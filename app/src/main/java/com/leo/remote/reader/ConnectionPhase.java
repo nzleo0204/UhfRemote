@@ -1,0 +1,14 @@
+package com.leo.remote.reader;
+
+public enum ConnectionPhase {
+    DISCONNECTED,
+    SCANNING,
+    CONNECTING,
+    DISCOVERING_SERVICES,
+    ENABLING_NOTIFICATIONS,
+    CONNECTING_DATA_CHANNEL,
+    VERIFYING_MODULE,
+    CONNECTED,
+    DISCONNECTING,
+    FAILED
+}

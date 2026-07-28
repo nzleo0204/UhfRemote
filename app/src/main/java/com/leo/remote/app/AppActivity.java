@@ -18,10 +18,7 @@ import com.leo.remote.R;
 import com.leo.remote.action.ImmersionAction;
 import com.leo.remote.action.TitleBarAction;
 import com.leo.remote.action.ToastAction;
-import com.leo.remote.http.model.HttpData;
 import com.leo.remote.ui.dialog.common.WaitDialog;
-import com.hjq.http.config.IRequestApi;
-import com.hjq.http.listener.OnHttpListener;
 
 /**
  *    author : Android 轮子哥
@@ -30,7 +27,7 @@ import com.hjq.http.listener.OnHttpListener;
  *    desc   : Activity 业务基类
  */
 public abstract class AppActivity extends BaseActivity
-    implements ToastAction, TitleBarAction, ImmersionAction, OnHttpListener<Object> {
+    implements ToastAction, TitleBarAction, ImmersionAction {
 
     /** 标题栏对象 */
     private TitleBar mTitleBar;
@@ -259,32 +256,6 @@ public abstract class AppActivity extends BaseActivity
     @Override
     public void onLeftClick(TitleBar titleBar) {
         getOnBackPressedDispatcher().onBackPressed();
-    }
-
-    /**
-     * {@link OnHttpListener}
-     */
-
-    @Override
-    public void onHttpStart(@NonNull IRequestApi api) {
-        showLoadingDialog();
-    }
-
-    @Override
-    public void onHttpSuccess(@NonNull Object result) {
-        if (result instanceof HttpData) {
-            toast(((HttpData<?>) result).getMessage());
-        }
-    }
-
-    @Override
-    public void onHttpFail(@NonNull Throwable throwable) {
-        toast(throwable.getMessage());
-    }
-
-    @Override
-    public void onHttpEnd(@NonNull IRequestApi api) {
-        hideLoadingDialog();
     }
 
     @Override

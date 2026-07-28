@@ -11,11 +11,11 @@ public final class OrderProgressActivity extends RfidPageActivity {
 
     @Override
     protected void initPageView() {
-        findViewById(R.id.tv_order_filter).setOnClickListener(v -> toast("筛选条件已打开"));
+        // No order filters are available until the backend is integrated.
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        // Backend integration is intentionally out of scope.
     }
 }

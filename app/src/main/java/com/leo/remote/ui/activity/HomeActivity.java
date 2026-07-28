@@ -24,6 +24,10 @@ import com.leo.remote.ui.fragment.home.InventoryFragment;
 import com.leo.remote.ui.fragment.home.MineFragment;
 import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
 import com.leo.remote.ui.fragment.home.SingleTagFragment;
+import com.leo.remote.reader.ConnectionPhase;
+import com.leo.remote.reader.ReaderObserver;
+import com.leo.remote.reader.ReaderSessionManager;
+import com.leo.remote.reader.ReaderState;
 
 /**
  *    author : Android 轮子哥
@@ -32,7 +36,7 @@ import com.leo.remote.ui.fragment.home.SingleTagFragment;
  *    desc   : 首页界面
  */
 public final class HomeActivity extends AppActivity
-        implements NavigationAdapter.OnNavigationListener {
+        implements NavigationAdapter.OnNavigationListener, ReaderObserver {
 
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
@@ -42,6 +46,19 @@ public final class HomeActivity extends AppActivity
 
     private NavigationAdapter mNavigationAdapter;
     private BasePagerAdapter<AppFragment<?>> mPagerAdapter;
+    private ReaderSessionManager mReaderSession;
+    private int mSelectedPage;
+    private final ViewPager.SimpleOnPageChangeListener mPageChangeListener =
+            new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    if (mSelectedPage == 1 && position != 1 && mReaderSession != null
+                            && mReaderSession.getState().isInventoryRunning()) {
+                        mReaderSession.stopInventory();
+                    }
+                    mSelectedPage = position;
+                }
+            };
 
     public static void start(@NonNull Context context) {
         start(context, ReaderConfigFragment.class);
@@ -89,12 +106,15 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void initData() {
+        mReaderSession = ReaderSessionManager.getInstance(getApplication());
+        mReaderSession.addObserver(this);
         mPagerAdapter = new BasePagerAdapter<>(this);
         mPagerAdapter.addFragment(ReaderConfigFragment.newInstance());
         mPagerAdapter.addFragment(InventoryFragment.newInstance());
         mPagerAdapter.addFragment(SingleTagFragment.newInstance());
         mPagerAdapter.addFragment(MineFragment.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.addOnPageChangeListener(mPageChangeListener);
 
         onNewIntent(getIntent());
     }
@@ -187,6 +207,9 @@ public final class HomeActivity extends AppActivity
             return;
         }
 
+        if (mReaderSession != null) {
+            mReaderSession.shutdown();
+        }
         // 移动到上一个任务栈
         moveTaskToBack(false);
         postDelayed(() -> {
@@ -197,9 +220,21 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void onDestroy() {
+        if (mReaderSession != null) {
+            mReaderSession.removeObserver(this);
+        }
         super.onDestroy();
+        mViewPager.removeOnPageChangeListener(mPageChangeListener);
         mViewPager.setAdapter(null);
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
     }
+
+    @Override
+    public void onReaderStateChanged(ReaderState state) {
+        if (state.getPhase() == ConnectionPhase.FAILED || state.getPhase() == ConnectionPhase.DISCONNECTED) {
+            switchFragment(0);
+        }
+    }
+
 }

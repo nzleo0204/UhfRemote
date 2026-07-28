@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/dp_8">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="存储区"
+            android:textColor="@color/rfid_text_muted" />
+        <Spinner
+            android:id="@+id/sp_tag_bank"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_48" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_tag_length"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="起始地址">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_tag_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <LinearLayout
+            android:id="@+id/group_tag_gb_sub_bank"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="用户子区"
+                android:textColor="@color/rfid_text_muted" />
+            <Spinner
+                android:id="@+id/sp_tag_gb_sub_bank"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_48" />
+        </LinearLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="块长度 / 重试次数">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_tag_length"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="HEX 数据">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_tag_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapCharacters" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="访问密码（8 位 HEX）">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_tag_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapCharacters" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+</ScrollView>

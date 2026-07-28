@@ -41,10 +41,6 @@ android {
         // BuglyKey
         buildConfigField('String', 'BUGLY_KEY', '"' + rootConfig.BUGLY_KEY + '"')
 
-        // 仅保留 arm64-v8a 架构（需要注意的是 mmkv 库在 2.0 及之后的版本已经不支持在 32 位的机器上面运行）
-        ndk {
-            abiFilters 'arm64-v8a'
-        }
     }
 
     sourceSets {
@@ -140,22 +136,15 @@ android {
         // 只对以下包名做 AOP 处理
         include android.defaultConfig.applicationId
     }
-}
 
-// 应用启动图标配置：保持所有构建类型使用同一套标准 adaptive icon。
-easylauncher {
-    buildTypes {
-        preview {
-            enable false
-        }
-        debug {
-            enable false
-        }
-        release {
-            enable false
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
     }
 }
+
+
 
 // 添加构建依赖项：https://developer.android.google.cn/studio/build/dependencies
 // api 与 implementation 的区别：https://www.jianshu.com/p/8962d6ba936e
@@ -172,23 +161,15 @@ dependencies {
 
     implementation libs.toaster
 
-    implementation libs.easyHttp
-    implementation libs.okHttp
-
-    implementation libs.gsonFactory
-    implementation(libs.gson)
+    implementation libs.easybleX
+    implementation libs.commonsAndroid
 
     implementation libs.shapeView
     implementation libs.shapeDrawable
 
     implementation libs.nestedScrollLayout
 
-    implementation libs.glide
-    annotationProcessor libs.glideCompiler
-
     implementation libs.immersionBar
-
-    implementation libs.photoView
 
     implementation libs.bugly
 
@@ -208,12 +189,10 @@ dependencies {
     implementation libs.androidAopCore
     annotationProcessor libs.androidAopApt
 
+    testImplementation 'junit:junit:4.13.2'
+
     debugImplementation libs.leakCanary
     previewImplementation libs.leakCanary
-
-    debugImplementation libs.chucker
-    previewImplementation libs.chucker
-    releaseImplementation libs.chuckerNoOp
 
     // 多语种：https://github.com/getActivity/MultiLanguages
     // 悬浮窗：https://github.com/getActivity/EasyWindow

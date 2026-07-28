@@ -29,11 +29,11 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         findViewById(R.id.ll_mine_order).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), OrderProgressActivity.class)));
         findViewById(R.id.ll_mine_shipment).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), ShipmentQueryActivity.class)));
         findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), FeedbackActivity.class)));
-        findViewById(R.id.tv_mine_login).setOnClickListener(v -> toast("登录信息已提交"));
+        findViewById(R.id.tv_mine_login).setOnClickListener(v -> toast("登录服务尚未接入"));
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        // Business backend integration is intentionally out of scope.
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row_config_blf"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dp_44"
     android:gravity="center_vertical">
@@ -11,12 +12,13 @@
         android:textColor="@color/rfid_text"
         android:textSize="@dimen/sp_16" />
     <TextView
+        android:id="@+id/tv_config_blf"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dp_32"
         android:background="@drawable/rfid_search_bg"
         android:gravity="center"
         android:paddingHorizontal="@dimen/dp_12"
-        android:text="256 kHz"
+        android:text="250 kHz"
         android:textColor="@color/rfid_primary_soft"
         android:textSize="@dimen/sp_14" />
 </LinearLayout>

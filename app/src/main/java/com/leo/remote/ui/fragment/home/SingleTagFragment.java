@@ -1,34 +1,324 @@
 package com.leo.remote.ui.fragment.home;
 
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 import com.leo.remote.R;
 import com.leo.remote.app.AppFragment;
+import com.leo.remote.reader.HexCodec;
+import com.leo.remote.reader.ProtocolEncoding;
+import com.leo.remote.reader.ReaderObserver;
+import com.leo.remote.reader.ReaderSessionManager;
+import com.leo.remote.reader.ReaderState;
+import com.leo.remote.reader.ReaderTag;
+import com.leo.remote.reader.TagProtocol;
 import com.leo.remote.ui.activity.HomeActivity;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * 单标签读写操作页。
- */
-public final class SingleTagFragment extends AppFragment<HomeActivity> {
+/** Single-target RFID operations. */
+public final class SingleTagFragment extends AppFragment<HomeActivity> implements ReaderObserver {
+    private ReaderSessionManager session;
+    private TextView readButton;
+    private TextView epcView;
+    private TextView tidView;
+    private TextView chipView;
+    private TextView rssiView;
+    private View writeAction;
+    private View updateEpcAction;
+    private View lockAction;
+    private View destroyAction;
+    private ReaderTag currentTag;
+    private ReaderState readerState;
 
-    public static SingleTagFragment newInstance() {
-        return new SingleTagFragment();
-    }
+    public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.single_tag_fragment;
-    }
+    protected int getLayoutId() { return R.layout.single_tag_fragment; }
 
     @Override
     protected void initView() {
-        findViewById(R.id.tv_single_read).setOnClickListener(v -> toast("已读取当前标签"));
-        findViewById(R.id.ll_single_write).setOnClickListener(v -> toast("进入写入数据流程"));
-        findViewById(R.id.ll_single_update_epc).setOnClickListener(v -> toast("进入 EPC 修改流程"));
-        findViewById(R.id.ll_single_lock).setOnClickListener(v -> toast("进入标签锁定流程"));
-        findViewById(R.id.ll_single_destroy).setOnClickListener(v -> toast("销毁标签需二次确认"));
+        readButton = findViewById(R.id.tv_single_read);
+        epcView = findViewById(R.id.tv_single_epc);
+        tidView = findViewById(R.id.tv_single_tid);
+        chipView = findViewById(R.id.tv_single_chip);
+        rssiView = findViewById(R.id.tv_single_rssi);
+        writeAction = findViewById(R.id.ll_single_write);
+        updateEpcAction = findViewById(R.id.ll_single_update_epc);
+        lockAction = findViewById(R.id.ll_single_lock);
+        destroyAction = findViewById(R.id.ll_single_destroy);
+
+        readButton.setOnClickListener(view -> readTag());
+        writeAction.setOnClickListener(view -> showWriteDialog(false));
+        updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
+        lockAction.setOnClickListener(view -> showLockDialog());
+        destroyAction.setOnClickListener(view -> showKillDialog());
+        setOperationEnabled(false);
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        session = ReaderSessionManager.getInstance(requireActivity().getApplication());
+        session.addObserver(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (session != null) { session.removeObserver(this); }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onReaderStateChanged(ReaderState state) {
+        readerState = state;
+        readButton.setEnabled(state.isConnected());
+        readButton.setAlpha(state.isConnected() ? 1f : 0.45f);
+        if (!state.isConnected()) {
+            currentTag = null;
+            bindTag(null);
+        }
+        setOperationEnabled(state.isConnected() && currentTag != null);
+    }
+
+    @Override
+    public void onCurrentTagChanged(ReaderTag tag) {
+        currentTag = tag;
+        bindTag(tag);
+        setOperationEnabled(readerState != null && readerState.isConnected() && tag != null);
+    }
+
+    private void readTag() {
+        if (session == null || !session.getState().isConnected()) {
+            toast("请先连接读写器");
+            return;
+        }
+        readButton.setEnabled(false);
+        readButton.setText("读取中...");
+        session.readSingleTag().whenComplete((tag, error) -> requireActivity().runOnUiThread(() -> {
+            readButton.setEnabled(true);
+            readButton.setText("读取标签");
+            if (error != null) { toast("读取失败：" + rootMessage(error)); }
+        }));
+    }
+
+    private void showWriteDialog(boolean updateEpc) {
+        if (!ensureTarget()) { return; }
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_write_dialog, null, false);
+        Spinner bankSpinner = content.findViewById(R.id.sp_tag_bank);
+        Spinner gbSubBankSpinner = content.findViewById(R.id.sp_tag_gb_sub_bank);
+        View gbSubBankGroup = content.findViewById(R.id.group_tag_gb_sub_bank);
+        TextInputLayout auxiliaryInput = content.findViewById(R.id.til_tag_length);
+        EditText addressView = content.findViewById(R.id.et_tag_address);
+        EditText lengthView = content.findViewById(R.id.et_tag_length);
+        EditText dataView = content.findViewById(R.id.et_tag_data);
+        EditText passwordView = content.findViewById(R.id.et_tag_password);
+        String[] banks = bankLabels(readerState.getProtocol());
+        bankSpinner.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, banks));
+        gbSubBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"子区 1", "子区 2", "子区 3", "子区 4", "子区 5", "子区 6",
+                        "子区 7", "子区 28", "子区 29", "子区 30"}));
+        addressView.setText(updateEpc ? "1" : "0");
+        TagProtocol protocol = readerState.getProtocol();
+        auxiliaryInput.setHint(protocol == TagProtocol.ISO_18000_6B
+                ? "重试次数（0-255）" : "块长度（0-255）");
+        auxiliaryInput.setVisibility(protocol == TagProtocol.ISO_18000_6C || updateEpc
+                ? View.GONE : View.VISIBLE);
+        lengthView.setText(protocol == TagProtocol.ISO_18000_6B ? "3" : "1");
+        passwordView.setText("00000000");
+        bankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                gbSubBankGroup.setVisibility(protocol == TagProtocol.GB_T_29768 && position == 3
+                        ? View.VISIBLE : View.GONE);
+            }
+
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        if (updateEpc) {
+            bankSpinner.setSelection(Math.min(1, banks.length - 1));
+            bankSpinner.setEnabled(false);
+            dataView.setText(currentTag.id);
+        }
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(updateEpc ? "修改 EPC" : "写入标签数据")
+                .setView(content)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("执行", null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    try {
+                        byte[] password = parsePassword(passwordView.getText().toString());
+                        byte[] inputData = HexCodec.decode(dataView.getText().toString());
+                        int bank = updateEpc ? 1 : ProtocolEncoding.encodeBank(protocol,
+                                bankSpinner.getSelectedItemPosition(), gbSubBankSpinner.getSelectedItemPosition());
+                        int address = parseUnsigned(addressView, "起始地址");
+                        int blockOrRetry = protocol == TagProtocol.ISO_18000_6C || updateEpc
+                                ? 0 : parseUnsigned(lengthView, "块长度 / 重试次数");
+                        byte[] writeData = inputData;
+                        int writeLength;
+                        if (updateEpc && readerState.getProtocol() == TagProtocol.ISO_18000_6C) {
+                            writeData = withEpcPcWord(inputData);
+                            address = 1;
+                            writeLength = writeData.length / 2;
+                        } else {
+                            address = ProtocolEncoding.encodeAddress(protocol, address, blockOrRetry);
+                            writeLength = ProtocolEncoding.writeLength(protocol, inputData);
+                        }
+                        executeStatus(session.writeCurrentTag(writeLength, address, bank, password, writeData),
+                                updateEpc ? "EPC 修改" : "数据写入", dialog);
+                    } catch (IllegalArgumentException error) {
+                        toast(error.getMessage());
+                    }
+                }));
+        dialog.show();
+    }
+
+    private void showLockDialog() {
+        if (!ensureTarget()) { return; }
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_lock_dialog, null, false);
+        Spinner bank = content.findViewById(R.id.sp_tag_lock_bank);
+        Spinner policy = content.findViewById(R.id.sp_tag_lock_policy);
+        EditText password = content.findViewById(R.id.et_tag_lock_password);
+        bank.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"访问密码", "销毁密码", "EPC", "TID", "USER"}));
+        policy.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"可读写", "永久可读写", "授权可读写", "永久不可读写"}));
+        password.setText("00000000");
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setTitle("锁定标签")
+                .setView(content).setNegativeButton("取消", null).setPositiveButton("执行", null).create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    try {
+                        executeStatus(session.lockCurrentTag(parsePassword(password.getText().toString()),
+                                bank.getSelectedItemPosition(), policy.getSelectedItemPosition()), "标签锁定", dialog);
+                    } catch (IllegalArgumentException error) { toast(error.getMessage()); }
+                }));
+        dialog.show();
+    }
+
+    private void showKillDialog() {
+        if (!ensureTarget()) { return; }
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_kill_dialog, null, false);
+        EditText accessPassword = content.findViewById(R.id.et_tag_kill_access_password);
+        EditText killPassword = content.findViewById(R.id.et_tag_kill_password);
+        accessPassword.setText("00000000");
+        AlertDialog form = new MaterialAlertDialogBuilder(requireContext()).setTitle("销毁标签")
+                .setView(content).setNegativeButton("取消", null).setPositiveButton("下一步", null).create();
+        form.setOnShowListener(ignored -> form.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    try {
+                        byte[] access = parsePassword(accessPassword.getText().toString());
+                        byte[] kill = parsePassword(killPassword.getText().toString());
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("确认永久销毁？")
+                                .setMessage("目标标签销毁后不可恢复。")
+                                .setNegativeButton("取消", null)
+                                .setPositiveButton("确认销毁", (dialog, which) -> {
+                                    form.dismiss();
+                                    executeStatus(session.killCurrentTag(access, kill), "标签销毁", null);
+                                }).show();
+                    } catch (IllegalArgumentException error) { toast(error.getMessage()); }
+                }));
+        form.show();
+    }
+
+    private void executeStatus(CompletableFuture<Integer> future, String operation, AlertDialog dialog) {
+        showLoadingDialog();
+        future.whenComplete((status, error) -> requireActivity().runOnUiThread(() -> {
+            hideLoadingDialog();
+            if (error != null) {
+                toast(operation + "失败：" + rootMessage(error));
+            } else if (status != 0) {
+                toast(operation + "失败（错误码 " + status + "）");
+            } else {
+                toast(operation + "成功");
+                if (dialog != null) { dialog.dismiss(); }
+            }
+        }));
+    }
+
+    private boolean ensureTarget() {
+        if (readerState == null || !readerState.isConnected()) {
+            toast("请先连接读写器");
+            return false;
+        }
+        if (currentTag == null) {
+            toast("请先读取目标标签");
+            return false;
+        }
+        return true;
+    }
+
+    private void bindTag(ReaderTag tag) {
+        epcView.setText(tag == null || tag.id.isEmpty() ? "-" : tag.id);
+        tidView.setText(tag == null || tag.data.isEmpty() ? "-" : tag.data);
+        chipView.setText(tag == null ? "-" : chipLabel(tag.data));
+        rssiView.setText(tag == null ? "-" : tag.rssi + " dBm");
+    }
+
+    private void setOperationEnabled(boolean enabled) {
+        boolean supports6cOperations = readerState != null
+                && readerState.getProtocol() == TagProtocol.ISO_18000_6C;
+        updateEpcAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
+        lockAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
+        destroyAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
+        for (View view : new View[]{writeAction, updateEpcAction, lockAction, destroyAction}) {
+            view.setEnabled(enabled);
+            view.setAlpha(enabled ? 1f : 0.45f);
+        }
+    }
+
+    private static byte[] parsePassword(String value) {
+        byte[] password = HexCodec.decode(value);
+        if (password.length != 4) { throw new IllegalArgumentException("密码必须是 8 位 HEX"); }
+        return password;
+    }
+
+    private static int parseUnsigned(EditText view, String name) {
+        try {
+            int value = Integer.parseInt(view.getText().toString());
+            if (value < 0) { throw new NumberFormatException(); }
+            return value;
+        } catch (NumberFormatException error) {
+            throw new IllegalArgumentException(name + "必须是非负整数");
+        }
+    }
+
+    private static byte[] withEpcPcWord(byte[] epc) {
+        if ((epc.length & 1) != 0 || epc.length == 0 || epc.length > 62) {
+            throw new IllegalArgumentException("EPC 必须是 2-62 字节的偶数长度 HEX");
+        }
+        int pc = (epc.length / 2) << 11;
+        byte[] result = new byte[epc.length + 2];
+        result[0] = (byte) (pc >> 8);
+        result[1] = (byte) pc;
+        System.arraycopy(epc, 0, result, 2, epc.length);
+        return result;
+    }
+
+    private static String[] bankLabels(TagProtocol protocol) {
+        return switch (protocol) {
+            case ISO_18000_6C -> new String[]{"保留区", "EPC", "TID", "USER"};
+            case ISO_18000_6B -> new String[]{"UID", "USER"};
+            case GJB_7377_1, GB_T_29768 -> new String[]{"标签信息区", "编码区", "安全区", "用户区"};
+        };
+    }
+
+    private static String chipLabel(String tid) {
+        return tid != null && (tid.startsWith("E28011") || tid.startsWith("E28012"))
+                ? "Impinj Monza" : "-";
+    }
+
+    private static String rootMessage(Throwable error) {
+        Throwable cause = error.getCause();
+        return cause == null ? error.getMessage() : cause.getMessage();
     }
 }

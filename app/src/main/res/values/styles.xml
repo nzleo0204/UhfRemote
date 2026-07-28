@@ -2,15 +2,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 应用主题样式 -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- 页面根布局自行绘制背景，避免窗口背景与页面背景重复绘制 -->
         <item name="android:windowBackground">@null</item>
         <!-- 应用的主要色调，ActionBar Toolbar 默认使用该颜色 -->
-        <item name="colorPrimary">@color/common_primary_color</item>
+        <item name="colorPrimary">@color/rfid_primary</item>
         <!-- 应用的主要暗色调，状态栏默认使用该颜色 -->
-        <item name="colorPrimaryDark">@color/common_primary_dark_color</item>
+        <item name="colorPrimaryDark">@color/rfid_nav_bg</item>
         <!-- 应用的强调色，CheckBox RadioButton Switch 等一般控件的选中效果默认采用该颜色 -->
-        <item name="colorAccent">@color/common_accent_color</item>
+        <item name="colorAccent">@color/rfid_primary_soft</item>
+        <item name="colorSecondary">@color/rfid_teal</item>
+        <item name="colorSurface">@color/rfid_panel_bg</item>
+        <item name="colorOnSurface">@color/rfid_text</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:colorBackground">@color/rfid_page_bg</item>
         <!-- 默认文本颜色，Button、TextView 的文字颜色 -->
         <item name="android:textColor">@color/common_text_color</item>
         <!-- 默认字体大小，Button、TextView 的字体大小 -->
@@ -34,6 +39,41 @@
         <item name="android:includeFontPadding">false</item>
         <!-- Activity 动画效果 -->
         <item name="android:windowAnimationStyle">@style/LeftToRightAnimStyle</item>
+    </style>
+
+    <style name="RfidSegmentButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/rfid_segment_text</item>
+        <item name="backgroundTint">@color/rfid_segment_background</item>
+        <item name="strokeColor">@color/rfid_line</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="RfidTextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/rfid_primary_soft</item>
+    </style>
+
+    <style name="RfidPrimaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/rfid_primary_button_text</item>
+        <item name="backgroundTint">@color/rfid_primary_button_background</item>
+    </style>
+
+    <style name="ReaderDeviceInfoLabel" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textColor">@color/rfid_text_muted</item>
+        <item name="android:textSize">@dimen/sp_13</item>
+    </style>
+
+    <style name="ReaderDeviceInfoValue" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">end</item>
+        <item name="android:textColor">@color/rfid_text</item>
+        <item name="android:textSize">@dimen/sp_13</item>
     </style>
 
     <!-- 全屏主题样式 -->

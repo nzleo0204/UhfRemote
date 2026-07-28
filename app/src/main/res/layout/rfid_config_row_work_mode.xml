@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/row_config_work_mode"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dp_44"
     android:gravity="center_vertical">
@@ -10,13 +12,39 @@
         android:text="工作模式"
         android:textColor="@color/rfid_text"
         android:textSize="@dimen/sp_16" />
-    <TextView
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/tg_config_work_mode"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/dp_32"
-        android:background="@drawable/rfid_search_bg"
-        android:gravity="center"
-        android:paddingHorizontal="@dimen/dp_12"
-        android:text="连续触发"
-        android:textColor="@color/rfid_primary_soft"
-        android:textSize="@dimen/sp_14" />
+        android:layout_height="@dimen/dp_36"
+        android:orientation="horizontal"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_work_single"
+            style="@style/RfidSegmentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="0dp"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:text="单次"
+            android:textSize="@dimen/sp_10" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_work_fast"
+            style="@style/RfidSegmentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="0dp"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:text="高性能"
+            android:textSize="@dimen/sp_10" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_work_low_power"
+            style="@style/RfidSegmentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="0dp"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:text="低功耗"
+            android:textSize="@dimen/sp_10" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 </LinearLayout>

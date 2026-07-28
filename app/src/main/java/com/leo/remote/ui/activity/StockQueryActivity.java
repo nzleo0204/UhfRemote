@@ -11,11 +11,11 @@ public final class StockQueryActivity extends RfidPageActivity {
 
     @Override
     protected void initPageView() {
-        findViewById(R.id.tv_stock_search).setOnClickListener(v -> toast("正在搜索标签库存"));
+        findViewById(R.id.tv_stock_search).setOnClickListener(v -> toast("库存查询服务尚未接入"));
     }
 
     @Override
     protected void initData() {
-        // Static preview data is rendered in XML.
+        // Backend integration is intentionally out of scope.
     }
 }

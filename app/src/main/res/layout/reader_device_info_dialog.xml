@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_8"
+        android:shrinkColumns="1"
+        android:stretchColumns="1">
+
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="传输方式" />
+            <TextView android:id="@+id/tv_device_info_transport" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="设备名称" />
+            <TextView android:id="@+id/tv_device_info_name" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="地址 / IP" />
+            <TextView android:id="@+id/tv_device_info_address" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="板卡序列号" />
+            <TextView android:id="@+id/tv_device_info_board_serial" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="板卡版本" />
+            <TextView android:id="@+id/tv_device_info_board_version" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="子类型原始值" />
+            <TextView android:id="@+id/tv_device_info_subtype_raw" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="当前子模块" />
+            <TextView android:id="@+id/tv_device_info_subtype" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="RF 模块序列号" />
+            <TextView android:id="@+id/tv_device_info_module_serial" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="RF 模块版本" />
+            <TextView android:id="@+id/tv_device_info_module_version" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
+            <TextView style="@style/ReaderDeviceInfoLabel" android:text="当前协议" />
+            <TextView android:id="@+id/tv_device_info_protocol" style="@style/ReaderDeviceInfoValue" />
+        </TableRow>
+    </TableLayout>
+</ScrollView>

@@ -1,11 +1,7 @@
 package com.leo.remote.app;
 
-import androidx.annotation.NonNull;
 import com.hjq.base.BaseFragment;
 import com.leo.remote.action.ToastAction;
-import com.leo.remote.http.model.HttpData;
-import com.hjq.http.config.IRequestApi;
-import com.hjq.http.listener.OnHttpListener;
 
 /**
  *    author : Android 轮子哥
@@ -13,8 +9,7 @@ import com.hjq.http.listener.OnHttpListener;
  *    time   : 2018/10/18
  *    desc   : Fragment 业务基类
  */
-public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
-        implements ToastAction, OnHttpListener<Object> {
+public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A> implements ToastAction {
 
     /**
      * 当前加载对话框是否在显示中
@@ -49,30 +44,4 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
         activity.hideLoadingDialog();
     }
 
-    /**
-     * {@link OnHttpListener}
-     */
-
-    @Override
-    public void onHttpStart(@NonNull IRequestApi api) {
-        showLoadingDialog();
-    }
-
-    @Override
-    public void onHttpSuccess(@NonNull Object result) {
-        if (!(result instanceof HttpData)) {
-            return;
-        }
-        toast(((HttpData<?>) result).getMessage());
-    }
-
-    @Override
-    public void onHttpFail(@NonNull Throwable throwable) {
-        toast(throwable.getMessage());
-    }
-
-    @Override
-    public void onHttpEnd(@NonNull IRequestApi api) {
-        hideLoadingDialog();
-    }
 }

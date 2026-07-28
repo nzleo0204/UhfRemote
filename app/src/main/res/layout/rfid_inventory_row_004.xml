@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView android:layout_width="@dimen/dp_40" android:layout_height="wrap_content" android:text="004" android:textColor="@color/rfid_text" android:textSize="@dimen/sp_13" />
-    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="E2000017..." android:textColor="@color/rfid_primary_soft" android:textSize="@dimen/sp_13" />
-    <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="41" android:textColor="@color/rfid_text" android:textSize="@dimen/sp_13" />
-    <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="-58" android:textColor="@color/rfid_success" android:textSize="@dimen/sp_13" />
-    <TextView android:layout_width="@dimen/dp_72" android:layout_height="wrap_content" android:text="Impinj M730" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
-</merge>

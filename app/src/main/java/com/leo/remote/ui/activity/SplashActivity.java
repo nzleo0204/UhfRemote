@@ -15,14 +15,10 @@ import com.hjq.core.manager.ActivityManager;
 import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
 import com.leo.remote.app.AppActivity;
-import com.leo.remote.http.api.UserInfoApi;
-import com.leo.remote.http.model.HttpData;
 import com.leo.remote.manager.InitManager;
 import com.leo.remote.util.AppConfig;
 import com.leo.remote.ui.dialog.PrivacyAgreementDialog;
 import com.leo.remote.ui.dialog.common.MessageDialog;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallbackProxy;
 import java.util.Locale;
 
 /**
@@ -97,19 +93,6 @@ public final class SplashActivity extends AppActivity {
             mBuildTypeView.setVisibility(View.INVISIBLE);
         }
 
-        if (true) {
-            return;
-        }
-        // 刷新用户信息
-        EasyHttp.post(this)
-                .api(new UserInfoApi())
-                .request(new HttpCallbackProxy<HttpData<UserInfoApi.Bean>>(this) {
-
-                    @Override
-                    public void onHttpSuccess(@NonNull HttpData<UserInfoApi.Bean> data) {
-
-                    }
-                });
     }
 
     @NonNull
