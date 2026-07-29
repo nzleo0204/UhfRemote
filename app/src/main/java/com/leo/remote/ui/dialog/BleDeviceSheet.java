@@ -90,6 +90,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
         RecyclerView recyclerView = view.findViewById(R.id.rv_ble_devices);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(null);
         recyclerView.setAdapter(adapter);
         view.findViewById(R.id.btn_ble_rescan).setOnClickListener(ignored -> startScanWithPermission());
         view.findViewById(R.id.btn_ble_close).setOnClickListener(ignored -> closeSheet());

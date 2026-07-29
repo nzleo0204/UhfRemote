@@ -14,6 +14,8 @@ import com.leo.remote.reader.InventoryItem;
 import java.util.List;
 
 public final class InventoryAdapter extends ListAdapter<InventoryItem, InventoryAdapter.ViewHolder> {
+    private static final Object PAYLOAD_COUNTERS = new Object();
+
     private static final DiffUtil.ItemCallback<InventoryItem> DIFF =
             new DiffUtil.ItemCallback<InventoryItem>() {
                 @Override
@@ -29,6 +31,13 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
                     return oldItem.getCount() == newItem.getCount()
                             && oldItem.getRssi() == newItem.getRssi()
                             && oldItem.getChipModel().equals(newItem.getChipModel());
+                }
+
+                @Override
+                public Object getChangePayload(@NonNull InventoryItem oldItem,
+                                               @NonNull InventoryItem newItem) {
+                    return oldItem.getChipModel().equals(newItem.getChipModel())
+                            ? PAYLOAD_COUNTERS : null;
                 }
             };
 
@@ -52,13 +61,27 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.id.setText(item.getId());
         holder.data.setText(item.getData());
         holder.data.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
+        bindCounters(holder, item);
+        int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
+        holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (payloads.contains(PAYLOAD_COUNTERS)) {
+            bindCounters(holder, getItem(position));
+            return;
+        }
+        super.onBindViewHolder(holder, position, payloads);
+    }
+
+    private static void bindCounters(ViewHolder holder, InventoryItem item) {
         holder.count.setText(String.valueOf(item.getCount()));
         holder.rssi.setText(String.valueOf(item.getRssi()));
         holder.rssi.setTextColor(ContextCompat.getColor(holder.itemView.getContext(),
                 rssiColor(item.getRssi())));
         holder.chip.setText(item.getChipModel().isEmpty() ? "-" : item.getChipModel());
-        int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
-        holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
     }
 
     private static int rssiColor(int rssi) {

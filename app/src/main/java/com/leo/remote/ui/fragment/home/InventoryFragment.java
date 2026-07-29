@@ -48,6 +48,8 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         emptyView = findViewById(R.id.tv_inventory_empty);
         RecyclerView recyclerView = findViewById(R.id.rv_inventory_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(null);
         adapter = new InventoryAdapter();
         recyclerView.setAdapter(adapter);
 

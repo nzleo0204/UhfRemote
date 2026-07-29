@@ -31,6 +31,7 @@ public final class StockQueryActivity extends RfidPageActivity {
         stateView = findViewById(R.id.tv_stock_state);
         recyclerView = findViewById(R.id.rv_stock);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
         adapter = new StockAdapter();
         recyclerView.setAdapter(adapter);
         findViewById(R.id.tv_stock_search).setOnClickListener(v -> loadStock());

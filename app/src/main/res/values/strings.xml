@@ -83,6 +83,7 @@
     <string name="config_unnamed_device">未命名设备</string>
     <string name="config_device_address">%1$s\n%2$s</string>
     <string name="config_scan_device">搜索设备</string>
+    <string name="ble_device_rssi">%1$d dBm</string>
     <string name="config_reader_ip_hint">读写器 IP 地址</string>
     <string name="config_reader_ip_invalid">请输入有效的 IPv4 地址</string>
     <string name="config_connect">连接</string>

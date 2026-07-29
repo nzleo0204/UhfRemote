@@ -20,7 +20,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
             android:maxLines="1"
+            android:singleLine="true"
             android:textColor="@color/rfid_text"
             android:textSize="@dimen/sp_15" />
 
@@ -30,7 +33,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_4"
             android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
             android:maxLines="1"
+            android:singleLine="true"
             android:textColor="@color/rfid_text_muted"
             android:textSize="@dimen/sp_12" />
     </LinearLayout>
@@ -39,8 +45,11 @@
         android:id="@+id/tv_ble_device_rssi"
         android:layout_width="@dimen/dp_72"
         android:layout_height="match_parent"
+        android:ellipsize="end"
         android:gravity="center_vertical|end"
+        android:includeFontPadding="false"
         android:maxLines="1"
+        android:singleLine="true"
         android:textColor="@color/rfid_text_secondary"
         android:textSize="@dimen/sp_12" />
 </LinearLayout>

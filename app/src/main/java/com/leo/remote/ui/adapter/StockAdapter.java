@@ -5,22 +5,43 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.model.StockItem;
 import com.leo.remote.util.RfidFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public final class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
-    private final List<StockItem> items = new ArrayList<>();
+public final class StockAdapter extends ListAdapter<StockItem, StockAdapter.ViewHolder> {
+    private static final DiffUtil.ItemCallback<StockItem> DIFF = new DiffUtil.ItemCallback<>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull StockItem oldItem, @NonNull StockItem newItem) {
+            return Objects.equals(oldItem.productName, newItem.productName)
+                    && Objects.equals(oldItem.chipModel, newItem.chipModel)
+                    && Objects.equals(oldItem.warehouse, newItem.warehouse);
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull StockItem oldItem, @NonNull StockItem newItem) {
+            return oldItem.availableQty == newItem.availableQty
+                    && oldItem.reservedQty == newItem.reservedQty
+                    && oldItem.updateTime == newItem.updateTime
+                    && Objects.equals(oldItem.productName, newItem.productName)
+                    && Objects.equals(oldItem.chipModel, newItem.chipModel)
+                    && Objects.equals(oldItem.warehouse, newItem.warehouse)
+                    && Objects.equals(oldItem.spec, newItem.spec)
+                    && Objects.equals(oldItem.imageUrl, newItem.imageUrl);
+        }
+    };
+
+    public StockAdapter() {
+        super(DIFF);
+    }
 
     public void submit(List<StockItem> data) {
-        int oldSize = items.size();
-        items.clear();
-        notifyItemRangeRemoved(0, oldSize);
-        items.addAll(data);
-        notifyItemRangeInserted(0, data.size());
+        submitList(List.copyOf(data));
     }
 
     @NonNull
@@ -32,7 +53,7 @@ public final class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        StockItem item = items.get(position);
+        StockItem item = getItem(position);
         holder.name.setText(item.productName);
         android.content.Context context = holder.itemView.getContext();
         holder.meta.setText(context.getString(R.string.stock_meta, item.chipModel, item.spec));
@@ -40,11 +61,6 @@ public final class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHo
         holder.price.setText(context.getString(R.string.stock_reserved, RfidFormat.quantity(item.reservedQty)));
         holder.tags.setText(item.warehouse);
         holder.time.setText(context.getString(R.string.stock_updated, RfidFormat.time(item.updateTime)));
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
     }
 
     static final class ViewHolder extends RecyclerView.ViewHolder {

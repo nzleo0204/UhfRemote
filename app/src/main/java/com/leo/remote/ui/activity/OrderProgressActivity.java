@@ -26,6 +26,7 @@ public final class OrderProgressActivity extends RfidPageActivity {
         recyclerView = findViewById(R.id.rv_order);
         stateView = findViewById(R.id.tv_order_state);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
         adapter = new OrderAdapter();
         recyclerView.setAdapter(adapter);
         findViewById(R.id.tv_order_filter).setOnClickListener(v -> loadOrders());

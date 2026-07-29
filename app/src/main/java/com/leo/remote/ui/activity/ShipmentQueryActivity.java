@@ -26,6 +26,7 @@ public final class ShipmentQueryActivity extends RfidPageActivity {
         recyclerView = findViewById(R.id.rv_shipment);
         stateView = findViewById(R.id.tv_shipment_state);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
         adapter = new ShipmentAdapter();
         recyclerView.setAdapter(adapter);
     }

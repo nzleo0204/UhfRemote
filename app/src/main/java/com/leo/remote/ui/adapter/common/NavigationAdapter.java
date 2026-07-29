@@ -1,6 +1,5 @@
 package com.leo.remote.ui.adapter.common;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -54,10 +53,14 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
         return mSelectedPosition;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void setSelectedPosition(int position) {
+        if (mSelectedPosition == position) {
+            return;
+        }
+        int oldPosition = mSelectedPosition;
         mSelectedPosition = position;
-        notifyDataSetChanged();
+        notifyItemChanged(oldPosition);
+        notifyItemChanged(position);
     }
 
     /**
@@ -71,7 +74,6 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
      * {@link BaseAdapter.OnItemClickListener}
      */
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemClick(@NonNull RecyclerView recyclerView, @NonNull View itemView, int position) {
         if (mSelectedPosition == position) {
@@ -79,8 +81,10 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
         }
 
         if (mListener == null || mListener.onNavigationItemSelected(position)) {
+            int oldPosition = mSelectedPosition;
             mSelectedPosition = position;
-            notifyDataSetChanged();
+            notifyItemChanged(oldPosition);
+            notifyItemChanged(position);
         }
     }
 

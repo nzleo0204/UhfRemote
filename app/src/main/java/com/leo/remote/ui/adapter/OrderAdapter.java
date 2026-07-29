@@ -7,23 +7,46 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.model.Order;
 import com.leo.remote.data.model.OrderStatus;
 import com.leo.remote.util.RfidFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public final class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
-    private final List<Order> items = new ArrayList<>();
+public final class OrderAdapter extends ListAdapter<Order, OrderAdapter.ViewHolder> {
+    private static final DiffUtil.ItemCallback<Order> DIFF = new DiffUtil.ItemCallback<>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Order oldItem, @NonNull Order newItem) {
+            return Objects.equals(oldItem.orderNo, newItem.orderNo);
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Order oldItem, @NonNull Order newItem) {
+            return oldItem.quantity == newItem.quantity
+                    && oldItem.progress == newItem.progress
+                    && oldItem.shippedQty == newItem.shippedQty
+                    && oldItem.pendingQty == newItem.pendingQty
+                    && oldItem.submitTime == newItem.submitTime
+                    && oldItem.finishTime == newItem.finishTime
+                    && Objects.equals(oldItem.status, newItem.status)
+                    && Objects.equals(oldItem.orderNo, newItem.orderNo)
+                    && Objects.equals(oldItem.productName, newItem.productName)
+                    && Objects.equals(oldItem.customRequirement, newItem.customRequirement)
+                    && Objects.equals(oldItem.processImages, newItem.processImages)
+                    && Objects.equals(oldItem.imageUrl, newItem.imageUrl);
+        }
+    };
+
+    public OrderAdapter() {
+        super(DIFF);
+    }
 
     public void submit(List<Order> data) {
-        int oldSize = items.size();
-        items.clear();
-        notifyItemRangeRemoved(0, oldSize);
-        items.addAll(data);
-        notifyItemRangeInserted(0, data.size());
+        submitList(List.copyOf(data));
     }
 
     @NonNull
@@ -35,7 +58,7 @@ public final class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Order item = items.get(position);
+        Order item = getItem(position);
         holder.no.setText(item.orderNo);
         holder.status.setText(item.status.label);
         holder.status.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), item.status.colorRes));
@@ -57,11 +80,6 @@ public final class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHo
         holder.progress.setVisibility(production ? View.VISIBLE : View.GONE);
         holder.progress.setProgress(item.progress);
         holder.progressLabel.setText(context.getString(R.string.order_progress, item.progress));
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
     }
 
     static final class ViewHolder extends RecyclerView.ViewHolder {

@@ -7,10 +7,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 import cn.wandersnail.ble.Device;
 import com.leo.remote.R;
+import java.util.List;
 
 public final class BleDeviceAdapter extends ListAdapter<BleDeviceAdapter.Item, BleDeviceAdapter.ViewHolder> {
+    private static final Object PAYLOAD_RSSI = new Object();
+
     public interface Listener { void onDeviceSelected(Device device); }
 
     public static final class Item {
@@ -38,6 +42,14 @@ public final class BleDeviceAdapter extends ListAdapter<BleDeviceAdapter.Item, B
             return oldItem.name.equals(newItem.name) && oldItem.address.equals(newItem.address)
                     && oldItem.rssi == newItem.rssi;
         }
+
+        @Override
+        public Object getChangePayload(@NonNull Item oldItem, @NonNull Item newItem) {
+            if (oldItem.name.equals(newItem.name) && oldItem.address.equals(newItem.address)) {
+                return PAYLOAD_RSSI;
+            }
+            return null;
+        }
     };
 
     private final Listener listener;
@@ -57,7 +69,14 @@ public final class BleDeviceAdapter extends ListAdapter<BleDeviceAdapter.Item, B
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ble_device_item, parent, false);
-        return new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view);
+        view.setOnClickListener(clicked -> {
+            int position = holder.getBindingAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                listener.onDeviceSelected(getItem(position).device);
+            }
+        });
+        return holder;
     }
 
     @Override
@@ -65,11 +84,24 @@ public final class BleDeviceAdapter extends ListAdapter<BleDeviceAdapter.Item, B
         Item item = getItem(position);
         holder.name.setText(item.name);
         holder.address.setText(item.address);
-        holder.rssi.setText(item.rssi + " dBm");
-        holder.itemView.setOnClickListener(view -> listener.onDeviceSelected(item.device));
+        bindRssi(holder, item);
     }
 
-    static final class ViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (payloads.contains(PAYLOAD_RSSI)) {
+            bindRssi(holder, getItem(position));
+            return;
+        }
+        super.onBindViewHolder(holder, position, payloads);
+    }
+
+    private static void bindRssi(ViewHolder holder, Item item) {
+        holder.rssi.setText(holder.itemView.getContext().getString(R.string.ble_device_rssi, item.rssi));
+    }
+
+    static final class ViewHolder extends RecyclerView.ViewHolder {
         final TextView name;
         final TextView address;
         final TextView rssi;
