@@ -1,8 +1,14 @@
 package com.leo.remote.ui.fragment.home;
 
 import android.content.Intent;
+import android.graphics.Rect;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leo.remote.R;
 import com.leo.remote.app.AppFragment;
@@ -37,6 +43,9 @@ public final class MineFragment extends AppFragment<HomeActivity> {
     private android.view.View loggedGroup;
     private android.view.View accountDivider;
     private android.view.View loginButton;
+    private View accountCard;
+    private View inputGuard;
+    private View rootView;
 
     public static MineFragment newInstance() {
         return new MineFragment();
@@ -57,6 +66,9 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         usernameInput = findViewById(R.id.et_mine_username);
         passwordInput = findViewById(R.id.et_mine_password);
         themeValueView = findViewById(R.id.tv_mine_theme_value);
+        accountCard = findViewById(R.id.ll_mine_account_card);
+        inputGuard = findViewById(R.id.v_mine_input_guard);
+        rootView = findViewById(R.id.fl_mine_root);
 
         findViewById(R.id.ll_mine_stock).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), StockQueryActivity.class)));
         findViewById(R.id.ll_mine_order).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), OrderProgressActivity.class)));
@@ -64,6 +76,7 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), FeedbackActivity.class)));
         loginButton.setOnClickListener(v -> login());
         findViewById(R.id.ll_mine_theme_setting).setOnClickListener(v -> showThemeDialog());
+        bindLoginInputGuard();
     }
 
     @Override
@@ -83,6 +96,7 @@ public final class MineFragment extends AppFragment<HomeActivity> {
                 authStorage.encode(KEY_USERNAME, data.username);
                 authStorage.encode(KEY_ROLE, data.role);
                 bindAuthState();
+                dismissLoginKeyboard();
                 toast("登录成功");
             }
 
@@ -95,8 +109,8 @@ public final class MineFragment extends AppFragment<HomeActivity> {
 
     private void bindAuthState() {
         boolean logged = authStorage != null && !authStorage.decodeString(KEY_TOKEN, "").isEmpty();
-        loggedGroup.setVisibility(logged ? android.view.View.VISIBLE : android.view.View.GONE);
-        accountDivider.setVisibility(logged ? android.view.View.VISIBLE : android.view.View.GONE);
+        loggedGroup.setVisibility(View.VISIBLE);
+        accountDivider.setVisibility(View.VISIBLE);
         usernameInput.setVisibility(logged ? android.view.View.GONE : android.view.View.VISIBLE);
         passwordInput.setVisibility(logged ? android.view.View.GONE : android.view.View.VISIBLE);
         loginButton.setVisibility(logged ? android.view.View.GONE : android.view.View.VISIBLE);
@@ -104,7 +118,76 @@ public final class MineFragment extends AppFragment<HomeActivity> {
             usernameView.setText(authStorage.decodeString(KEY_USERNAME, "admin"));
             roleView.setText(getString(R.string.mine_logged_role,
                     authStorage.decodeString(KEY_ROLE, getString(R.string.mine_default_role))));
+            roleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.rfid_success));
+        } else {
+            usernameView.setText(R.string.mine_guest);
+            roleView.setText(R.string.mine_not_logged_in);
+            roleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.rfid_text_muted));
         }
+    }
+
+    private void bindLoginInputGuard() {
+        View.OnFocusChangeListener listener = (view, hasFocus) -> {
+            if (hasFocus) {
+                showInputGuard();
+            } else {
+                view.post(() -> {
+                    if (!usernameInput.hasFocus() && !passwordInput.hasFocus()) {
+                        inputGuard.setVisibility(View.GONE);
+                    }
+                });
+            }
+        };
+        usernameInput.setOnFocusChangeListener(listener);
+        passwordInput.setOnFocusChangeListener(listener);
+        passwordInput.setOnEditorActionListener((view, actionId, event) -> {
+            if (actionId != EditorInfo.IME_ACTION_DONE) { return false; }
+            login();
+            return true;
+        });
+        inputGuard.setOnClickListener(view -> dismissLoginKeyboard());
+        findViewById(R.id.sv_mine_content).setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                view.performClick();
+            }
+            if (event.getAction() == MotionEvent.ACTION_DOWN && isLoginInputFocused()
+                    && !isTouchInside(usernameInput, event) && !isTouchInside(passwordInput, event)) {
+                dismissLoginKeyboard();
+            }
+            return false;
+        });
+    }
+
+    private void showInputGuard() {
+        accountCard.post(() -> {
+            int[] rootLocation = new int[2];
+            int[] cardLocation = new int[2];
+            rootView.getLocationOnScreen(rootLocation);
+            accountCard.getLocationOnScreen(cardLocation);
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) inputGuard.getLayoutParams();
+            params.topMargin = Math.max(0,
+                    cardLocation[1] - rootLocation[1] + accountCard.getHeight());
+            inputGuard.setLayoutParams(params);
+            inputGuard.setVisibility(View.VISIBLE);
+        });
+    }
+
+    private void dismissLoginKeyboard() {
+        View focused = passwordInput.hasFocus() ? passwordInput : usernameInput;
+        hideKeyboard(focused);
+        usernameInput.clearFocus();
+        passwordInput.clearFocus();
+        inputGuard.setVisibility(View.GONE);
+    }
+
+    private boolean isLoginInputFocused() {
+        return usernameInput.hasFocus() || passwordInput.hasFocus();
+    }
+
+    private boolean isTouchInside(View target, MotionEvent event) {
+        Rect bounds = new Rect();
+        return target.getGlobalVisibleRect(bounds)
+                && bounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     private void bindThemeState() {

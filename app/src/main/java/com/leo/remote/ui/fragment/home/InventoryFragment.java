@@ -77,12 +77,11 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onReaderStateChanged(ReaderState state) {
-        boolean connected = state.isConnected();
-        startButton.setEnabled(connected);
+        startButton.setEnabled(true);
         startButton.setText(state.isInventoryRunning()
                 ? R.string.inventory_stop : R.string.inventory_start);
         startButton.setIconResource(state.isInventoryRunning()
-                ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
+                ? R.drawable.rfid_inventory_stop_ic : R.drawable.rfid_inventory_play_ic);
     }
 
     @Override

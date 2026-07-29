@@ -37,28 +37,37 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_start"
             style="@style/RfidSuccessButton"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/dp_100"
             android:layout_height="@dimen/dp_40"
             android:text="@string/inventory_start"
-            app:icon="@android:drawable/ic_media_play" />
+            android:textSize="@dimen/sp_14"
+            app:icon="@drawable/rfid_inventory_play_ic"
+            app:iconPadding="@dimen/dp_6"
+            app:iconSize="@dimen/dp_18" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_clear"
             style="@style/RfidGhostButton"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_40"
             android:layout_marginStart="@dimen/dp_8"
             android:text="@string/inventory_clear"
-            app:icon="@android:drawable/ic_menu_delete"
-            app:iconTint="@color/rfid_text_muted" />
+            android:textSize="@dimen/sp_14"
+            app:icon="@drawable/rfid_inventory_clear_ic"
+            app:iconPadding="@dimen/dp_6"
+            app:iconSize="@dimen/dp_18"
+            app:iconTint="@null" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_export"
             style="@style/RfidGhostButton"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_40"
             android:layout_marginStart="@dimen/dp_8"
             android:text="@string/inventory_export"
-            app:icon="@android:drawable/stat_sys_download"
-            app:iconTint="@color/rfid_text_muted" />
+            android:textSize="@dimen/sp_14"
+            app:icon="@drawable/rfid_inventory_export_ic"
+            app:iconPadding="@dimen/dp_6"
+            app:iconSize="@dimen/dp_18"
+            app:iconTint="@null" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

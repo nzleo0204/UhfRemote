@@ -1,181 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fl_mine_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
-    android:fillViewport="true"
     tools:context=".ui.fragment.home.MineFragment">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/sv_mine_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/dp_16">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_56"
-            android:background="@color/rfid_nav_bg"
-            android:gravity="center"
-            android:text="我的"
-            android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_18" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/ll_mine_account_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dp_16"
-            style="@style/RfidCard"
             android:orientation="vertical"
-            android:padding="@dimen/dp_20">
+            android:paddingBottom="@dimen/dp_16">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_56"
+                android:background="@color/rfid_nav_bg"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:text="我的"
+                android:textColor="@color/rfid_text"
+                android:textSize="@dimen/sp_18" />
 
             <LinearLayout
-                android:id="@+id/ll_mine_logged"
+                android:id="@+id/ll_mine_account_card"
+                style="@style/RfidCard"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_52"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="@dimen/dp_52"
-                    android:layout_height="@dimen/dp_52"
-                    android:background="@drawable/rfid_avatar_bg"
-                    android:padding="@dimen/dp_14"
-                    android:src="@drawable/rfid_nav_mine_ic"
-                    app:tint="@color/white" />
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_16"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_20">
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/dp_14"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:id="@+id/ll_mine_logged"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_52"
+                    android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tv_mine_username"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="admin"
-                        android:textColor="@color/rfid_text"
-                        android:textSize="@dimen/sp_18" />
+                    <ImageView
+                        android:layout_width="@dimen/dp_52"
+                        android:layout_height="@dimen/dp_52"
+                        android:background="@drawable/rfid_avatar_bg"
+                        android:contentDescription="@null"
+                        android:padding="@dimen/dp_14"
+                        android:src="@drawable/rfid_user_ic"
+                        app:tint="@color/white" />
 
-                    <TextView
-                        android:id="@+id/tv_mine_role"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dp_4"
-                        android:text="管理员 · 已登"
-                        android:textColor="@color/rfid_success"
-                        android:textSize="@dimen/sp_12" />
+                        android:layout_marginStart="@dimen/dp_14"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_mine_username"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="访客"
+                            android:textColor="@color/rfid_text"
+                            android:textSize="@dimen/sp_18" />
+
+                        <TextView
+                            android:id="@+id/tv_mine_role"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/dp_4"
+                            android:text="未登录"
+                            android:textColor="@color/rfid_text_muted"
+                            android:textSize="@dimen/sp_12" />
+                    </LinearLayout>
                 </LinearLayout>
+
+                <View
+                    android:id="@+id/v_mine_account_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="@dimen/dp_16"
+                    android:background="@color/rfid_line" />
+
+                <EditText
+                    android:id="@+id/et_mine_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_44"
+                    android:autofillHints="username"
+                    android:background="@drawable/rfid_search_bg"
+                    android:drawableStart="@drawable/rfid_user_ic"
+                    android:drawablePadding="@dimen/dp_10"
+                    android:drawableTint="@color/rfid_text_muted"
+                    android:hint="用户名"
+                    android:inputType="text"
+                    android:paddingHorizontal="@dimen/dp_14"
+                    android:singleLine="true"
+                    android:textColor="@color/rfid_text"
+                    android:textColorHint="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_14" />
+
+                <EditText
+                    android:id="@+id/et_mine_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_44"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:autofillHints="password"
+                    android:background="@drawable/rfid_search_bg"
+                    android:drawableStart="@drawable/rfid_password_ic"
+                    android:drawablePadding="@dimen/dp_10"
+                    android:drawableTint="@color/rfid_text_muted"
+                    android:hint="••••••••"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="@dimen/dp_14"
+                    android:singleLine="true"
+                    android:textColor="@color/rfid_text"
+                    android:textColorHint="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_14" />
+
+                <TextView
+                    android:id="@+id/tv_mine_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_44"
+                    android:layout_marginTop="@dimen/dp_16"
+                    android:background="@drawable/rfid_button_bg"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:text="登录"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16" />
             </LinearLayout>
-
-            <View
-                android:id="@+id/v_mine_account_divider"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="@dimen/dp_16"
-                android:background="@color/rfid_line" />
-
-            <EditText
-                android:id="@+id/et_mine_username"
-                android:autofillHints="username"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_44"
-                android:background="@drawable/rfid_search_bg"
-                android:hint="用户名"
-                android:inputType="text"
-                android:paddingHorizontal="@dimen/dp_14"
-                android:singleLine="true"
-                android:textColor="@color/rfid_text"
-                android:textColorHint="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_14" />
-
-            <EditText
-                android:id="@+id/et_mine_password"
-                android:autofillHints="password"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_44"
-                android:layout_marginTop="@dimen/dp_12"
-                android:background="@drawable/rfid_search_bg"
-                android:hint="••••••••"
-                android:inputType="textPassword"
-                android:paddingHorizontal="@dimen/dp_14"
-                android:singleLine="true"
-                android:textColor="@color/rfid_text"
-                android:textColorHint="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_14" />
-
-            <TextView
-                android:id="@+id/tv_mine_login"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_44"
-                android:layout_marginTop="@dimen/dp_16"
-                android:background="@drawable/rfid_button_bg"
-                android:gravity="center"
-                android:text="登录"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp_16" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/dp_16"
-            style="@style/RfidCard"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                style="@style/RfidGroupTitle"
-                android:text="功能菜" />
-
-            <include layout="@layout/rfid_mine_menu_stock" />
-            <include layout="@layout/rfid_mine_menu_order" />
-            <include layout="@layout/rfid_mine_menu_shipment" />
-            <include layout="@layout/rfid_mine_menu_feedback" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_mine_theme_card"
-            style="@style/RfidCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dp_16"
-            android:orientation="vertical">
-
-            <TextView
-                style="@style/RfidGroupTitle"
-                android:text="主题设置" />
 
             <LinearLayout
-                android:id="@+id/ll_mine_theme_setting"
+                style="@style/RfidCard"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_50"
-                android:layout_marginTop="@dimen/dp_8"
-                android:gravity="center_vertical">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_16"
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="@dimen/dp_32"
-                    android:layout_height="@dimen/dp_32"
-                    android:background="@drawable/rfid_chip_blue_bg"
-                    android:gravity="center"
-                    android:text="亮"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/sp_13" />
+                <TextView style="@style/RfidGroupTitle" android:text="功能菜单" />
+                <include layout="@layout/rfid_mine_menu_stock" />
+                <include layout="@layout/rfid_mine_menu_order" />
+                <include layout="@layout/rfid_mine_menu_shipment" />
+                <include layout="@layout/rfid_mine_menu_feedback" />
+            </LinearLayout>
 
-                <TextView
-                    style="@style/RfidRowLabel"
-                    android:layout_marginStart="@dimen/dp_12"
-                    android:text="显示主题" />
+            <LinearLayout
+                android:id="@+id/ll_mine_theme_card"
+                style="@style/RfidCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_16"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tv_mine_theme_value"
-                    style="@style/RfidValueChip"
-                    android:text="跟随系统" />
+                <TextView style="@style/RfidGroupTitle" android:text="主题设置" />
+
+                <LinearLayout
+                    android:id="@+id/ll_mine_theme_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_50"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/dp_32"
+                        android:layout_height="@dimen/dp_32"
+                        android:background="@drawable/rfid_chip_blue_bg"
+                        android:contentDescription="@null"
+                        android:padding="@dimen/dp_7"
+                        android:src="@drawable/rfid_theme_ic" />
+
+                    <TextView
+                        style="@style/RfidRowLabel"
+                        android:layout_marginStart="@dimen/dp_12"
+                        android:text="显示主题" />
+
+                    <TextView
+                        android:id="@+id/tv_mine_theme_value"
+                        style="@style/RfidValueChip"
+                        android:text="跟随系统" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <View
+        android:id="@+id/v_mine_input_guard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/rfid_input_guard"
+        android:clickable="true"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+</FrameLayout>

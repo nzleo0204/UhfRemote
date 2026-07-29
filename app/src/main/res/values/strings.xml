@@ -84,6 +84,7 @@
     <string name="config_device_address">%1$s\n%2$s</string>
     <string name="config_scan_device">搜索设备</string>
     <string name="config_reader_ip_hint">读写器 IP 地址</string>
+    <string name="config_reader_ip_invalid">请输入有效的 IPv4 地址</string>
     <string name="config_connect">连接</string>
     <string name="config_protocol">射频协议</string>
     <string name="config_protocol_iso_18000_6c">ISO 18000-6C</string>
@@ -155,8 +156,14 @@
     <string name="inventory_stop_failed">停止盘点失败</string>
     <string name="inventory_exported">CSV 已导出</string>
     <string name="inventory_export_failed">导出失败：%1$s</string>
+    <string name="single_preview_epc">E2000017211E0018</string>
+    <string name="single_preview_tid">E2801160600002041891F8C0</string>
+    <string name="single_preview_chip">Impinj Monza R6</string>
+    <string name="single_preview_rssi">-62 dBm</string>
     <string name="mine_default_role">管理员</string>
     <string name="mine_logged_role">%1$s · 已登</string>
+    <string name="mine_guest">访客</string>
+    <string name="mine_not_logged_in">未登录</string>
     <string name="stock_count">共 %1$d 种标签</string>
     <string name="stock_meta">%1$s | %2$s</string>
     <string name="stock_available">库存: %1$s</string>

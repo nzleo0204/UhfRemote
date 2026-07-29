@@ -59,7 +59,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
         lockAction.setOnClickListener(view -> showLockDialog());
         destroyAction.setOnClickListener(view -> showKillDialog());
-        setOperationEnabled(false);
+        bindTag(null);
+        refreshOperations();
     }
 
     @Override
@@ -77,20 +78,18 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onReaderStateChanged(ReaderState state) {
         readerState = state;
-        readButton.setEnabled(state.isConnected());
-        readButton.setAlpha(state.isConnected() ? 1f : 0.45f);
         if (!state.isConnected()) {
             currentTag = null;
             bindTag(null);
         }
-        setOperationEnabled(state.isConnected() && currentTag != null);
+        refreshOperations();
     }
 
     @Override
     public void onCurrentTagChanged(ReaderTag tag) {
         currentTag = tag;
         bindTag(tag);
-        setOperationEnabled(readerState != null && readerState.isConnected() && tag != null);
+        refreshOperations();
     }
 
     private void readTag() {
@@ -258,21 +257,28 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     }
 
     private void bindTag(ReaderTag tag) {
-        epcView.setText(tag == null || tag.id.isEmpty() ? "-" : tag.id);
-        tidView.setText(tag == null || tag.data.isEmpty() ? "-" : tag.data);
-        chipView.setText(tag == null ? "-" : chipLabel(tag.data));
-        rssiView.setText(tag == null ? "-" : tag.rssi + " dBm");
+        if (tag == null) {
+            epcView.setText(R.string.single_preview_epc);
+            tidView.setText(R.string.single_preview_tid);
+            chipView.setText(R.string.single_preview_chip);
+            rssiView.setText(R.string.single_preview_rssi);
+            return;
+        }
+        epcView.setText(tag.id.isEmpty() ? "-" : tag.id);
+        tidView.setText(tag.data.isEmpty() ? "-" : tag.data);
+        chipView.setText(chipLabel(tag.data));
+        rssiView.setText(tag.rssi + " dBm");
     }
 
-    private void setOperationEnabled(boolean enabled) {
-        boolean supports6cOperations = readerState != null
-                && readerState.getProtocol() == TagProtocol.ISO_18000_6C;
+    private void refreshOperations() {
+        boolean supports6cOperations = readerState == null || !readerState.isConnected()
+                || readerState.getProtocol() == TagProtocol.ISO_18000_6C;
         updateEpcAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
         lockAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
         destroyAction.setVisibility(supports6cOperations ? View.VISIBLE : View.GONE);
         for (View view : new View[]{writeAction, updateEpcAction, lockAction, destroyAction}) {
-            view.setEnabled(enabled);
-            view.setAlpha(enabled ? 1f : 0.45f);
+            view.setEnabled(true);
+            view.setAlpha(1f);
         }
     }
 

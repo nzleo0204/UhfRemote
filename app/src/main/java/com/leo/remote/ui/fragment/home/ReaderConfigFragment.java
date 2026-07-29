@@ -1,8 +1,11 @@
 package com.leo.remote.ui.fragment.home;
 
+import android.graphics.Rect;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.text.TextUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -126,8 +129,22 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         findViewById(R.id.row_config_wifi).setOnClickListener(view -> wifiSwitch.setChecked(true));
         statusView.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
-        findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view ->
-                session.connectWifi(wifiAddressView.getText().toString()));
+        findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view -> connectWifi());
+        wifiAddressView.setOnEditorActionListener((view, actionId, event) -> {
+            if (actionId != EditorInfo.IME_ACTION_DONE) { return false; }
+            connectWifi();
+            return true;
+        });
+        findViewById(R.id.sv_config_root).setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                view.performClick();
+            }
+            if (event.getAction() == MotionEvent.ACTION_DOWN && wifiAddressView.hasFocus()
+                    && !isTouchInside(wifiAddressView, event)) {
+                dismissWifiKeyboard();
+            }
+            return false;
+        });
         findViewById(R.id.row_config_protocol).setOnClickListener(view -> showProtocolDialog());
         findViewById(R.id.row_config_work_mode).setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
@@ -186,9 +203,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         bindTransportRows(bleSwitch.isChecked(), connected);
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
-            bleDeviceView.setText(getString(R.string.config_device_address,
-                    state.getDeviceName().isEmpty() ? getString(R.string.config_unnamed_device)
-                            : state.getDeviceName(), state.getAddress()));
+            bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
         }
 
         if (isConnectionDialogPhase(state.getPhase())) {
@@ -221,9 +236,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void showBleDevices() {
         BleDeviceSheet sheet = new BleDeviceSheet();
         sheet.setListener(device -> {
-            bleDeviceView.setText(getString(R.string.config_device_address,
-                    TextUtils.isEmpty(device.getName()) ? getString(R.string.config_unnamed_device)
-                            : device.getName(), device.getAddress()));
+            bleDeviceView.setText(bleDisplayName(device.getName()));
             session.connectBle(device);
         });
         sheet.show(getParentFragmentManager(), "ble_devices");
@@ -243,11 +256,35 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             return;
         }
         String target = state.getTransport() == TransportType.BLE
-                ? (state.getDeviceName().isEmpty() ? state.getAddress()
-                : getString(R.string.config_connection_target, state.getDeviceName(), state.getAddress()))
-                : state.getAddress();
+                ? bleDisplayName(state.getDeviceName()) : state.getAddress();
         connectionTargetView.setText(target);
         connectionTargetView.setVisibility(View.VISIBLE);
+    }
+
+    private String bleDisplayName(String name) {
+        return TextUtils.isEmpty(name) ? getString(R.string.config_unnamed_device) : name;
+    }
+
+    private void connectWifi() {
+        String address = wifiAddressView.getText().toString().trim();
+        if (!ReaderSessionManager.isValidIpv4(address)) {
+            wifiAddressView.setError(getString(R.string.config_reader_ip_invalid));
+            return;
+        }
+        wifiAddressView.setError(null);
+        dismissWifiKeyboard();
+        session.connectWifi(address);
+    }
+
+    private void dismissWifiKeyboard() {
+        hideKeyboard(wifiAddressView);
+        wifiAddressView.clearFocus();
+    }
+
+    private boolean isTouchInside(View target, MotionEvent event) {
+        Rect bounds = new Rect();
+        return target.getGlobalVisibleRect(bounds)
+                && bounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     private void showProtocolDialog() {

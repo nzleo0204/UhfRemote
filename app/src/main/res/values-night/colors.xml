@@ -11,8 +11,10 @@
     <color name="rfid_warning">#FBBF24</color>
     <color name="rfid_danger">#EF4444</color>
     <color name="rfid_orange">#F97316</color>
+    <color name="rfid_purple">#8B5CF6</color>
     <color name="rfid_text">#F8FAFC</color>
     <color name="rfid_text_secondary">#CBD5E1</color>
     <color name="rfid_text_muted">#64748B</color>
     <color name="rfid_line">#334155</color>
+    <color name="rfid_input_guard">#66000000</color>
 </resources>

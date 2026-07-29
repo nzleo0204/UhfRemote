@@ -19,6 +19,7 @@
             android:layout_height="@dimen/dp_56"
             android:background="@color/rfid_nav_bg"
             android:gravity="center"
+            android:fontFamily="sans-serif"
             android:text="单标签操作"
             android:textColor="@color/rfid_text"
             android:textSize="@dimen/sp_18" />
@@ -46,10 +47,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_44"
                 android:layout_marginTop="@dimen/dp_12"
+                android:fontFamily="sans-serif-medium"
                 android:text="读取标签"
                 android:textSize="@dimen/sp_15"
-                app:icon="@android:drawable/ic_menu_camera"
-                app:iconTint="@color/white" />
+                app:icon="@drawable/rfid_scan_ic"
+                app:iconPadding="@dimen/dp_8"
+                app:iconSize="@dimen/dp_20"
+                app:iconTint="@null" />
         </LinearLayout>
 
         <LinearLayout
