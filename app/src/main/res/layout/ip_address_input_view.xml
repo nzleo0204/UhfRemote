@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.hjq.custom.widget.view.RegexEditText
+        android:id="@+id/et_ip_octet_1"
+        style="@style/RfidIpOctet"
+        android:imeOptions="actionNext" />
+
+    <TextView style="@style/RfidIpSeparator" />
+
+    <com.hjq.custom.widget.view.RegexEditText
+        android:id="@+id/et_ip_octet_2"
+        style="@style/RfidIpOctet"
+        android:imeOptions="actionNext" />
+
+    <TextView style="@style/RfidIpSeparator" />
+
+    <com.hjq.custom.widget.view.RegexEditText
+        android:id="@+id/et_ip_octet_3"
+        style="@style/RfidIpOctet"
+        android:imeOptions="actionNext" />
+
+    <TextView style="@style/RfidIpSeparator" />
+
+    <com.hjq.custom.widget.view.RegexEditText
+        android:id="@+id/et_ip_octet_4"
+        style="@style/RfidIpOctet"
+        android:imeOptions="actionDone" />
+</merge>

@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sv_config_root"
+    android:id="@+id/fl_config_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
-    android:fillViewport="true"
     tools:context=".ui.fragment.home.ReaderConfigFragment">
+
+    <ScrollView
+        android:id="@+id/sv_config_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -234,24 +240,14 @@
                 android:layout_height="@dimen/dp_48"
                 android:gravity="center_vertical"
                 android:visibility="gone">
-                <com.hjq.custom.widget.view.RegexEditText
+                <com.leo.remote.ui.view.IpAddressInputView
                     android:id="@+id/et_config_wifi_ip"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/dp_44"
                     android:layout_weight="1"
                     android:background="@drawable/rfid_search_bg"
-                    android:digits="0123456789."
-                    android:hint="@string/config_reader_ip_hint"
-                    android:imeOptions="actionDone"
-                    android:importantForAutofill="no"
-                    android:inputType="numberDecimal"
-                    android:maxLength="15"
-                    android:paddingHorizontal="@dimen/dp_12"
-                    android:singleLine="true"
-                    android:textColor="@color/rfid_text"
-                    android:textColorHint="@color/rfid_text_muted"
-                    android:textSize="@dimen/sp_14"
-                    app:inputRegex="[0-9.]*" />
+                    android:contentDescription="@string/config_reader_ip_hint"
+                    android:paddingHorizontal="@dimen/dp_8" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_config_wifi_connect"
                     style="@style/RfidTextButton"
@@ -278,4 +274,23 @@
             <include layout="@layout/rfid_config_row_q" />
         </LinearLayout>
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <View
+        android:id="@+id/v_config_input_guard_top"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/rfid_input_guard"
+        android:clickable="true"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/v_config_input_guard_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/rfid_input_guard"
+        android:clickable="true"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+</FrameLayout>

@@ -54,5 +54,4 @@
             android:textSize="@dimen/sp_14" />
     </FrameLayout>
 
-    <include layout="@layout/rfid_business_bottom_nav" />
 </LinearLayout>

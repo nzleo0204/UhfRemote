@@ -29,7 +29,7 @@
                 android:src="@drawable/rfid_back_ic" />
 
             <TextView
-                android:id="@+id/tv_feedback_product"
+                android:id="@+id/tv_feedback_page_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dp_4"
@@ -55,7 +55,7 @@
             android:layout_marginTop="@dimen/dp_10">
 
             <TextView
-                android:id="@+id/tv_feedback_order"
+                android:id="@+id/tv_feedback_product"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -66,7 +66,7 @@
                 android:textSize="@dimen/sp_14" />
 
             <TextView
-                android:id="@+id/tv_feedback_requirement"
+                android:id="@+id/tv_feedback_order"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/dp_8"
@@ -78,6 +78,7 @@
                 android:textSize="@dimen/sp_14" />
 
             <TextView
+                android:id="@+id/tv_feedback_requirement"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/dp_8"
@@ -221,6 +222,5 @@
             android:textColor="@color/white"
             android:textSize="@dimen/sp_16" />
 
-        <include layout="@layout/rfid_business_bottom_nav" />
     </LinearLayout>
 </ScrollView>

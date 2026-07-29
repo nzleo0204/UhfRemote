@@ -1,16 +1,18 @@
 package com.leo.remote.ui.fragment.home;
 
 import android.graphics.Rect;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.text.TextUtils;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.leo.remote.R;
@@ -30,6 +32,7 @@ import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.dialog.BleDeviceSheet;
 import com.leo.remote.ui.dialog.ReaderConnectionDialog;
 import com.leo.remote.ui.dialog.ReaderDeviceInfoDialog;
+import com.leo.remote.ui.view.IpAddressInputView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -49,18 +52,24 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private TextView blfView;
     private TextView qView;
     private TextView bleDeviceView;
-    private EditText wifiAddressView;
+    private IpAddressInputView wifiAddressView;
     private SeekBar powerSeekBar;
     private View hardwareSection;
     private View protocolSection;
     private View rateSection;
     private View bleActions;
     private View wifiActions;
+    private View configRoot;
+    private ScrollView configScroll;
+    private View inputGuardTop;
+    private View inputGuardBottom;
     private SwitchMaterial bleSwitch;
     private SwitchMaterial wifiSwitch;
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
+    private int imeInsetBottom;
+    private int configScrollBaseBottomPadding;
 
     public static ReaderConfigFragment newInstance() { return new ReaderConfigFragment(); }
 
@@ -85,6 +94,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         rateSection = findViewById(R.id.ll_config_rate);
         bleActions = findViewById(R.id.ll_config_ble_actions);
         wifiActions = findViewById(R.id.ll_config_wifi_actions);
+        configRoot = findViewById(R.id.fl_config_root);
+        configScroll = findViewById(R.id.sv_config_root);
+        inputGuardTop = findViewById(R.id.v_config_input_guard_top);
+        inputGuardBottom = findViewById(R.id.v_config_input_guard_bottom);
         bleSwitch = findViewById(R.id.sw_config_ble);
         wifiSwitch = findViewById(R.id.sw_config_wifi);
 
@@ -105,6 +118,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             bindingUi = true;
             wifiSwitch.setChecked(false);
             bindingUi = false;
+            dismissWifiKeyboard();
             bindTransportRows(true, false);
             if (session != null && session.getState().getTransport() != TransportType.NONE) {
                 session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
@@ -125,25 +139,36 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
             }
         });
-        findViewById(R.id.row_config_ble).setOnClickListener(view -> bleSwitch.setChecked(true));
-        findViewById(R.id.row_config_wifi).setOnClickListener(view -> wifiSwitch.setChecked(true));
         statusView.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
         findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view -> connectWifi());
-        wifiAddressView.setOnEditorActionListener((view, actionId, event) -> {
-            if (actionId != EditorInfo.IME_ACTION_DONE) { return false; }
-            connectWifi();
-            return true;
+        wifiAddressView.setOnDoneAction(this::connectWifi);
+        wifiAddressView.setOnEditingChangedListener(editing -> {
+            if (editing) {
+                showWifiInputGuard();
+            } else {
+                hideWifiInputGuard();
+            }
         });
-        findViewById(R.id.sv_config_root).setOnTouchListener((view, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                view.performClick();
+        inputGuardTop.setOnClickListener(view -> dismissWifiKeyboard());
+        inputGuardBottom.setOnClickListener(view -> dismissWifiKeyboard());
+        configScrollBaseBottomPadding = configScroll.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(configRoot, (view, insets) -> {
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+            imeInsetBottom = imeInsets.bottom;
+            configScroll.setPadding(configScroll.getPaddingLeft(), configScroll.getPaddingTop(),
+                    configScroll.getPaddingRight(), configScrollBaseBottomPadding + imeInsetBottom);
+            if (wifiAddressView.hasInputFocus()) {
+                configScroll.post(this::keepWifiInputAboveKeyboard);
             }
-            if (event.getAction() == MotionEvent.ACTION_DOWN && wifiAddressView.hasFocus()
-                    && !isTouchInside(wifiAddressView, event)) {
-                dismissWifiKeyboard();
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(configRoot);
+        configRoot.addOnLayoutChangeListener((view, left, top, right, bottom,
+                                               oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (wifiAddressView.hasInputFocus()) {
+                updateWifiInputGuardBounds();
             }
-            return false;
         });
         findViewById(R.id.row_config_protocol).setOnClickListener(view -> showProtocolDialog());
         findViewById(R.id.row_config_work_mode).setOnClickListener(view -> showWorkModeDialog());
@@ -172,7 +197,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     @Override
     protected void initData() {
         session = ReaderSessionManager.getInstance(requireActivity().getApplication());
-        wifiAddressView.setText(session.getSavedWifiAddress());
         session.addObserver(this);
     }
 
@@ -194,9 +218,11 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         if (state.getTransport() == TransportType.BLE) {
             bindingUi = true;
             bleSwitch.setChecked(true);
+            wifiSwitch.setChecked(false);
             bindingUi = false;
         } else if (state.getTransport() == TransportType.WIFI) {
             bindingUi = true;
+            bleSwitch.setChecked(false);
             wifiSwitch.setChecked(true);
             bindingUi = false;
         }
@@ -266,25 +292,76 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void connectWifi() {
-        String address = wifiAddressView.getText().toString().trim();
+        String address = wifiAddressView.getAddress();
         if (!ReaderSessionManager.isValidIpv4(address)) {
             wifiAddressView.setError(getString(R.string.config_reader_ip_invalid));
             return;
         }
-        wifiAddressView.setError(null);
+        wifiAddressView.clearError();
         dismissWifiKeyboard();
         session.connectWifi(address);
     }
 
     private void dismissWifiKeyboard() {
-        hideKeyboard(wifiAddressView);
-        wifiAddressView.clearFocus();
+        View focusedInput = wifiAddressView.getFocusedInput();
+        hideKeyboard(focusedInput == null ? wifiAddressView : focusedInput);
+        wifiAddressView.clearInputFocus();
+        hideWifiInputGuard();
     }
 
-    private boolean isTouchInside(View target, MotionEvent event) {
-        Rect bounds = new Rect();
-        return target.getGlobalVisibleRect(bounds)
-                && bounds.contains((int) event.getRawX(), (int) event.getRawY());
+    private void showWifiInputGuard() {
+        wifiAddressView.postDelayed(() -> {
+            Rect inputBounds = new Rect();
+            wifiAddressView.getDrawingRect(inputBounds);
+            wifiAddressView.requestRectangleOnScreen(inputBounds, false);
+            keepWifiInputAboveKeyboard();
+        }, 120);
+    }
+
+    private void keepWifiInputAboveKeyboard() {
+        if (!wifiAddressView.hasInputFocus()) {
+            return;
+        }
+        int[] rootLocation = new int[2];
+        int[] rowLocation = new int[2];
+        configRoot.getLocationOnScreen(rootLocation);
+        wifiActions.getLocationOnScreen(rowLocation);
+        int spacing = getResources().getDimensionPixelSize(R.dimen.dp_16);
+        int visibleBottom = rootLocation[1] + configRoot.getHeight() - imeInsetBottom - spacing;
+        int rowBottom = rowLocation[1] + wifiActions.getHeight();
+        if (rowBottom > visibleBottom) {
+            configScroll.smoothScrollBy(0, rowBottom - visibleBottom);
+            configScroll.post(this::updateWifiInputGuardBounds);
+        } else {
+            updateWifiInputGuardBounds();
+        }
+    }
+
+    private void updateWifiInputGuardBounds() {
+        int[] rootLocation = new int[2];
+        int[] rowLocation = new int[2];
+        configRoot.getLocationOnScreen(rootLocation);
+        wifiActions.getLocationOnScreen(rowLocation);
+        int rowTop = Math.min(configRoot.getHeight(),
+                Math.max(0, rowLocation[1] - rootLocation[1]));
+        int rowBottom = Math.min(configRoot.getHeight(), rowTop + wifiActions.getHeight());
+
+        FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) inputGuardTop.getLayoutParams();
+        topParams.height = rowTop;
+        inputGuardTop.setLayoutParams(topParams);
+
+        FrameLayout.LayoutParams bottomParams =
+                (FrameLayout.LayoutParams) inputGuardBottom.getLayoutParams();
+        bottomParams.topMargin = rowBottom;
+        bottomParams.height = Math.max(0, configRoot.getHeight() - rowBottom);
+        inputGuardBottom.setLayoutParams(bottomParams);
+        inputGuardTop.setVisibility(View.VISIBLE);
+        inputGuardBottom.setVisibility(View.VISIBLE);
+    }
+
+    private void hideWifiInputGuard() {
+        inputGuardTop.setVisibility(View.GONE);
+        inputGuardBottom.setVisibility(View.GONE);
     }
 
     private void showProtocolDialog() {
