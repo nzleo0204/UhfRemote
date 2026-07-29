@@ -133,7 +133,7 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected boolean isStatusBarDarkFont() {
-        return false;
+        return isRfidLightTheme();
     }
 
     @Override
@@ -196,7 +196,7 @@ public final class HomeActivity extends AppActivity
     @Override
     protected ImmersionBar createStatusBarConfig() {
         return super.createStatusBarConfig()
-                .statusBarDarkFont(false)
+                .statusBarDarkFont(isRfidLightTheme())
                 .statusBarColor(R.color.rfid_nav_bg)
                 .navigationBarColor(R.color.rfid_nav_bg);
     }

@@ -34,7 +34,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="RFID 读写器"
+                    android:text="@string/app_name"
                     android:textColor="@color/rfid_text"
                     android:textSize="@dimen/sp_18" />
 
@@ -45,18 +45,10 @@
                     android:background="@drawable/rfid_chip_gray_bg"
                     android:gravity="center"
                     android:paddingHorizontal="@dimen/dp_12"
-                    android:text="● 未连接"
+                    android:text="@string/config_status_not_connected"
                     android:textColor="@color/rfid_text"
                     android:textSize="@dimen/sp_12" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_config_device_info"
-                    style="@style/RfidTextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/dp_40"
-                    android:minWidth="0dp"
-                    android:text="设备"
-                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView
@@ -77,16 +69,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp_16"
-            android:background="@drawable/rfid_card_bg"
+            style="@style/RfidCard"
             android:orientation="vertical"
-            android:padding="@dimen/dp_16">
+            >
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="功率设置"
-                android:textColor="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_12" />
+                style="@style/RfidGroupTitle"
+                android:text="@string/config_group_power" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,12 +84,8 @@
                 android:gravity="center_vertical">
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="发射功率"
-                    android:textColor="@color/rfid_text"
-                    android:textSize="@dimen/sp_16" />
+                    style="@style/RfidRowLabel"
+                    android:text="@string/config_transmit_power" />
 
                 <TextView
                     android:id="@+id/tv_config_power_value"
@@ -128,14 +113,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="0 dBm"
+                    android:text="@string/config_power_min"
                     android:textColor="@color/rfid_text_muted"
                     android:textSize="@dimen/sp_12" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="33 dBm"
+                    android:text="@string/config_power_max"
                     android:textColor="@color/rfid_text_muted"
                     android:textSize="@dimen/sp_12" />
             </LinearLayout>
@@ -146,16 +131,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dp_16"
-            android:background="@drawable/rfid_card_bg"
+            style="@style/RfidCard"
             android:orientation="vertical"
-            android:padding="@dimen/dp_16">
+            >
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="协议与模式"
-                android:textColor="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_12" />
+                style="@style/RfidGroupTitle"
+                android:text="@string/config_group_protocol" />
 
             <include layout="@layout/rfid_config_row_protocol" />
             <include layout="@layout/rfid_config_row_work_mode" />
@@ -167,41 +149,62 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp_16"
-            android:background="@drawable/rfid_card_bg"
+            style="@style/RfidCard"
             android:orientation="vertical"
-            android:padding="@dimen/dp_16">
+            >
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="传输方式"
-                android:textColor="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_12" />
+                style="@style/RfidGroupTitle"
+                android:text="@string/config_group_transport" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/tg_config_transport"
+            <LinearLayout
+                android:id="@+id/row_config_ble"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_48"
-                android:orientation="horizontal"
-                app:singleSelection="true"
-                app:selectionRequired="true">
+                android:layout_height="@dimen/dp_44"
+                android:layout_marginTop="@dimen/dp_10"
+                android:gravity="center_vertical">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_config_ble"
-                    style="@style/RfidSegmentButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="蓝牙" />
+                <ImageView
+                    android:layout_width="@dimen/dp_20"
+                    android:layout_height="@dimen/dp_20"
+                    android:src="@drawable/rfid_bluetooth_ic" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_config_wifi"
-                    style="@style/RfidSegmentButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="Wi-Fi" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                <TextView
+                    style="@style/RfidRowLabel"
+                    android:layout_marginStart="@dimen/dp_12"
+                    android:text="@string/config_bluetooth" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_config_ble"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/rfid_switch_thumb_selector"
+                    app:trackTint="@color/rfid_switch_track_selector" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_config_wifi"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="@dimen/dp_20"
+                    android:layout_height="@dimen/dp_20"
+                    android:src="@drawable/rfid_wifi_ic" />
+
+                <TextView
+                    style="@style/RfidRowLabel"
+                    android:layout_marginStart="@dimen/dp_12"
+                    android:text="@string/config_wifi" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_config_wifi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/rfid_switch_thumb_selector"
+                    app:trackTint="@color/rfid_switch_track_selector" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_config_ble_actions"
@@ -213,7 +216,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="未选择设备"
+                    android:text="@string/config_no_device"
                     android:textColor="@color/rfid_text"
                     android:textSize="@dimen/sp_16" />
                 <com.google.android.material.button.MaterialButton
@@ -221,7 +224,7 @@
                     style="@style/RfidTextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="搜索设备" />
+                    android:text="@string/config_scan_device" />
             </LinearLayout>
 
             <LinearLayout
@@ -235,7 +238,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="读写器 IP 地址"
+                    android:hint="@string/config_reader_ip_hint"
+                    android:importantForAutofill="no"
                     android:inputType="textUri"
                     android:textColor="@color/rfid_text"
                     android:textSize="@dimen/sp_16" />
@@ -244,7 +248,7 @@
                     style="@style/RfidTextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="连接" />
+                    android:text="@string/config_connect" />
             </LinearLayout>
         </LinearLayout>
 
@@ -253,16 +257,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dp_16"
-            android:background="@drawable/rfid_card_bg"
+            style="@style/RfidCard"
             android:orientation="vertical"
-            android:padding="@dimen/dp_16">
+            >
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="速率设置"
-                android:textColor="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_12" />
+                style="@style/RfidGroupTitle"
+                android:text="@string/config_group_rate" />
 
             <include layout="@layout/rfid_config_row_blf" />
             <include layout="@layout/rfid_config_row_q" />

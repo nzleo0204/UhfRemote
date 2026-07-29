@@ -57,6 +57,121 @@
     <string name="order_progress_title">订单进度查询</string>
     <string name="shipment_query_title">发货单号查询</string>
     <string name="feedback_title">问题与需求提交</string>
+    <string name="theme_setting_title">显示主题</string>
+    <string name="theme_mode_system">跟随系统</string>
+    <string name="theme_mode_light">亮色</string>
+    <string name="theme_mode_dark">深色</string>
+    <string-array name="theme_mode_labels">
+        <item>@string/theme_mode_system</item>
+        <item>@string/theme_mode_light</item>
+        <item>@string/theme_mode_dark</item>
+    </string-array>
+    <string name="config_status_connected">● 已连接</string>
+    <string name="config_status_disconnected">● 已断开</string>
+    <string name="config_status_failed">● 连接失败</string>
+    <string name="config_status_not_connected">● 未连接</string>
+    <string name="config_group_power">功率设</string>
+    <string name="config_group_protocol">协议与模</string>
+    <string name="config_group_transport">传输方</string>
+    <string name="config_group_rate">速率设</string>
+    <string name="config_transmit_power">发射功率</string>
+    <string name="config_power_min">0 dBm</string>
+    <string name="config_power_max">33 dBm</string>
+    <string name="config_bluetooth">蓝牙</string>
+    <string name="config_wifi">WiFi</string>
+    <string name="config_no_device">未选择设备</string>
+    <string name="config_unnamed_device">未命名设备</string>
+    <string name="config_device_address">%1$s\n%2$s</string>
+    <string name="config_scan_device">搜索设备</string>
+    <string name="config_reader_ip_hint">读写器 IP 地址</string>
+    <string name="config_connect">连接</string>
+    <string name="config_protocol">射频协议</string>
+    <string name="config_protocol_iso_18000_6c">ISO 18000-6C</string>
+    <string name="config_work_mode">工作模式</string>
+    <string name="config_work_mode_single">单次触发</string>
+    <string name="config_work_mode_continuous">连续触发</string>
+    <string name="config_work_mode_low_power">低功耗</string>
+    <string name="config_session">Session</string>
+    <string name="config_session_s0">S0</string>
+    <string name="config_session_value">S%1$d</string>
+    <string name="config_session_target">Session / Target</string>
+    <string name="config_blf_rate">Blf 速率</string>
+    <string name="config_blf_40">40 kHz</string>
+    <string name="config_blf_256">256 kHz</string>
+    <string name="config_blf_300">300 kHz</string>
+    <string name="config_blf_400">400 kHz</string>
+    <string name="config_q_value_label">Q 值</string>
+    <string name="config_adaptive">自适应</string>
+    <string name="config_fixed_q">固定 Q%1$d</string>
+    <string name="config_dynamic_q">动态 Q%1$d</string>
+    <string name="config_q_value">Q%1$d</string>
+    <string name="config_q_parameter">Q 参数</string>
+    <string name="config_magic_power">MagicRF 功率</string>
+    <string name="config_connection_target">%1$s · %2$s</string>
+    <string name="config_power_set_failed">功率设置失败</string>
+    <string name="config_protocol_set_failed">协议切换失败</string>
+    <string name="config_query_set_failed">Query 参数设置失败</string>
+    <string name="config_blf_set_failed">BLF 设置失败</string>
+    <string name="config_q_set_failed">Q 参数设置失败</string>
+    <string name="config_error_code">%1$s（错误码 %2$d）</string>
+    <string name="config_unknown_value">未知 (%1$d)</string>
+    <string name="config_power_decimal">%1$d.%2$d dBm</string>
+    <string-array name="config_work_mode_labels">
+        <item>@string/config_work_mode_single</item>
+        <item>@string/config_work_mode_continuous</item>
+        <item>@string/config_work_mode_low_power</item>
+    </string-array>
+    <string-array name="config_session_labels">
+        <item>S0 / A</item>
+        <item>S0 / B</item>
+        <item>S1 / A</item>
+        <item>S1 / B</item>
+        <item>S2 / A</item>
+        <item>S2 / B</item>
+        <item>S3 / A</item>
+        <item>S3 / B</item>
+    </string-array>
+    <string-array name="config_blf_labels">
+        <item>@string/config_blf_40</item>
+        <item>@string/config_blf_256</item>
+        <item>@string/config_blf_300</item>
+        <item>@string/config_blf_400</item>
+    </string-array>
+    <string name="inventory_title">标签盘点</string>
+    <string name="inventory_total">%1$d 条</string>
+    <string name="inventory_total_zero">0 条</string>
+    <string name="inventory_start">开始盘点</string>
+    <string name="inventory_stop">停止盘点</string>
+    <string name="inventory_clear">清除</string>
+    <string name="inventory_export">导出</string>
+    <string name="inventory_column_index">编号</string>
+    <string name="inventory_column_epc">EPC 号</string>
+    <string name="inventory_column_count">次数</string>
+    <string name="inventory_column_rssi">RSSI</string>
+    <string name="inventory_column_chip">芯片型号</string>
+    <string name="inventory_empty">尚未发现标签</string>
+    <string name="inventory_connect_first">请先连接读写器</string>
+    <string name="inventory_start_failed">开始盘点失败</string>
+    <string name="inventory_stop_failed">停止盘点失败</string>
+    <string name="inventory_exported">CSV 已导出</string>
+    <string name="inventory_export_failed">导出失败：%1$s</string>
+    <string name="mine_default_role">管理员</string>
+    <string name="mine_logged_role">%1$s · 已登</string>
+    <string name="stock_count">共 %1$d 种标签</string>
+    <string name="stock_meta">%1$s | %2$s</string>
+    <string name="stock_available">库存: %1$s</string>
+    <string name="stock_reserved">预定: %1$s</string>
+    <string name="stock_updated">更新 %1$s</string>
+    <string name="order_quantity">数量: %1$s</string>
+    <string name="order_shipment_quantity">已发: %1$s 枚 | 待发: %2$s</string>
+    <string name="order_submit_time">提交时间: %1$s</string>
+    <string name="order_finish_time">完成时间: %1$s</string>
+    <string name="order_requirement">定制要求: %1$s</string>
+    <string name="order_progress">生产进度 %1$d%%</string>
+    <string name="shipment_meta">%1$s | %2$s 枚 | %3$s | %4$s</string>
+    <string name="shipment_tracking_no">运单号: %1$s</string>
+    <string name="shipment_timeline_done">● %1$s · %2$s\n%3$s</string>
+    <string name="shipment_timeline_pending">○ %1$s · %2$s\n%3$s</string>
 
     <!-- 登录 -->
     <string name="login_register">注册</string>

@@ -19,6 +19,7 @@ import com.leo.remote.action.ImmersionAction;
 import com.leo.remote.action.TitleBarAction;
 import com.leo.remote.action.ToastAction;
 import com.leo.remote.ui.dialog.common.WaitDialog;
+import com.leo.remote.util.ThemeModeManager;
 
 /**
  *    author : Android 轮子哥
@@ -134,7 +135,7 @@ public abstract class AppActivity extends BaseActivity
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(
                 getWindow(), getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(isStatusBarDarkFont());
-        controller.setAppearanceLightNavigationBars(false);
+        controller.setAppearanceLightNavigationBars(isNavigationBarDarkFont());
 
         View bottomInsetView = bottomView != null ? bottomView : contentView;
         int topPaddingLeft = topView == null ? 0 : topView.getPaddingLeft();
@@ -190,6 +191,10 @@ public abstract class AppActivity extends BaseActivity
         return true;
     }
 
+    protected boolean isNavigationBarDarkFont() {
+        return isStatusBarDarkFont();
+    }
+
     /**
      * 获取状态栏沉浸的配置对象
      */
@@ -211,8 +216,12 @@ public abstract class AppActivity extends BaseActivity
             .statusBarDarkFont(isStatusBarDarkFont())
             // 状态栏字体和导航栏内容自动变色，必须指定状态栏颜色和导航栏颜色才可以自动变色
             .autoDarkModeEnable(true, 0.2f);
-        immersionBar.navigationBarColor(R.color.white);
+        immersionBar.navigationBarColor(R.color.rfid_nav_bg);
         return immersionBar;
+    }
+
+    protected boolean isRfidLightTheme() {
+        return ThemeModeManager.isLightTheme(this);
     }
 
     /**

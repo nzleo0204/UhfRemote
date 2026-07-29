@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/RfidCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/dp_12"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_30"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_order_no"
+            style="@style/RfidRowLabel"
+            android:textSize="@dimen/sp_15" />
+
+        <TextView
+            android:id="@+id/tv_order_status"
+            style="@style/RfidValueChip" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="@dimen/dp_64"
+            android:layout_height="@dimen/dp_64"
+            android:background="@drawable/rfid_thumb_bg"
+            android:gravity="center"
+            android:text="RFID"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_12"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_order_product"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/rfid_text"
+                android:textSize="@dimen/sp_15" />
+
+            <TextView
+                android:id="@+id/tv_order_qty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_12" />
+
+            <TextView
+                android:id="@+id/tv_order_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:textColor="@color/rfid_primary_soft"
+                android:textSize="@dimen/sp_12" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_order_progress_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:textColor="@color/rfid_text_muted"
+        android:textSize="@dimen/sp_12" />
+
+    <ProgressBar
+        android:id="@+id/pb_order_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_8"
+        android:layout_marginTop="@dimen/dp_6"
+        android:max="100"
+        android:progressDrawable="@drawable/rfid_progress_drawable" />
+</LinearLayout>

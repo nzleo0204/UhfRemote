@@ -33,14 +33,14 @@ public abstract class RfidPageActivity extends AppActivity {
 
     @Override
     protected boolean isStatusBarDarkFont() {
-        return false;
+        return isRfidLightTheme();
     }
 
     @NonNull
     @Override
     protected ImmersionBar createStatusBarConfig() {
         return super.createStatusBarConfig()
-                .statusBarDarkFont(false)
+                .statusBarDarkFont(isRfidLightTheme())
                 .statusBarColor(R.color.rfid_nav_bg)
                 .navigationBarColor(R.color.rfid_nav_bg);
     }

@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape>
-            <solid android:color="#334155" />
+            <solid android:color="@color/rfid_line" />
             <corners android:radius="@dimen/dp_3" />
         </shape>
     </item>

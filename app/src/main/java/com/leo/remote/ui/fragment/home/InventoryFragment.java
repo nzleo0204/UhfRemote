@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
@@ -78,7 +79,8 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     public void onReaderStateChanged(ReaderState state) {
         boolean connected = state.isConnected();
         startButton.setEnabled(connected);
-        startButton.setText(state.isInventoryRunning() ? "停止盘点" : "开始盘点");
+        startButton.setText(state.isInventoryRunning()
+                ? R.string.inventory_stop : R.string.inventory_start);
         startButton.setIconResource(state.isInventoryRunning()
                 ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
@@ -86,27 +88,31 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onInventoryChanged(List<InventoryItem> items, long totalReads) {
         adapter.submitList(items);
-        totalView.setText(items.size() + " 标签 / " + totalReads + " 次");
+        totalView.setText(getString(R.string.inventory_total, items.size()));
         emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void toggleInventory() {
         ReaderState state = session.getState();
         if (!state.isConnected()) {
-            toast("请先连接读写器");
+            toast(R.string.inventory_connect_first);
             return;
         }
         if (state.isInventoryRunning()) {
-            session.stopInventory().whenComplete((status, error) -> showResult(status, error, "停止盘点失败"));
+            session.stopInventory().whenComplete((status, error) ->
+                    showResult(status, error, R.string.inventory_stop_failed));
         } else {
-            session.startInventory().whenComplete((status, error) -> showResult(status, error, "开始盘点失败"));
+            session.startInventory().whenComplete((status, error) ->
+                    showResult(status, error, R.string.inventory_start_failed));
         }
     }
 
-    private void showResult(Integer status, Throwable error, String message) {
+    private void showResult(Integer status, Throwable error, @StringRes int message) {
         requireActivity().runOnUiThread(() -> {
             if (error != null) { toast(rootMessage(error)); }
-            else if (status != null && status != 0) { toast(message + "（错误码 " + status + "）"); }
+            else if (status != null && status != 0) {
+                toast(getString(R.string.config_error_code, getString(message), status));
+            }
         });
     }
 
@@ -122,9 +128,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         try (OutputStream output = requireContext().getContentResolver().openOutputStream(uri)) {
             if (output == null) { throw new IOException("Unable to open document"); }
             output.write(csv.toString().getBytes(StandardCharsets.UTF_8));
-            toast("CSV 已导出");
+            toast(R.string.inventory_exported);
         } catch (IOException error) {
-            toast("导出失败：" + error.getMessage());
+            toast(getString(R.string.inventory_export_failed, error.getMessage()));
         }
     }
 

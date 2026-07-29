@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <!-- 发送通知权限（Android 13.0 新增的权限）-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -33,7 +35,7 @@
         android:resizeableActivity="true"
         android:roundIcon="@mipmap/launcher_ic_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/UhfRemoteTheme"
         android:usesCleartextTraffic="false"
         tools:ignore="AllowBackup,DiscouragedApi"
         tools:targetApi="s">

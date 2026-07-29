@@ -5,20 +5,10 @@
     android:layout_height="@dimen/dp_44"
     android:gravity="center_vertical">
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Q 值"
-        android:textColor="@color/rfid_text"
-        android:textSize="@dimen/sp_16" />
+        style="@style/RfidRowLabel"
+        android:text="@string/config_q_value_label" />
     <TextView
         android:id="@+id/tv_config_q"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/dp_32"
-        android:background="@drawable/rfid_search_bg"
-        android:gravity="center"
-        android:paddingHorizontal="@dimen/dp_12"
-        android:text="自适应"
-        android:textColor="@color/rfid_primary_soft"
-        android:textSize="@dimen/sp_14" />
+        style="@style/RfidValueChip"
+        android:text="@string/config_adaptive" />
 </LinearLayout>

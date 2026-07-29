@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
@@ -14,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="标签盘点"
+            android:text="@string/inventory_title"
             android:textColor="@color/rfid_text"
             android:textSize="@dimen/sp_18" />
         <TextView
@@ -24,7 +25,7 @@
             android:background="@drawable/rfid_chip_blue_bg"
             android:gravity="center"
             android:paddingHorizontal="@dimen/dp_12"
-            android:text="0 条"
+            android:text="@string/inventory_total_zero"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_12" />
     </LinearLayout>
@@ -35,24 +36,29 @@
         android:paddingHorizontal="@dimen/dp_16">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_start"
-            style="@style/RfidPrimaryButton"
+            style="@style/RfidSuccessButton"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_40"
-            android:text="开始盘点" />
+            android:text="@string/inventory_start"
+            app:icon="@android:drawable/ic_media_play" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_clear"
-            style="@style/RfidTextButton"
+            style="@style/RfidGhostButton"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_40"
             android:layout_marginStart="@dimen/dp_8"
-            android:text="清除" />
+            android:text="@string/inventory_clear"
+            app:icon="@android:drawable/ic_menu_delete"
+            app:iconTint="@color/rfid_text_muted" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_inventory_export"
-            style="@style/RfidTextButton"
+            style="@style/RfidGhostButton"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_40"
             android:layout_marginStart="@dimen/dp_8"
-            android:text="导出 CSV" />
+            android:text="@string/inventory_export"
+            app:icon="@android:drawable/stat_sys_download"
+            app:iconTint="@color/rfid_text_muted" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -60,11 +66,11 @@
         android:background="@color/rfid_nav_bg"
         android:gravity="center_vertical"
         android:paddingHorizontal="@dimen/dp_16">
-        <TextView android:layout_width="@dimen/dp_40" android:layout_height="wrap_content" android:text="编号" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="EPC / UID" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
-        <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="次数" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
-        <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="RSSI" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
-        <TextView android:layout_width="@dimen/dp_72" android:layout_height="wrap_content" android:text="芯片型号" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+        <TextView android:layout_width="@dimen/dp_40" android:layout_height="wrap_content" android:text="@string/inventory_column_index" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/inventory_column_epc" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+        <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="@string/inventory_column_count" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+        <TextView android:layout_width="@dimen/dp_52" android:layout_height="wrap_content" android:text="@string/inventory_column_rssi" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
+        <TextView android:layout_width="@dimen/dp_72" android:layout_height="wrap_content" android:text="@string/inventory_column_chip" android:textColor="@color/rfid_text_muted" android:textSize="@dimen/sp_12" />
     </LinearLayout>
     <FrameLayout
         android:layout_width="match_parent"
@@ -79,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="尚未发现标签"
+            android:text="@string/inventory_empty"
             android:textColor="@color/rfid_text_muted"
             android:textSize="@dimen/sp_14" />
     </FrameLayout>

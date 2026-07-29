@@ -154,6 +154,7 @@ dependencies {
     implementation project(':library:smallestWidth')
     implementation project(':library:customWidget')
 
+    implementation libs.appCompat
     implementation libs.deviceCompat
     implementation libs.xxPermissions
 
@@ -163,6 +164,12 @@ dependencies {
 
     implementation libs.easybleX
     implementation libs.commonsAndroid
+    implementation libs.easyHttp
+    implementation libs.okHttp
+    implementation(libs.gsonFactory) {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    implementation libs.gson
 
     implementation libs.shapeView
     implementation libs.shapeDrawable

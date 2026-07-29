@@ -7,14 +7,18 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import com.hjq.bar.TitleBar;
 import com.hjq.core.manager.ActivityManager;
+import com.hjq.http.EasyConfig;
 import com.hjq.toast.Toaster;
 import com.leo.remote.R;
+import com.leo.remote.http.model.RequestHandler;
+import com.leo.remote.http.model.RequestServer;
 import com.leo.remote.reader.ReaderSessionManager;
 import com.leo.remote.util.AppConfig;
 import com.leo.remote.util.CrashHandler;
 import com.leo.remote.util.DebugLoggerTree;
 import com.leo.remote.util.MaterialHeader;
 import com.leo.remote.util.SmartBallPulseFooter;
+import com.leo.remote.util.ThemeModeManager;
 import com.leo.remote.util.TitleBarStyle;
 import com.leo.remote.util.ToastInterceptor;
 import com.leo.remote.util.ToastStyle;
@@ -22,6 +26,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.bugly.library.Bugly;
 import com.tencent.bugly.library.BuglyBuilder;
 import com.tencent.mmkv.MMKV;
+import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 public final class InitManager {
@@ -41,6 +46,9 @@ public final class InitManager {
     }
 
     public static void preInitSdk(@NonNull Application application) {
+        MMKV.initialize(application);
+        ThemeModeManager.applyStoredMode();
+
         if (AppConfig.isLogEnable()) {
             Timber.plant(new DebugLoggerTree());
         }
@@ -65,7 +73,14 @@ public final class InitManager {
         builder.debugMode = AppConfig.isDebug();
         Bugly.init(application, builder);
         ActivityManager.getInstance().init(application);
-        MMKV.initialize(application);
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        EasyConfig.with(okHttpClient)
+                .setLogEnabled(AppConfig.isLogEnable())
+                .setServer(new RequestServer())
+                .setHandler(new RequestHandler(application))
+                .setRetryCount(1)
+                .into();
     }
 
     public static void initSdk(@NonNull Application application) {

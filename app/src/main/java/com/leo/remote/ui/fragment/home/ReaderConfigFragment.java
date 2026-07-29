@@ -7,8 +7,9 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import com.google.android.material.button.MaterialButtonToggleGroup;
+import androidx.annotation.StringRes;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.leo.remote.R;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.ConnectionPhase;
@@ -40,6 +41,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private TextView connectionTargetView;
     private TextView powerValueView;
     private TextView protocolView;
+    private TextView workModeView;
     private TextView sessionView;
     private TextView blfView;
     private TextView qView;
@@ -51,9 +53,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private View rateSection;
     private View bleActions;
     private View wifiActions;
-    private View deviceInfoButton;
-    private MaterialButtonToggleGroup transportGroup;
-    private MaterialButtonToggleGroup workModeGroup;
+    private SwitchMaterial bleSwitch;
+    private SwitchMaterial wifiSwitch;
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
@@ -69,6 +70,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         connectionTargetView = findViewById(R.id.tv_config_connection_target);
         powerValueView = findViewById(R.id.tv_config_power_value);
         protocolView = findViewById(R.id.tv_config_protocol);
+        workModeView = findViewById(R.id.tv_config_work_mode);
         sessionView = findViewById(R.id.tv_config_session);
         blfView = findViewById(R.id.tv_config_blf);
         qView = findViewById(R.id.tv_config_q);
@@ -80,30 +82,54 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         rateSection = findViewById(R.id.ll_config_rate);
         bleActions = findViewById(R.id.ll_config_ble_actions);
         wifiActions = findViewById(R.id.ll_config_wifi_actions);
-        deviceInfoButton = findViewById(R.id.btn_config_device_info);
-        transportGroup = findViewById(R.id.tg_config_transport);
-        workModeGroup = findViewById(R.id.tg_config_work_mode);
+        bleSwitch = findViewById(R.id.sw_config_ble);
+        wifiSwitch = findViewById(R.id.sw_config_wifi);
 
         bindingUi = true;
-        transportGroup.check(R.id.btn_config_ble);
-        workModeGroup.check(R.id.btn_work_fast);
+        bleSwitch.setChecked(true);
+        wifiSwitch.setChecked(false);
         bindingUi = false;
+        bindTransportRows(true, false);
         setHardwareEnabled(false);
 
-        transportGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked || bindingUi) { return; }
-            boolean ble = checkedId == R.id.btn_config_ble;
-            bleActions.setVisibility(ble ? View.VISIBLE : View.GONE);
-            wifiActions.setVisibility(ble ? View.GONE : View.VISIBLE);
+        bleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (bindingUi) { return; }
+            if (!isChecked && !wifiSwitch.isChecked()) {
+                buttonView.setChecked(true);
+                return;
+            }
+            if (!isChecked) { return; }
+            bindingUi = true;
+            wifiSwitch.setChecked(false);
+            bindingUi = false;
+            bindTransportRows(true, false);
             if (session != null && session.getState().getTransport() != TransportType.NONE) {
                 session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
             }
         });
-        deviceInfoButton.setOnClickListener(view -> showDeviceInfo());
+        wifiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (bindingUi) { return; }
+            if (!isChecked && !bleSwitch.isChecked()) {
+                buttonView.setChecked(true);
+                return;
+            }
+            if (!isChecked) { return; }
+            bindingUi = true;
+            bleSwitch.setChecked(false);
+            bindingUi = false;
+            bindTransportRows(false, false);
+            if (session != null && session.getState().getTransport() != TransportType.NONE) {
+                session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
+            }
+        });
+        findViewById(R.id.row_config_ble).setOnClickListener(view -> bleSwitch.setChecked(true));
+        findViewById(R.id.row_config_wifi).setOnClickListener(view -> wifiSwitch.setChecked(true));
+        statusView.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
         findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view ->
                 session.connectWifi(wifiAddressView.getText().toString()));
         findViewById(R.id.row_config_protocol).setOnClickListener(view -> showProtocolDialog());
+        findViewById(R.id.row_config_work_mode).setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
         findViewById(R.id.row_config_blf).setOnClickListener(view -> showBlfDialog());
         findViewById(R.id.row_config_q).setOnClickListener(view -> showQDialog());
@@ -111,12 +137,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             if (readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF) { showMagicPowerDialog(); }
         });
 
-        workModeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked || bindingUi || session == null) { return; }
-            int mode = checkedId == R.id.btn_work_single ? 0
-                    : checkedId == R.id.btn_work_low_power ? 2 : 1;
-            session.setInventoryMode(mode);
-        });
         powerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(@NonNull SeekBar seekBar, int progress, boolean fromUser) {
@@ -127,7 +147,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
             @Override
             public void onStopTrackingTouch(@NonNull SeekBar seekBar) {
-                handleResult(session.setPower(seekBar.getProgress() * 10), "功率设置失败");
+                handleResult(session.setPower(seekBar.getProgress() * 10), R.string.config_power_set_failed);
             }
         });
     }
@@ -152,13 +172,23 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         ReaderConnectionStatus connectionStatus = state.getConnectionStatus();
         statusView.setText(statusText(connectionStatus));
         statusView.setBackgroundResource(statusBackground(connectionStatus));
-        deviceInfoButton.setVisibility(connected ? View.VISIBLE : View.GONE);
-        deviceInfoButton.setEnabled(connected);
+        statusView.setEnabled(connected);
         bindConnectionTarget(state);
+        if (state.getTransport() == TransportType.BLE) {
+            bindingUi = true;
+            bleSwitch.setChecked(true);
+            bindingUi = false;
+        } else if (state.getTransport() == TransportType.WIFI) {
+            bindingUi = true;
+            wifiSwitch.setChecked(true);
+            bindingUi = false;
+        }
+        bindTransportRows(bleSwitch.isChecked(), connected);
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
-            bleDeviceView.setText((state.getDeviceName().isEmpty() ? "未命名设备" : state.getDeviceName())
-                    + "\n" + state.getAddress());
+            bleDeviceView.setText(getString(R.string.config_device_address,
+                    state.getDeviceName().isEmpty() ? getString(R.string.config_unnamed_device)
+                            : state.getDeviceName(), state.getAddress()));
         }
 
         if (isConnectionDialogPhase(state.getPhase())) {
@@ -176,18 +206,24 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         powerSeekBar.setProgress(value.powerTenthsDbm / 10);
         powerValueView.setText(formatPower(value.powerTenthsDbm));
         blfView.setText(blfLabel(value.blfProfile));
-        sessionView.setText("S" + value.session + " / " + (value.target == 0 ? "A" : "B"));
-        qView.setText(value.dynamicQ ? "动态 Q" + value.qValue : "固定 Q" + value.qValue);
-        workModeGroup.check(value.inventoryMode == 0 ? R.id.btn_work_single
-                : value.inventoryMode == 2 ? R.id.btn_work_low_power : R.id.btn_work_fast);
+        sessionView.setText(getString(R.string.config_session_value, value.session));
+        qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
+                : getString(R.string.config_q_value, value.qValue));
+        workModeView.setText(workModeLabel(value.inventoryMode));
         bindingUi = false;
+    }
+
+    private void bindTransportRows(boolean ble, boolean connected) {
+        bleActions.setVisibility(!connected && ble ? View.VISIBLE : View.GONE);
+        wifiActions.setVisibility(!connected && !ble ? View.VISIBLE : View.GONE);
     }
 
     private void showBleDevices() {
         BleDeviceSheet sheet = new BleDeviceSheet();
         sheet.setListener(device -> {
-            bleDeviceView.setText((TextUtils.isEmpty(device.getName()) ? "未命名设备" : device.getName())
-                    + "\n" + device.getAddress());
+            bleDeviceView.setText(getString(R.string.config_device_address,
+                    TextUtils.isEmpty(device.getName()) ? getString(R.string.config_unnamed_device)
+                            : device.getName(), device.getAddress()));
             session.connectBle(device);
         });
         sheet.show(getParentFragmentManager(), "ble_devices");
@@ -208,7 +244,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         String target = state.getTransport() == TransportType.BLE
                 ? (state.getDeviceName().isEmpty() ? state.getAddress()
-                : state.getDeviceName() + " · " + state.getAddress())
+                : getString(R.string.config_connection_target, state.getDeviceName(), state.getAddress()))
                 : state.getAddress();
         connectionTargetView.setText(target);
         connectionTargetView.setVisibility(View.VISIBLE);
@@ -219,50 +255,61 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         String[] labels = protocols.stream().map(TagProtocol::getDisplayName).toArray(String[]::new);
         int selected = Math.max(0, protocols.indexOf(readerState.getProtocol()));
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("射频协议")
+                .setTitle(R.string.config_protocol)
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    handleResult(session.setProtocol(protocols.get(which)), "协议切换失败");
+                    handleResult(session.setProtocol(protocols.get(which)), R.string.config_protocol_set_failed);
                     dialog.dismiss();
-                }).setNegativeButton("取消", null).show();
+                }).setNegativeButton(R.string.common_cancel, null).show();
+    }
+
+    private void showWorkModeDialog() {
+        String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
+        int selected = configuration == null ? 1 : configuration.inventoryMode;
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_work_mode)
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    session.setInventoryMode(which);
+                    workModeView.setText(workModeLabel(which));
+                    dialog.dismiss();
+                }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
     private void showSessionDialog() {
-        String[] labels = {"S0 / A", "S0 / B", "S1 / A", "S1 / B", "S2 / A", "S2 / B", "S3 / A", "S3 / B"};
+        String[] labels = getResources().getStringArray(R.array.config_session_labels);
         int selected = configuration == null ? 0 : configuration.session * 2 + configuration.target;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle("Session / Target")
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_session_target)
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    handleResult(session.setSessionTarget(which / 2, which % 2), "Query 参数设置失败");
+                    handleResult(session.setSessionTarget(which / 2, which % 2), R.string.config_query_set_failed);
                     dialog.dismiss();
-                }).setNegativeButton("取消", null).show();
+                }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
     private void showBlfDialog() {
-        String[] labels = {"40 kHz", "250 kHz", "300 kHz", "400 kHz"};
+        String[] labels = getResources().getStringArray(R.array.config_blf_labels);
         int selected = configuration == null ? 1 : configuration.blfProfile;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle("BLF 速率")
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_blf_rate)
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    handleResult(session.setBlf(which), "BLF 设置失败");
+                    handleResult(session.setBlf(which), R.string.config_blf_set_failed);
                     dialog.dismiss();
-                }).setNegativeButton("取消", null).show();
+                }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
     private void showQDialog() {
         String[] labels = new String[32];
         for (int i = 0; i < 16; i++) {
-            labels[i] = "固定 Q" + i;
-            labels[16 + i] = "动态 Q" + i;
+            labels[i] = getString(R.string.config_fixed_q, i);
+            labels[16 + i] = getString(R.string.config_dynamic_q, i);
         }
         if (readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF) {
             labels = new String[16];
-            for (int i = 0; i < 16; i++) { labels[i] = "Q" + i; }
+            for (int i = 0; i < 16; i++) { labels[i] = getString(R.string.config_q_value, i); }
         }
         String[] choices = labels;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle("Q 参数")
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_q_parameter)
                 .setSingleChoiceItems(choices, -1, (dialog, which) -> {
                     boolean dynamic = choices.length == 32 && which >= 16;
-                    handleResult(session.setQ(dynamic, which % 16), "Q 参数设置失败");
+                    handleResult(session.setQ(dynamic, which % 16), R.string.config_q_set_failed);
                     dialog.dismiss();
-                }).setNegativeButton("取消", null).show();
+                }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
     private void showMagicPowerDialog() {
@@ -270,22 +317,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 readerState.getModuleVersion());
         String[] values = new String[levels.length];
         for (int i = 0; i < values.length; i++) { values[i] = formatPower(levels[i]); }
-        new MaterialAlertDialogBuilder(requireContext()).setTitle("MagicRF 功率")
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_magic_power)
                 .setSingleChoiceItems(values, -1, (dialog, which) -> {
-                    handleResult(session.setPower(levels[which]), "功率设置失败");
+                    handleResult(session.setPower(levels[which]), R.string.config_power_set_failed);
                     dialog.dismiss();
-                }).setNegativeButton("取消", null).show();
+                }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
     private void applyModuleUi(ModuleSubtype subtype) {
         boolean magic = subtype == ModuleSubtype.MAGIC_RF;
         findViewById(R.id.row_config_blf).setVisibility(magic ? View.GONE : View.VISIBLE);
         powerSeekBar.setVisibility(magic ? View.GONE : View.VISIBLE);
-        workModeGroup.setEnabled(!magic && readerState.isConnected());
+        findViewById(R.id.row_config_work_mode).setEnabled(!magic && readerState.isConnected());
         if (magic) {
-            bindingUi = true;
-            workModeGroup.check(R.id.btn_work_fast);
-            bindingUi = false;
+            workModeView.setText(workModeLabel(1));
         }
         protocolView.setText(readerState.getProtocol().getDisplayName());
     }
@@ -309,10 +354,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
     }
 
-    private void handleResult(CompletableFuture<Integer> future, String failureMessage) {
+    private void handleResult(CompletableFuture<Integer> future, @StringRes int failureMessage) {
         future.whenComplete((status, error) -> requireActivity().runOnUiThread(() -> {
             if (error != null) { toast(error.getCause() == null ? error.getMessage() : error.getCause().getMessage()); }
-            else if (status != 0) { toast(failureMessage + "（错误码 " + status + "）"); }
+            else if (status != 0) { toast(getString(R.string.config_error_code, getString(failureMessage), status)); }
         }));
     }
 
@@ -340,12 +385,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 || phase == ConnectionPhase.FAILED || phase == ConnectionPhase.DISCONNECTING;
     }
 
-    private static String statusText(ReaderConnectionStatus status) {
+    @StringRes
+    private static int statusText(ReaderConnectionStatus status) {
         return switch (status) {
-            case CONNECTED -> "● 已连接";
-            case DISCONNECTED -> "● 已断开";
-            case FAILED -> "● 连接失败";
-            case NOT_CONNECTED -> "● 未连接";
+            case CONNECTED -> R.string.config_status_connected;
+            case DISCONNECTED -> R.string.config_status_disconnected;
+            case FAILED -> R.string.config_status_failed;
+            case NOT_CONNECTED -> R.string.config_status_not_connected;
         };
     }
 
@@ -357,18 +403,27 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         };
     }
 
-    private static String blfLabel(int profile) {
+    private String blfLabel(int profile) {
         return switch (profile) {
-            case 0 -> "40 kHz";
-            case 1 -> "250 kHz";
-            case 2 -> "300 kHz";
-            case 3 -> "400 kHz";
-            default -> "未知 (" + profile + ")";
+            case 0 -> getString(R.string.config_blf_40);
+            case 1 -> getString(R.string.config_blf_256);
+            case 2 -> getString(R.string.config_blf_300);
+            case 3 -> getString(R.string.config_blf_400);
+            default -> getString(R.string.config_unknown_value, profile);
         };
     }
 
-    private static String formatPower(int tenthsDbm) {
-        return tenthsDbm % 10 == 0 ? (tenthsDbm / 10) + " dBm"
-                : (tenthsDbm / 10) + "." + Math.abs(tenthsDbm % 10) + " dBm";
+    private String workModeLabel(int mode) {
+        return switch (mode) {
+            case 0 -> getString(R.string.config_work_mode_single);
+            case 2 -> getString(R.string.config_work_mode_low_power);
+            default -> getString(R.string.config_work_mode_continuous);
+        };
+    }
+
+    private String formatPower(int tenthsDbm) {
+        return tenthsDbm % 10 == 0 ? getString(R.string.rfid_power_value, tenthsDbm / 10)
+                : getString(R.string.config_power_decimal, tenthsDbm / 10,
+                Math.abs(tenthsDbm % 10));
     }
 }

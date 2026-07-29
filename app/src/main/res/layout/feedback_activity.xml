@@ -29,6 +29,7 @@
                 android:src="@drawable/rfid_back_ic" />
 
             <TextView
+                android:id="@+id/tv_feedback_product"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dp_4"
@@ -54,6 +55,7 @@
             android:layout_marginTop="@dimen/dp_10">
 
             <TextView
+                android:id="@+id/tv_feedback_order"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -64,6 +66,7 @@
                 android:textSize="@dimen/sp_14" />
 
             <TextView
+                android:id="@+id/tv_feedback_requirement"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/dp_8"
@@ -96,6 +99,7 @@
             android:textSize="@dimen/sp_14" />
 
         <EditText
+            android:id="@+id/et_feedback_order_no"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_44"
             android:layout_marginHorizontal="@dimen/dp_16"
@@ -120,6 +124,7 @@
             android:textSize="@dimen/sp_14" />
 
         <EditText
+            android:id="@+id/et_feedback_title"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_44"
             android:layout_marginHorizontal="@dimen/dp_16"
@@ -144,6 +149,7 @@
             android:textSize="@dimen/sp_14" />
 
         <EditText
+            android:id="@+id/et_feedback_detail"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_120"
             android:layout_marginHorizontal="@dimen/dp_16"
@@ -159,6 +165,51 @@
             android:textSize="@dimen/sp_14" />
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_14"
+            android:text="上传图片（最多6张）"
+            android:textColor="@color/rfid_text_secondary"
+            android:textSize="@dimen/sp_14" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_84"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_10"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/ll_feedback_images"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_feedback_camera"
+                    android:layout_width="@dimen/dp_72"
+                    android:layout_height="@dimen/dp_72"
+                    android:background="@drawable/rfid_field_bg"
+                    android:gravity="center"
+                    android:text="拍照"
+                    android:textColor="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_12" />
+
+                <TextView
+                    android:id="@+id/tv_feedback_add_image"
+                    android:layout_width="@dimen/dp_72"
+                    android:layout_height="@dimen/dp_72"
+                    android:layout_marginStart="@dimen/dp_10"
+                    android:background="@drawable/rfid_field_bg"
+                    android:gravity="center"
+                    android:text="添加"
+                    android:textColor="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_12" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
             android:id="@+id/tv_feedback_submit"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_50"
@@ -169,5 +220,7 @@
             android:text="提交问题"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_16" />
+
+        <include layout="@layout/rfid_business_bottom_nav" />
     </LinearLayout>
 </ScrollView>

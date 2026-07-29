@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/RfidCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/dp_10"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="@dimen/dp_64"
+        android:layout_height="@dimen/dp_64"
+        android:background="@drawable/rfid_thumb_bg"
+        android:gravity="center"
+        android:text="RFID"
+        android:textColor="@color/rfid_text_muted"
+        android:textSize="@dimen/sp_12" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_12"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_stock_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_15" />
+
+        <TextView
+            android:id="@+id/tv_stock_item_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_4"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <TextView
+            android:id="@+id/tv_stock_item_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_24"
+            android:layout_marginTop="@dimen/dp_6"
+            android:background="@drawable/rfid_chip_green_bg"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_11" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="@dimen/dp_90"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_stock_item_qty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/rfid_primary_soft"
+            android:textSize="@dimen/sp_13" />
+
+        <TextView
+            android:id="@+id/tv_stock_item_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_4"
+            android:textColor="@color/rfid_warning"
+            android:textSize="@dimen/sp_13" />
+
+        <TextView
+            android:id="@+id/tv_stock_item_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_6"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_10" />
+    </LinearLayout>
+</LinearLayout>

@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,8 +54,21 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.data.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
         holder.count.setText(String.valueOf(item.getCount()));
         holder.rssi.setText(String.valueOf(item.getRssi()));
+        holder.rssi.setTextColor(ContextCompat.getColor(holder.itemView.getContext(),
+                rssiColor(item.getRssi())));
         holder.chip.setText(item.getChipModel().isEmpty() ? "-" : item.getChipModel());
-        holder.itemView.setBackgroundResource(position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg);
+        int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
+        holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
+    }
+
+    private static int rssiColor(int rssi) {
+        if (rssi >= -70) {
+            return R.color.rfid_success;
+        }
+        if (rssi >= -80) {
+            return R.color.rfid_warning;
+        }
+        return R.color.rfid_danger;
     }
 
     static final class ViewHolder extends RecyclerView.ViewHolder {
