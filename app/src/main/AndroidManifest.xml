@@ -61,6 +61,7 @@
         <activity
             android:name=".ui.activity.HomeActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize" />
 
@@ -72,22 +73,26 @@
 
         <activity
             android:name=".ui.activity.StockQueryActivity"
+            android:exported="false"
             android:label="@string/stock_query_title"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".ui.activity.OrderProgressActivity"
+            android:exported="false"
             android:label="@string/order_progress_title"
             android:launchMode="singleTop" />
 
         <activity
             android:name=".ui.activity.ShipmentQueryActivity"
+            android:exported="false"
             android:label="@string/shipment_query_title"
             android:launchMode="singleTop" />
 
         <activity
             android:name=".ui.activity.FeedbackActivity"
+            android:exported="false"
             android:label="@string/feedback_title"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize" />
@@ -95,12 +100,14 @@
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
             android:name=".ui.activity.common.CrashActivity"
+            android:exported="false"
             android:launchMode="singleTop"
             android:process=":crash" />
 
         <!-- 重启应用（必须在独立进程） -->
         <activity
             android:name=".ui.activity.common.RestartActivity"
+            android:exported="false"
             android:launchMode="singleTop"
             android:process=":restart" />
 

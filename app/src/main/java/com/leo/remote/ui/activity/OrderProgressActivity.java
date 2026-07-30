@@ -1,5 +1,7 @@
 package com.leo.remote.ui.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.DataCallback;
@@ -10,6 +12,10 @@ import java.util.List;
 
 public final class OrderProgressActivity extends PagedQueryActivity<Order> {
     private OrderAdapter adapter;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, OrderProgressActivity.class));
+    }
 
     @Override
     protected int getLayoutId() {
@@ -54,11 +60,11 @@ public final class OrderProgressActivity extends PagedQueryActivity<Order> {
 
     @Override
     protected String emptyMessage() {
-        return "暂无订单数据";
+        return getString(R.string.order_empty);
     }
 
     @Override
     protected String errorMessage() {
-        return "加载失败，点击筛选重试";
+        return getString(R.string.order_load_failed);
     }
 }

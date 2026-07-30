@@ -8,9 +8,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.StringRes;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.leo.remote.R;
+import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.HexCodec;
 import com.leo.remote.reader.ProtocolEncoding;
@@ -92,20 +94,22 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         refreshOperations();
     }
 
+    @SingleClick
     private void readTag() {
         if (session == null || !session.getState().isConnected()) {
-            toast("请先连接读写器");
+            toast(R.string.inventory_connect_first);
             return;
         }
         readButton.setEnabled(false);
-        readButton.setText("读取中...");
+        readButton.setText(R.string.single_reading);
         session.readSingleTag().whenComplete((tag, error) -> requireActivity().runOnUiThread(() -> {
             readButton.setEnabled(true);
-            readButton.setText("读取标签");
-            if (error != null) { toast("读取失败：" + rootMessage(error)); }
+            readButton.setText(R.string.single_read_tag);
+            if (error != null) { toast(getString(R.string.single_read_failed, rootMessage(error))); }
         }));
     }
 
+    @SingleClick
     private void showWriteDialog(boolean updateEpc) {
         if (!ensureTarget()) { return; }
         View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_write_dialog, null, false);
@@ -121,12 +125,12 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         bankSpinner.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, banks));
         gbSubBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"子区 1", "子区 2", "子区 3", "子区 4", "子区 5", "子区 6",
-                        "子区 7", "子区 28", "子区 29", "子区 30"}));
+                getResources().getStringArray(R.array.single_gb_sub_bank_labels)));
         addressView.setText(updateEpc ? "1" : "0");
         TagProtocol protocol = readerState.getProtocol();
         auxiliaryInput.setHint(protocol == TagProtocol.ISO_18000_6B
-                ? "重试次数（0-255）" : "块长度（0-255）");
+                ? getString(R.string.single_retry_count_hint)
+                : getString(R.string.single_block_length_hint));
         auxiliaryInput.setVisibility(protocol == TagProtocol.ISO_18000_6C || updateEpc
                 ? View.GONE : View.VISIBLE);
         lengthView.setText(protocol == TagProtocol.ISO_18000_6B ? "3" : "1");
@@ -146,10 +150,10 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             dataView.setText(currentTag.id);
         }
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(updateEpc ? "修改 EPC" : "写入标签数据")
+                .setTitle(updateEpc ? R.string.single_update_epc_title : R.string.single_write_title)
                 .setView(content)
-                .setNegativeButton("取消", null)
-                .setPositiveButton("执行", null)
+                .setNegativeButton(R.string.common_cancel, null)
+                .setPositiveButton(R.string.single_execute, null)
                 .create();
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
@@ -158,9 +162,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                         byte[] inputData = HexCodec.decode(dataView.getText().toString());
                         int bank = updateEpc ? 1 : ProtocolEncoding.encodeBank(protocol,
                                 bankSpinner.getSelectedItemPosition(), gbSubBankSpinner.getSelectedItemPosition());
-                        int address = parseUnsigned(addressView, "起始地址");
+                        int address = parseUnsigned(addressView, R.string.single_start_address);
                         int blockOrRetry = protocol == TagProtocol.ISO_18000_6C || updateEpc
-                                ? 0 : parseUnsigned(lengthView, "块长度 / 重试次数");
+                                ? 0 : parseUnsigned(lengthView, R.string.single_block_or_retry);
                         byte[] writeData = inputData;
                         int writeLength;
                         if (updateEpc && readerState.getProtocol() == TagProtocol.ISO_18000_6C) {
@@ -172,7 +176,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                             writeLength = ProtocolEncoding.writeLength(protocol, inputData);
                         }
                         executeStatus(session.writeCurrentTag(writeLength, address, bank, password, writeData),
-                                updateEpc ? "EPC 修改" : "数据写入", dialog);
+                                updateEpc ? R.string.single_update_epc_operation
+                                        : R.string.single_write_operation, dialog);
                     } catch (IllegalArgumentException error) {
                         toast(error.getMessage());
                     }
@@ -180,6 +185,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         dialog.show();
     }
 
+    @SingleClick
     private void showLockDialog() {
         if (!ensureTarget()) { return; }
         View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_lock_dialog, null, false);
@@ -187,58 +193,65 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         Spinner policy = content.findViewById(R.id.sp_tag_lock_policy);
         EditText password = content.findViewById(R.id.et_tag_lock_password);
         bank.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"访问密码", "销毁密码", "EPC", "TID", "USER"}));
+                getResources().getStringArray(R.array.single_lock_bank_labels)));
         policy.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"可读写", "永久可读写", "授权可读写", "永久不可读写"}));
+                getResources().getStringArray(R.array.single_lock_policy_labels)));
         password.setText("00000000");
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setTitle("锁定标签")
-                .setView(content).setNegativeButton("取消", null).setPositiveButton("执行", null).create();
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_lock_title)
+                .setView(content).setNegativeButton(R.string.common_cancel, null)
+                .setPositiveButton(R.string.single_execute, null).create();
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
                         executeStatus(session.lockCurrentTag(parsePassword(password.getText().toString()),
-                                bank.getSelectedItemPosition(), policy.getSelectedItemPosition()), "标签锁定", dialog);
+                                bank.getSelectedItemPosition(), policy.getSelectedItemPosition()),
+                                R.string.single_lock_operation, dialog);
                     } catch (IllegalArgumentException error) { toast(error.getMessage()); }
                 }));
         dialog.show();
     }
 
+    @SingleClick
     private void showKillDialog() {
         if (!ensureTarget()) { return; }
         View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_kill_dialog, null, false);
         EditText accessPassword = content.findViewById(R.id.et_tag_kill_access_password);
         EditText killPassword = content.findViewById(R.id.et_tag_kill_password);
         accessPassword.setText("00000000");
-        AlertDialog form = new MaterialAlertDialogBuilder(requireContext()).setTitle("销毁标签")
-                .setView(content).setNegativeButton("取消", null).setPositiveButton("下一步", null).create();
+        AlertDialog form = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_kill_title)
+                .setView(content).setNegativeButton(R.string.common_cancel, null)
+                .setPositiveButton(R.string.single_next_step, null).create();
         form.setOnShowListener(ignored -> form.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
                         byte[] access = parsePassword(accessPassword.getText().toString());
                         byte[] kill = parsePassword(killPassword.getText().toString());
                         new MaterialAlertDialogBuilder(requireContext())
-                                .setTitle("确认永久销毁？")
-                                .setMessage("目标标签销毁后不可恢复。")
-                                .setNegativeButton("取消", null)
-                                .setPositiveButton("确认销毁", (dialog, which) -> {
+                                .setTitle(R.string.single_kill_confirm_title)
+                                .setMessage(R.string.single_kill_confirm_message)
+                                .setNegativeButton(R.string.common_cancel, null)
+                                .setPositiveButton(R.string.single_kill_confirm, (dialog, which) -> {
                                     form.dismiss();
-                                    executeStatus(session.killCurrentTag(access, kill), "标签销毁", null);
+                                    executeStatus(session.killCurrentTag(access, kill),
+                                            R.string.single_kill_operation, null);
                                 }).show();
                     } catch (IllegalArgumentException error) { toast(error.getMessage()); }
                 }));
         form.show();
     }
 
-    private void executeStatus(CompletableFuture<Integer> future, String operation, AlertDialog dialog) {
+    private void executeStatus(CompletableFuture<Integer> future, @StringRes int operationRes,
+            AlertDialog dialog) {
         showLoadingDialog();
         future.whenComplete((status, error) -> requireActivity().runOnUiThread(() -> {
             hideLoadingDialog();
+            String operation = getString(operationRes);
             if (error != null) {
-                toast(operation + "失败：" + rootMessage(error));
+                toast(getString(R.string.single_operation_failed, operation, rootMessage(error)));
             } else if (status != 0) {
-                toast(operation + "失败（错误码 " + status + "）");
+                toast(getString(R.string.single_operation_error_code, operation, status));
             } else {
-                toast(operation + "成功");
+                toast(getString(R.string.single_operation_success, operation));
                 if (dialog != null) { dialog.dismiss(); }
             }
         }));
@@ -246,11 +259,11 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     private boolean ensureTarget() {
         if (readerState == null || !readerState.isConnected()) {
-            toast("请先连接读写器");
+            toast(R.string.inventory_connect_first);
             return false;
         }
         if (currentTag == null) {
-            toast("请先读取目标标签");
+            toast(R.string.single_no_tag_hint);
             return false;
         }
         return true;
@@ -282,25 +295,28 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         }
     }
 
-    private static byte[] parsePassword(String value) {
+    private byte[] parsePassword(String value) {
         byte[] password = HexCodec.decode(value);
-        if (password.length != 4) { throw new IllegalArgumentException("密码必须是 8 位 HEX"); }
+        if (password.length != 4) {
+            throw new IllegalArgumentException(getString(R.string.single_password_invalid));
+        }
         return password;
     }
 
-    private static int parseUnsigned(EditText view, String name) {
+    private int parseUnsigned(EditText view, @StringRes int nameRes) {
         try {
             int value = Integer.parseInt(view.getText().toString());
             if (value < 0) { throw new NumberFormatException(); }
             return value;
         } catch (NumberFormatException error) {
-            throw new IllegalArgumentException(name + "必须是非负整数");
+            throw new IllegalArgumentException(getString(
+                    R.string.single_field_must_be_unsigned, getString(nameRes)));
         }
     }
 
-    private static byte[] withEpcPcWord(byte[] epc) {
+    private byte[] withEpcPcWord(byte[] epc) {
         if ((epc.length & 1) != 0 || epc.length == 0 || epc.length > 62) {
-            throw new IllegalArgumentException("EPC 必须是 2-62 字节的偶数长度 HEX");
+            throw new IllegalArgumentException(getString(R.string.single_epc_length_invalid));
         }
         int pc = (epc.length / 2) << 11;
         byte[] result = new byte[epc.length + 2];
@@ -310,12 +326,13 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         return result;
     }
 
-    private static String[] bankLabels(TagProtocol protocol) {
-        return switch (protocol) {
-            case ISO_18000_6C -> new String[]{"保留区", "EPC", "TID", "USER"};
-            case ISO_18000_6B -> new String[]{"UID", "USER"};
-            case GJB_7377_1, GB_T_29768 -> new String[]{"标签信息区", "编码区", "安全区", "用户区"};
+    private String[] bankLabels(TagProtocol protocol) {
+        int labelsRes = switch (protocol) {
+            case ISO_18000_6C -> R.array.single_bank_labels_6c;
+            case ISO_18000_6B -> R.array.single_bank_labels_6b;
+            case GJB_7377_1, GB_T_29768 -> R.array.single_bank_labels_gb;
         };
+        return getResources().getStringArray(labelsRes);
     }
 
     private static String chipLabel(String tid) {

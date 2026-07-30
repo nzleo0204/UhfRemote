@@ -1,5 +1,7 @@
 package com.leo.remote.ui.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +16,10 @@ public final class StockQueryActivity extends PagedQueryActivity<StockItem> {
     private EditText keywordView;
     private TextView countView;
     private StockAdapter adapter;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, StockQueryActivity.class));
+    }
 
     @Override
     protected int getLayoutId() {
@@ -65,11 +71,11 @@ public final class StockQueryActivity extends PagedQueryActivity<StockItem> {
 
     @Override
     protected String emptyMessage() {
-        return "暂无库存数据";
+        return getString(R.string.stock_empty);
     }
 
     @Override
     protected String errorMessage() {
-        return "加载失败，点击搜索重试";
+        return getString(R.string.stock_load_failed);
     }
 }

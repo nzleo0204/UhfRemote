@@ -6,6 +6,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.leo.remote.R;
 import com.leo.remote.data.DataCallback;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
@@ -93,7 +94,7 @@ abstract class PagedQueryActivity<T> extends RfidPageActivity
         int generation = ++requestGeneration;
         refreshLayout.setNoMoreData(false);
         if (visibleItemCount == 0) {
-            showState("加载中...");
+            showState(getString(R.string.common_loading));
         }
         queryData(new QueryCallback<>(this, generation, fromRefresh));
     }

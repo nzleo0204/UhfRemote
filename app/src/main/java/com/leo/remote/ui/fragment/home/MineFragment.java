@@ -1,6 +1,5 @@
 package com.leo.remote.ui.fragment.home;
 
-import android.content.Intent;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leo.remote.R;
+import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.data.DataCallback;
 import com.leo.remote.data.model.UserInfo;
@@ -70,10 +70,10 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         inputGuard = findViewById(R.id.v_mine_input_guard);
         rootView = findViewById(R.id.fl_mine_root);
 
-        findViewById(R.id.ll_mine_stock).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), StockQueryActivity.class)));
-        findViewById(R.id.ll_mine_order).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), OrderProgressActivity.class)));
-        findViewById(R.id.ll_mine_shipment).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), ShipmentQueryActivity.class)));
-        findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> startActivity(new Intent(getAttachActivity(), FeedbackActivity.class)));
+        findViewById(R.id.ll_mine_stock).setOnClickListener(v -> StockQueryActivity.start(getAttachActivity()));
+        findViewById(R.id.ll_mine_order).setOnClickListener(v -> OrderProgressActivity.start(getAttachActivity()));
+        findViewById(R.id.ll_mine_shipment).setOnClickListener(v -> ShipmentQueryActivity.start(getAttachActivity()));
+        findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> FeedbackActivity.start(getAttachActivity()));
         loginButton.setOnClickListener(v -> login());
         findViewById(R.id.ll_mine_theme_setting).setOnClickListener(v -> showThemeDialog());
         bindLoginInputGuard();
@@ -86,6 +86,7 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         bindThemeState();
     }
 
+    @SingleClick
     private void login() {
         String username = usernameInput.getText().toString().trim();
         String password = passwordInput.getText().toString();

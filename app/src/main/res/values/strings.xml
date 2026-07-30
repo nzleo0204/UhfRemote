@@ -5,11 +5,12 @@
     <!ENTITY user_agreement "《用户协议》">
     <!ENTITY privacy_policy "《隐私政策》">
     ]>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="rfid_power_value">%1$d dBm</string>
     <string name="app_name">&app_name;</string>
     <string name="app_name_debug">&app_name; Debug 版</string>
-    <string name="app_name_preview">&app_name; Preview 版</string>
+    <!-- Referenced by the preview build type through a manifest placeholder. -->
+    <string name="app_name_preview" tools:ignore="UnusedResources">&app_name; Preview 版</string>
     <string name="reader_ble_service_channel">读写器蓝牙连接</string>
     <string name="reader_ble_service_title">RFID 读写器</string>
     <string name="reader_ble_service_running">蓝牙透传服务运行中</string>
@@ -23,29 +24,6 @@
     <string name="privacy_agreement_content">欢迎使用&app_name;，我们将努力为你提供更优秀的用户体验，在使用本应用的过程中，我们将可能联网，并且申请使用部分权限。\n\n在使用前，请认真阅读并同意我们的&user_agreement;和&privacy_policy;，了解你的用户权益及相关使用数据的处理办法。</string>
     <string name="privacy_agreement_agree">同意</string>
     <string name="privacy_agreement_disagree">不同意并退出</string>
-
-    <!-- 升级对话框 -->
-    <string name="update_title">发现新版本</string>
-
-    <string name="update_content">更新内容</string>
-
-    <string name="update_no">下次再说</string>
-    <string name="update_yes">立即更新</string>
-
-    <string name="update_permission_hint">必须先要授予权限才能正常下载更新哦</string>
-
-    <string name="update_status_start">正在下载</string>
-    <string name="update_status_running">下载中 %d%%</string>
-    <string name="update_status_successful">下载完成，点击安装</string>
-    <string name="update_status_failed">下载失败，点击重试</string>
-
-    <string name="update_no_update">当前已是最新版本</string>
-
-    <string name="update_notification_channel_id">update</string>
-    <string name="update_notification_channel_name">升级通知</string>
-
-    <!-- 身份校验对话框 -->
-    <string name="safe_title">身份校验</string>
 
     <!-- 首页 -->
     <string name="home_exit_hint">再按一次退出</string>
@@ -81,7 +59,6 @@
     <string name="config_wifi">WiFi</string>
     <string name="config_no_device">未选择设备</string>
     <string name="config_unnamed_device">未命名设备</string>
-    <string name="config_device_address">%1$s\n%2$s</string>
     <string name="config_scan_device">搜索设备</string>
     <string name="ble_device_rssi">%1$d dBm</string>
     <string name="config_reader_ip_hint">读写器 IP 地址</string>
@@ -109,7 +86,6 @@
     <string name="config_q_value">Q%1$d</string>
     <string name="config_q_parameter">Q 参数</string>
     <string name="config_magic_power">MagicRF 功率</string>
-    <string name="config_connection_target">%1$s · %2$s</string>
     <string name="config_power_set_failed">功率设置失败</string>
     <string name="config_protocol_set_failed">协议切换失败</string>
     <string name="config_query_set_failed">Query 参数设置失败</string>
@@ -161,6 +137,74 @@
     <string name="single_preview_tid">E2801160600002041891F8C0</string>
     <string name="single_preview_chip">Impinj Monza R6</string>
     <string name="single_preview_rssi">-62 dBm</string>
+    <string name="single_no_tag_hint">请先读取目标标签</string>
+    <string name="single_reading">读取中&#8230;</string>
+    <string name="single_read_tag">读取标签</string>
+    <string name="single_read_failed">读取失败：%1$s</string>
+    <string name="single_password_invalid">密码必须是 8 位 HEX</string>
+    <string name="single_field_must_be_unsigned">%1$s必须是非负整数</string>
+    <string name="single_epc_length_invalid">EPC 必须是 2-62 字节的偶数长度 HEX</string>
+    <string name="single_write_title">写入标签数据</string>
+    <string name="single_update_epc_title">修改 EPC</string>
+    <string name="single_lock_title">锁定标签</string>
+    <string name="single_kill_title">销毁标签</string>
+    <string name="single_kill_confirm_title">确认永久销毁？</string>
+    <string name="single_kill_confirm_message">目标标签销毁后不可恢复。</string>
+    <string name="single_execute">执行</string>
+    <string name="single_next_step">下一步</string>
+    <string name="single_kill_confirm">确认销毁</string>
+    <string name="single_retry_count_hint">重试次数（0-255）</string>
+    <string name="single_block_length_hint">块长度（0-255）</string>
+    <string name="single_start_address">起始地址</string>
+    <string name="single_block_or_retry">块长度 / 重试次数</string>
+    <string name="single_update_epc_operation">EPC 修改</string>
+    <string name="single_write_operation">数据写入</string>
+    <string name="single_lock_operation">标签锁定</string>
+    <string name="single_kill_operation">标签销毁</string>
+    <string name="single_operation_failed">%1$s失败：%2$s</string>
+    <string name="single_operation_error_code">%1$s失败（错误码 %2$d）</string>
+    <string name="single_operation_success">%1$s成功</string>
+    <string-array name="single_bank_labels_6c">
+        <item>保留区</item>
+        <item>EPC</item>
+        <item>TID</item>
+        <item>USER</item>
+    </string-array>
+    <string-array name="single_bank_labels_6b">
+        <item>UID</item>
+        <item>USER</item>
+    </string-array>
+    <string-array name="single_bank_labels_gb">
+        <item>标签信息区</item>
+        <item>编码区</item>
+        <item>安全区</item>
+        <item>用户区</item>
+    </string-array>
+    <string-array name="single_lock_policy_labels">
+        <item>可读写</item>
+        <item>永久可读写</item>
+        <item>授权可读写</item>
+        <item>永久不可读写</item>
+    </string-array>
+    <string-array name="single_lock_bank_labels">
+        <item>访问密码</item>
+        <item>销毁密码</item>
+        <item>EPC</item>
+        <item>TID</item>
+        <item>USER</item>
+    </string-array>
+    <string-array name="single_gb_sub_bank_labels">
+        <item>子区 1</item>
+        <item>子区 2</item>
+        <item>子区 3</item>
+        <item>子区 4</item>
+        <item>子区 5</item>
+        <item>子区 6</item>
+        <item>子区 7</item>
+        <item>子区 28</item>
+        <item>子区 29</item>
+        <item>子区 30</item>
+    </string-array>
     <string name="mine_default_role">管理员</string>
     <string name="mine_logged_role">%1$s · 已登</string>
     <string name="mine_guest">访客</string>
@@ -168,90 +212,31 @@
     <string name="stock_count">共 %1$d 种标签</string>
     <string name="stock_meta">%1$s | %2$s</string>
     <string name="stock_available">库存: %1$s</string>
-    <string name="stock_reserved">预定: %1$s</string>
-    <string name="stock_updated">更新 %1$s</string>
     <string name="stock_price">¥%1$.2f/个</string>
     <string name="order_quantity">数量: %1$s</string>
     <string name="order_shipment_quantity">已发: %1$s 枚 | 待发: %2$s</string>
     <string name="order_submit_time">提交时间: %1$s</string>
     <string name="order_finish_time">完成时间: %1$s</string>
     <string name="order_requirement">定制要求: %1$s</string>
-    <string name="order_progress">生产进度 %1$d%%</string>
     <string name="order_progress_value">%1$d</string>
-    <string name="shipment_meta">%1$s | %2$s 枚 | %3$s | %4$s</string>
     <string name="shipment_quantity">%1$s 枚</string>
     <string name="shipment_batch_quantity">%1$s · %2$s 枚</string>
     <string name="shipment_tracking_no">运单号: %1$s</string>
     <string name="shipment_timeline_done">● %1$s · %2$s\n%3$s</string>
     <string name="shipment_timeline_pending">○ %1$s · %2$s\n%3$s</string>
-
-    <!-- 登录 -->
-    <string name="login_register">注册</string>
-    <string name="login_forget">忘记密码？</string>
-    <string name="login_text">登录</string>
-
-    <string name="login_other">其他登录方式</string>
-
-    <!-- 注册 -->
-    <string name="register_title">注册</string>
-    <string name="register_hint">手机号仅用于登录和保护账号安全</string>
-    <string name="register_password_hint1">设置6&#8211;18位登录密码</string>
-    <string name="register_password_hint2">请再次输入一次密码</string>
-
-    <!-- 设置 -->
-    <string name="setting_title">设置</string>
-
-    <string name="setting_language_switchover">语言切换</string>
-    <string name="setting_language_simple">简体中文</string>
-    <string name="setting_language_complex">繁体中文</string>
-    <string name="setting_update">检查更新</string>
-
-    <string name="setting_password">修改密码</string>
-    <string name="setting_phone">修改手机</string>
-
-    <string name="setting_auto">自动登录</string>
-    <string name="setting_cache">清空缓存</string>
-
-    <string name="setting_agreement">隐私协议</string>
-    <string name="setting_about">关于我们</string>
-
-    <string name="setting_exit">退出登录</string>
-
-    <!-- 关于 -->
-    <string name="about_title">关于我们</string>
-    <string name="about_author"><font color="#85b84f">Android</font> 轮子哥</string>
-
-    <string name="about_copyright">Copyright © 2018 &#8211; 2021</string>
-
-    <!-- 忘记密码 -->
-    <string name="password_forget_title">忘记密码</string>
-
-    <!-- 重置密码 -->
-    <string name="password_reset_title">设置登录密码</string>
-    <string name="password_reset_phone_hint1">设置6&#8211;18位登录密码</string>
-    <string name="password_reset_phone_hint2">重新输入一次密码</string>
-    <string name="password_reset_input_error">两次密码输入不一致，请重新输入</string>
-    <string name="password_reset_success">修改成功</string>
-
-    <!-- 修改手机号 -->
-    <string name="phone_reset_title">设置手机号</string>
-    <string name="phone_reset_change_hint">下次登录请使用更换后的新手机号登录</string>
-    <string name="phone_reset_commit">立即绑定</string>
-
-    <string name="phone_reset_commit_succeed">绑定成功</string>
-
-    <!-- 个人资料 -->
-    <string name="personal_data_title">个人资料</string>
-    <string name="personal_data_head">头像</string>
-
-    <string name="personal_data_id">用户ID</string>
-    <string name="personal_data_name">昵称</string>
-    <string name="personal_data_name_hint">设置昵称</string>
-
-    <string name="personal_data_address">地区</string>
-    <string name="personal_data_address_hint">请选择</string>
-
-    <string name="personal_data_phone">手机号码</string>
-    <string name="personal_data_phone_hint">立即绑定</string>
+    <string name="stock_empty">暂无库存数据</string>
+    <string name="stock_load_failed">加载失败，点击搜索重试</string>
+    <string name="order_empty">暂无订单数据</string>
+    <string name="order_load_failed">加载失败，点击筛选重试</string>
+    <string name="shipment_empty">暂无发货数据</string>
+    <string name="shipment_load_failed">加载失败，请稍后重试</string>
+    <string name="feedback_permission_denied">未获得图片权限</string>
+    <string name="feedback_image_limit">最多上传 6 张图片</string>
+    <string name="feedback_image_save_failed">图片保存失败</string>
+    <string name="feedback_title_empty">请输入问题标题</string>
+    <string name="feedback_detail_empty">请输入详细描述</string>
+    <string name="feedback_submitting">正在提交</string>
+    <string name="feedback_submit_success">提交成功</string>
+    <string name="feedback_submit_failed">提交失败，请检查内容</string>
 
 </resources>

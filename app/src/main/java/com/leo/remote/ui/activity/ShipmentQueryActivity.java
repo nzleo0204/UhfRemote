@@ -1,5 +1,7 @@
 package com.leo.remote.ui.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.DataCallback;
@@ -10,6 +12,10 @@ import java.util.List;
 
 public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
     private ShipmentAdapter adapter;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, ShipmentQueryActivity.class));
+    }
 
     @Override
     protected int getLayoutId() {
@@ -49,11 +55,11 @@ public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
 
     @Override
     protected String emptyMessage() {
-        return "暂无发货数据";
+        return getString(R.string.shipment_empty);
     }
 
     @Override
     protected String errorMessage() {
-        return "加载失败，请稍后重试";
+        return getString(R.string.shipment_load_failed);
     }
 }

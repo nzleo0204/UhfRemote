@@ -1,5 +1,7 @@
 package com.leo.remote.ui.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
 import com.leo.remote.R;
+import com.leo.remote.aop.SingleClick;
 import com.leo.remote.data.DataCallback;
 import com.leo.remote.data.model.FeedbackDraft;
 import com.leo.remote.data.model.FeedbackType;
@@ -35,6 +38,10 @@ public final class FeedbackActivity extends RfidPageActivity {
     private EditText titleView;
     private EditText detailView;
     private LinearLayout imageContainer;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, FeedbackActivity.class));
+    }
 
     private final ActivityResultLauncher<String> pickImage = registerForActivityResult(
             new ActivityResultContracts.GetContent(), this::addImage);
@@ -89,7 +96,7 @@ public final class FeedbackActivity extends RfidPageActivity {
             if (deniedList.isEmpty()) {
                 takePicture.launch(null);
             } else {
-                toast("未获得图片权限");
+                toast(R.string.feedback_permission_denied);
             }
         });
     }
@@ -99,7 +106,7 @@ public final class FeedbackActivity extends RfidPageActivity {
             return;
         }
         if (imagePaths.size() >= 6) {
-            toast("最多上传 6 张图片");
+            toast(R.string.feedback_image_limit);
             return;
         }
         addImagePath(compressImage(uri));
@@ -114,7 +121,7 @@ public final class FeedbackActivity extends RfidPageActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
             addImagePath(output.getAbsolutePath());
         } catch (IOException error) {
-            toast("图片保存失败");
+            toast(R.string.feedback_image_save_failed);
         } finally {
             bitmap.recycle();
         }
@@ -122,7 +129,7 @@ public final class FeedbackActivity extends RfidPageActivity {
 
     private void addImagePath(String path) {
         if (imagePaths.size() >= 6) {
-            toast("最多上传 6 张图片");
+            toast(R.string.feedback_image_limit);
             return;
         }
         imagePaths.add(path);
@@ -177,29 +184,30 @@ public final class FeedbackActivity extends RfidPageActivity {
         }
     }
 
+    @SingleClick
     private void submit() {
         String title = titleView.getText().toString().trim();
         String detail = detailView.getText().toString().trim();
         if (title.isEmpty()) {
-            toast("请输入问题标题");
+            toast(R.string.feedback_title_empty);
             return;
         }
         if (detail.isEmpty()) {
-            toast("请输入详细描述");
+            toast(R.string.feedback_detail_empty);
             return;
         }
         FeedbackDraft draft = new FeedbackDraft(selectedType,
                 orderNoView.getText().toString().trim(), title, detail, List.copyOf(imagePaths));
-        showLoadingDialog("正在提交");
+        showLoadingDialog(getString(R.string.feedback_submitting));
         RepositoryProvider.feedback().submitFeedback(draft, new DataCallback<>() {
             @Override
             public void onSuccess(Boolean data) {
                 hideLoadingDialog();
                 if (Boolean.TRUE.equals(data)) {
-                    toast("提交成功");
+                    toast(R.string.feedback_submit_success);
                     finish();
                 } else {
-                    toast("提交失败，请检查内容");
+                    toast(R.string.feedback_submit_failed);
                 }
             }
 

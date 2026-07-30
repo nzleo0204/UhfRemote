@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
+import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.InventoryItem;
 import com.leo.remote.reader.ReaderObserver;
@@ -93,6 +94,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
+    @SingleClick
     private void toggleInventory() {
         ReaderState state = session.getState();
         if (!state.isConnected()) {
