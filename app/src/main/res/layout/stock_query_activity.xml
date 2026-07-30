@@ -81,25 +81,29 @@
             app:tint="@color/rfid_text_muted" />
     </LinearLayout>
 
-    <FrameLayout
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/srl_stock"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_stock"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="@dimen/dp_16"
-            android:paddingBottom="@dimen/dp_12" />
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_stock"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="@dimen/dp_16"
+                android:paddingBottom="@dimen/dp_12" />
 
-        <TextView
-            android:id="@+id/tv_stock_state"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textColor="@color/rfid_text_muted"
-            android:textSize="@dimen/sp_14" />
-    </FrameLayout>
+            <TextView
+                android:id="@+id/tv_stock_state"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@color/rfid_text_muted"
+                android:textSize="@dimen/sp_14" />
+        </FrameLayout>
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
 </LinearLayout>

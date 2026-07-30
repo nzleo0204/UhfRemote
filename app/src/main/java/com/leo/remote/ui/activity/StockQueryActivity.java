@@ -1,9 +1,7 @@
 package com.leo.remote.ui.activity;
 
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.DataCallback;
@@ -12,11 +10,9 @@ import com.leo.remote.data.repository.RepositoryProvider;
 import com.leo.remote.ui.adapter.StockAdapter;
 import java.util.List;
 
-public final class StockQueryActivity extends RfidPageActivity {
+public final class StockQueryActivity extends PagedQueryActivity<StockItem> {
     private EditText keywordView;
     private TextView countView;
-    private TextView stateView;
-    private RecyclerView recyclerView;
     private StockAdapter adapter;
 
     @Override
@@ -25,47 +21,55 @@ public final class StockQueryActivity extends RfidPageActivity {
     }
 
     @Override
-    protected void initPageView() {
-        keywordView = findViewById(R.id.et_stock_keyword);
-        countView = findViewById(R.id.tv_stock_count);
-        stateView = findViewById(R.id.tv_stock_state);
-        recyclerView = findViewById(R.id.rv_stock);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        adapter = new StockAdapter();
-        recyclerView.setAdapter(adapter);
-        findViewById(R.id.tv_stock_search).setOnClickListener(v -> loadStock());
+    protected int getRecyclerViewId() {
+        return R.id.rv_stock;
     }
 
     @Override
-    protected void initData() {
-        loadStock();
+    protected int getStateViewId() {
+        return R.id.tv_stock_state;
     }
 
-    private void loadStock() {
-        showState("加载中...");
-        RepositoryProvider.stock().queryStock(keywordView.getText().toString(), new DataCallback<>() {
-            @Override
-            public void onSuccess(List<StockItem> data) {
-                adapter.submit(data);
-                countView.setText(getString(R.string.stock_count, data.size()));
-                recyclerView.setVisibility(data.isEmpty() ? View.GONE : View.VISIBLE);
-                stateView.setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
-                stateView.setText(data.isEmpty() ? "暂无库存数据" : "");
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                recyclerView.setVisibility(View.GONE);
-                stateView.setVisibility(View.VISIBLE);
-                stateView.setText("加载失败，点击搜索重试");
-            }
-        });
+    @Override
+    protected int getRefreshLayoutId() {
+        return R.id.srl_stock;
     }
 
-    private void showState(String text) {
-        recyclerView.setVisibility(View.GONE);
-        stateView.setVisibility(View.VISIBLE);
-        stateView.setText(text);
+    @Override
+    protected RecyclerView.Adapter<?> createAdapter() {
+        adapter = new StockAdapter();
+        return adapter;
+    }
+
+    @Override
+    protected void initQueryControls() {
+        keywordView = findViewById(R.id.et_stock_keyword);
+        countView = findViewById(R.id.tv_stock_count);
+        findViewById(R.id.tv_stock_search).setOnClickListener(v -> reloadFromControl());
+    }
+
+    @Override
+    protected void queryData(DataCallback<List<StockItem>> callback) {
+        RepositoryProvider.stock().queryStock(keywordView.getText().toString(), callback);
+    }
+
+    @Override
+    protected void submitPage(List<StockItem> page) {
+        adapter.submit(page);
+    }
+
+    @Override
+    protected void onResultCountChanged(int totalCount) {
+        countView.setText(getString(R.string.stock_count, totalCount));
+    }
+
+    @Override
+    protected String emptyMessage() {
+        return "暂无库存数据";
+    }
+
+    @Override
+    protected String errorMessage() {
+        return "加载失败，点击搜索重试";
     }
 }

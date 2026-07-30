@@ -1,8 +1,5 @@
 package com.leo.remote.ui.activity;
 
-import android.view.View;
-import android.widget.TextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.data.DataCallback;
@@ -11,9 +8,7 @@ import com.leo.remote.data.repository.RepositoryProvider;
 import com.leo.remote.ui.adapter.OrderAdapter;
 import java.util.List;
 
-public final class OrderProgressActivity extends RfidPageActivity {
-    private RecyclerView recyclerView;
-    private TextView stateView;
+public final class OrderProgressActivity extends PagedQueryActivity<Order> {
     private OrderAdapter adapter;
 
     @Override
@@ -22,42 +17,48 @@ public final class OrderProgressActivity extends RfidPageActivity {
     }
 
     @Override
-    protected void initPageView() {
-        recyclerView = findViewById(R.id.rv_order);
-        stateView = findViewById(R.id.tv_order_state);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        adapter = new OrderAdapter();
-        recyclerView.setAdapter(adapter);
-        findViewById(R.id.tv_order_filter).setOnClickListener(v -> loadOrders());
+    protected int getRecyclerViewId() {
+        return R.id.rv_order;
     }
 
     @Override
-    protected void initData() {
-        loadOrders();
+    protected int getStateViewId() {
+        return R.id.tv_order_state;
     }
 
-    private void loadOrders() {
-        showState("加载中...");
-        RepositoryProvider.order().queryOrders("", null, new DataCallback<>() {
-            @Override
-            public void onSuccess(List<Order> data) {
-                adapter.submit(data);
-                recyclerView.setVisibility(data.isEmpty() ? View.GONE : View.VISIBLE);
-                stateView.setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
-                stateView.setText(data.isEmpty() ? "暂无订单数据" : "");
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                showState("加载失败，点击筛选重试");
-            }
-        });
+    @Override
+    protected int getRefreshLayoutId() {
+        return R.id.srl_order;
     }
 
-    private void showState(String text) {
-        recyclerView.setVisibility(View.GONE);
-        stateView.setVisibility(View.VISIBLE);
-        stateView.setText(text);
+    @Override
+    protected RecyclerView.Adapter<?> createAdapter() {
+        adapter = new OrderAdapter();
+        return adapter;
+    }
+
+    @Override
+    protected void initQueryControls() {
+        findViewById(R.id.tv_order_filter).setOnClickListener(v -> reloadFromControl());
+    }
+
+    @Override
+    protected void queryData(DataCallback<List<Order>> callback) {
+        RepositoryProvider.order().queryOrders("", null, callback);
+    }
+
+    @Override
+    protected void submitPage(List<Order> page) {
+        adapter.submit(page);
+    }
+
+    @Override
+    protected String emptyMessage() {
+        return "暂无订单数据";
+    }
+
+    @Override
+    protected String errorMessage() {
+        return "加载失败，点击筛选重试";
     }
 }
