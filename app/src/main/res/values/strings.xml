@@ -170,13 +170,17 @@
     <string name="stock_available">库存: %1$s</string>
     <string name="stock_reserved">预定: %1$s</string>
     <string name="stock_updated">更新 %1$s</string>
+    <string name="stock_price">¥%1$.2f/个</string>
     <string name="order_quantity">数量: %1$s</string>
     <string name="order_shipment_quantity">已发: %1$s 枚 | 待发: %2$s</string>
     <string name="order_submit_time">提交时间: %1$s</string>
     <string name="order_finish_time">完成时间: %1$s</string>
     <string name="order_requirement">定制要求: %1$s</string>
     <string name="order_progress">生产进度 %1$d%%</string>
+    <string name="order_progress_value">%1$d</string>
     <string name="shipment_meta">%1$s | %2$s 枚 | %3$s | %4$s</string>
+    <string name="shipment_quantity">%1$s 枚</string>
+    <string name="shipment_batch_quantity">%1$s · %2$s 枚</string>
     <string name="shipment_tracking_no">运单号: %1$s</string>
     <string name="shipment_timeline_done">● %1$s · %2$s\n%3$s</string>
     <string name="shipment_timeline_pending">○ %1$s · %2$s\n%3$s</string>

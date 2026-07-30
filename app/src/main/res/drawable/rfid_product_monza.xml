@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <path android:fillColor="@color/rfid_panel_bg" android:pathData="M24,7h16v50h-16z" />
+    <path android:fillColor="@color/rfid_line" android:pathData="M28,7h8v50h-8z" />
+    <path android:fillColor="@color/rfid_text_muted" android:pathData="M31,2h2v9h-2zM31,53h2v9h-2z" />
+    <path android:fillColor="@color/rfid_text_secondary" android:pathData="M26,25h12v2h-12zM26,31h8v2h-8z" />
+</vector>

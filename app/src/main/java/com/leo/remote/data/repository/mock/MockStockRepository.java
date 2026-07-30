@@ -30,11 +30,23 @@ public final class MockStockRepository extends BaseMockRepository implements Sto
     private static List<StockItem> data() {
         long now = System.currentTimeMillis();
         return List.of(
-                new StockItem("H47 Monza R6 定制款", "Monza R6", 128000, 12000,
-                        "深圳仓 A-03", "30×15mm 白底黑字背胶", "", now - 3600_000L),
-                new StockItem("H47 Alien H3 标准款", "Alien H3", 86000, 8000,
-                        "深圳仓 B-11", "40×20mm 白底黑字背胶", "", now - 7200_000L),
-                new StockItem("抗金属资产标签", "Impinj M730", 24000, 3000,
-                        "上海仓 C-02", "70×25mm 抗金属泡棉", "", now - 10_800_000L));
+                new StockItem("H47 Monza R6", "860-960MHz", 1280, 0,
+                        "深圳仓 A-03", "EPC Gen2", "product_monza", now - 3600_000L,
+                        0.38, List.of("背胶", "定制")),
+                new StockItem("Alien H3 标准型", "902-928MHz", 3540, 0,
+                        "深圳仓 B-11", "ISO 18000-6C", "product_alien", now - 7200_000L,
+                        0.22, List.of("无芯片", "标准")),
+                new StockItem("NXP UCODE 9", "840-960MHz", 892, 0,
+                        "上海仓 C-02", "EPC Gen2", "product_ucode", now - 10_800_000L,
+                        0.65, List.of("背胶", "标准")),
+                new StockItem("Impinj E710 定制型", "865-868MHz", 156, 0,
+                        "上海仓 C-02", "EPC Gen2", "product_e710", now - 14_400_000L,
+                        1.20, List.of("定制")),
+                new StockItem("UHF 抗金属标签", "860-960MHz", 438, 0,
+                        "北京仓 D-08", "ISO 18000-6C", "product_ucode", now - 18_000_000L,
+                        1.85, List.of("抗金属", "标准")),
+                new StockItem("柔性可打印标签", "902-928MHz", 2160, 0,
+                        "深圳仓 A-12", "EPC Gen2", "product_alien", now - 21_600_000L,
+                        0.31, List.of("背胶", "标准")));
     }
 }

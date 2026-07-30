@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -298,6 +299,15 @@ public class BaseDialog extends AppCompatDialog implements LifecycleOwner,
             return;
         }
         window.setDimAmount(dimAmount);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        Window window = getWindow();
+        if (window != null) {
+            hideKeyboardIfTouchOutside(window.getDecorView(), event);
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     @Override

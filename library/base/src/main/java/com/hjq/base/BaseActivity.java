@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.Window;
 import androidx.annotation.NonNull;
@@ -82,11 +83,13 @@ public abstract class BaseActivity extends AppCompatActivity
      * 初始化软键盘
      */
     protected void initSoftKeyboard() {
-        // 点击外部隐藏软键盘，提升用户体验
-        getContentView().setOnClickListener(v -> {
-            // 隐藏软键，避免内存泄漏
-            hideKeyboard(getCurrentFocus());
-        });
+        // 触摸事件统一在 dispatchTouchEvent 中处理，避免嵌套控件吞掉根布局点击。
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        hideKeyboardIfTouchOutside(getWindow().getDecorView(), event);
+        return super.dispatchTouchEvent(event);
     }
 
     @Override

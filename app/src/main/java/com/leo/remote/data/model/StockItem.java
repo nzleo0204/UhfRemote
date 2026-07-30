@@ -1,5 +1,7 @@
 package com.leo.remote.data.model;
 
+import java.util.List;
+
 public final class StockItem {
     public String productName;
     public String chipModel;
@@ -9,9 +11,18 @@ public final class StockItem {
     public String spec;
     public String imageUrl;
     public long updateTime;
+    public double unitPrice;
+    public List<String> tags;
 
     public StockItem(String productName, String chipModel, int availableQty, int reservedQty,
             String warehouse, String spec, String imageUrl, long updateTime) {
+        this(productName, chipModel, availableQty, reservedQty, warehouse, spec, imageUrl,
+                updateTime, 0.0, List.of());
+    }
+
+    public StockItem(String productName, String chipModel, int availableQty, int reservedQty,
+            String warehouse, String spec, String imageUrl, long updateTime, double unitPrice,
+            List<String> tags) {
         this.productName = productName;
         this.chipModel = chipModel;
         this.availableQty = availableQty;
@@ -20,5 +31,7 @@ public final class StockItem {
         this.spec = spec;
         this.imageUrl = imageUrl;
         this.updateTime = updateTime;
+        this.unitPrice = unitPrice;
+        this.tags = tags;
     }
 }

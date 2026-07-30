@@ -16,7 +16,7 @@ import java.util.List;
 /** Shared pull-to-refresh and paged loading behavior for query result pages. */
 abstract class PagedQueryActivity<T> extends RfidPageActivity
         implements OnRefreshLoadMoreListener {
-    private static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 4;
 
     private RecyclerView recyclerView;
     private TextView stateView;
