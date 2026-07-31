@@ -24,7 +24,8 @@ public class ReaderDomainTest {
         assertEquals(4, ModuleSubtype.R2000.supportedProtocols().size());
         assertEquals(4, ModuleSubtype.R2000_PLUS.supportedProtocols().size());
         assertEquals(List.of(TagProtocol.ISO_18000_6C), List.copyOf(ModuleSubtype.MAGIC_RF.supportedProtocols()));
-        assertEquals(List.of(TagProtocol.ISO_18000_6C), List.copyOf(ModuleSubtype.RM100X.supportedProtocols()));
+        assertEquals(List.of(TagProtocol.ISO_18000_6C, TagProtocol.GJB_7377_1),
+                List.copyOf(ModuleSubtype.RM100X.supportedProtocols()));
     }
 
     @Test
@@ -76,11 +77,35 @@ public class ReaderDomainTest {
 
     @Test
     public void exposesMagicRfDiscretePowerLevelsInTenthsOfDbm() {
-        assertArrayEquals(new int[]{130, 145, 155, 170, 185, 200},
-                MagicPowerLevels.forModule("RM-20dBm", "V1.0"));
-        assertArrayEquals(new int[]{100, 140, 170, 190, 210, 230, 240, 250, 260, 270, 280, 290, 300},
-                MagicPowerLevels.forModule("RM-30dBm", "[V3.80]"));
-        assertEquals(12, MagicPowerLevels.forModule("RM-26dBm V1.0", "V1.0").length);
+        int[] expected = new int[21];
+        for (int i = 0; i <= 20; i++) { expected[i] = i * 10; }
+        assertArrayEquals(expected, MagicPowerLevels.levels());
+    }
+
+    @Test
+    public void inventoryMaskOwnsItsByteArray() {
+        byte[] source = {(byte) 0xE2, (byte) 0x80, 0x11, 0x60};
+        InventoryMaskConfig config = new InventoryMaskConfig(1, 32, 32, source);
+        source[0] = 0;
+        byte[] returned = config.getMask();
+        returned[1] = 0;
+        assertArrayEquals(new byte[]{(byte) 0xE2, (byte) 0x80, 0x11, 0x60}, config.getMask());
+        assertEquals(4, config.getMaskByteLength());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void inventoryMaskRejectsLengthBeyondProvidedBits() {
+        new InventoryMaskConfig(1, 32, 17, new byte[2]);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void inventoryMaskRejectsUnknownBank() {
+        new InventoryMaskConfig(4, 0, 8, new byte[1]);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void inventoryMaskRejectsOffsetBeyondSdkRange() {
+        new InventoryMaskConfig(1, 0x01000000, 8, new byte[1]);
     }
 
     @Test

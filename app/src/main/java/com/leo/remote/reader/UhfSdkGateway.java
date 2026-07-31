@@ -25,6 +25,8 @@ public interface UhfSdkGateway {
     int setQueryGroup(int session, int target);
     int setQ(boolean dynamic, int qValue);
     int setMagicQuery(int session, int target, int qValue);
+    int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config);
+    int clearInventoryMask(TagProtocol protocol);
     int setTargetMask(TagProtocol protocol, ReaderTag tag);
     int clearTargetMask(TagProtocol protocol);
     byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password,

@@ -1,6 +1,8 @@
 package com.leo.remote.ui.fragment.home;
 
+import android.annotation.SuppressLint;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.text.TextUtils;
@@ -38,7 +40,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /** RFID reader connection and parameter configuration page. */
+@SuppressLint("LogNotTimber")
 public final class ReaderConfigFragment extends AppFragment<HomeActivity> implements ReaderObserver {
+    private static final String TAG = "UhfReader/Config";
     private static final String CONNECTION_DIALOG_TAG = "reader_connection";
     private static final String DEVICE_INFO_DIALOG_TAG = "reader_device_info";
 
@@ -59,6 +63,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private View rateSection;
     private View bleActions;
     private View wifiActions;
+    private View workModeRow;
+    private View blfRow;
     private View configRoot;
     private ScrollView configScroll;
     private View inputGuardTop;
@@ -94,6 +100,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         rateSection = findViewById(R.id.ll_config_rate);
         bleActions = findViewById(R.id.ll_config_ble_actions);
         wifiActions = findViewById(R.id.ll_config_wifi_actions);
+        workModeRow = findViewById(R.id.row_config_work_mode);
+        blfRow = findViewById(R.id.row_config_blf);
         configRoot = findViewById(R.id.fl_config_root);
         configScroll = findViewById(R.id.sv_config_root);
         inputGuardTop = findViewById(R.id.v_config_input_guard_top);
@@ -171,9 +179,9 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             }
         });
         findViewById(R.id.row_config_protocol).setOnClickListener(view -> showProtocolDialog());
-        findViewById(R.id.row_config_work_mode).setOnClickListener(view -> showWorkModeDialog());
+        workModeRow.setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
-        findViewById(R.id.row_config_blf).setOnClickListener(view -> showBlfDialog());
+        blfRow.setOnClickListener(view -> showBlfDialog());
         findViewById(R.id.row_config_q).setOnClickListener(view -> showQDialog());
         powerValueView.setOnClickListener(view -> {
             if (readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF) { showMagicPowerDialog(); }
@@ -250,7 +258,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         sessionView.setText(getString(R.string.config_session_value, value.session));
         qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
                 : getString(R.string.config_q_value, value.qValue));
-        workModeView.setText(workModeLabel(value.inventoryMode));
+        workModeView.setText(readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF
+                ? workModeLabel(1) : workModeLabel(value.inventoryMode));
         bindingUi = false;
     }
 
@@ -427,8 +436,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showMagicPowerDialog() {
-        int[] levels = MagicPowerLevels.forModule(readerState.getModuleSerial(),
-                readerState.getModuleVersion());
+        int[] levels = MagicPowerLevels.levels();
         String[] values = new String[levels.length];
         for (int i = 0; i < values.length; i++) { values[i] = formatPower(levels[i]); }
         new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_magic_power)
@@ -438,20 +446,29 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
+    // ========== Module-aware UI ==========
+
+    /** Keeps module-specific controls consistent after connection and subtype changes. */
     private void applyModuleUi(ModuleSubtype subtype) {
-        boolean magic = subtype == ModuleSubtype.MAGIC_RF;
-        findViewById(R.id.row_config_blf).setVisibility(magic ? View.GONE : View.VISIBLE);
-        powerSeekBar.setVisibility(magic ? View.GONE : View.VISIBLE);
-        findViewById(R.id.row_config_work_mode).setEnabled(!magic && readerState.isConnected());
-        if (magic) {
+        boolean isMagic = subtype == ModuleSubtype.MAGIC_RF;
+        boolean connected = readerState.isConnected();
+        powerSeekBar.setVisibility(isMagic ? View.GONE : View.VISIBLE);
+        powerValueView.setClickable(isMagic && connected);
+        blfRow.setVisibility(isMagic ? View.GONE : View.VISIBLE);
+        workModeRow.setEnabled(!isMagic && connected);
+        if (isMagic) {
             workModeView.setText(workModeLabel(1));
         }
         protocolView.setText(readerState.getProtocol().getDisplayName());
+        Log.d(TAG, "applyModuleUi subtype=" + subtype + " isMagic=" + isMagic
+                + " connected=" + connected);
     }
 
     private void setHardwareEnabled(boolean enabled) {
         setEnabledRecursive(hardwareSection, enabled);
-        setEnabledRecursive(protocolSection, enabled);
+        protocolSection.setEnabled(enabled);
+        setEnabledRecursive(findViewById(R.id.row_config_protocol), enabled);
+        setEnabledRecursive(findViewById(R.id.row_config_session), enabled);
         setEnabledRecursive(rateSection, enabled);
         float alpha = enabled ? 1f : 0.45f;
         hardwareSection.setAlpha(alpha);

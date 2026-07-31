@@ -9,6 +9,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.leo.remote.R;
@@ -32,6 +33,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private TextView tidView;
     private TextView chipView;
     private TextView rssiView;
+    private TextView targetHintView;
     private View writeAction;
     private View updateEpcAction;
     private View lockAction;
@@ -51,6 +53,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         tidView = findViewById(R.id.tv_single_tid);
         chipView = findViewById(R.id.tv_single_chip);
         rssiView = findViewById(R.id.tv_single_rssi);
+        targetHintView = findViewById(R.id.tv_single_target_hint);
         writeAction = findViewById(R.id.ll_single_write);
         updateEpcAction = findViewById(R.id.ll_single_update_epc);
         lockAction = findViewById(R.id.ll_single_lock);
@@ -271,12 +274,18 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     private void bindTag(ReaderTag tag) {
         if (tag == null) {
+            targetHintView.setText(R.string.single_no_target_hint);
+            targetHintView.setTextColor(ContextCompat.getColor(
+                    requireContext(), R.color.rfid_text_muted));
             epcView.setText(R.string.single_preview_epc);
             tidView.setText(R.string.single_preview_tid);
             chipView.setText(R.string.single_preview_chip);
             rssiView.setText(R.string.single_preview_rssi);
             return;
         }
+        targetHintView.setText(getString(R.string.single_target_locked, tag.id));
+        targetHintView.setTextColor(ContextCompat.getColor(
+                requireContext(), R.color.rfid_primary_soft));
         epcView.setText(tag.id.isEmpty() ? "-" : tag.id);
         tidView.setText(tag.data.isEmpty() ? "-" : tag.data);
         chipView.setText(chipLabel(tag.data));

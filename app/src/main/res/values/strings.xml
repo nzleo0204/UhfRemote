@@ -48,10 +48,10 @@
     <string name="config_status_disconnected">● 已断开</string>
     <string name="config_status_failed">● 连接失败</string>
     <string name="config_status_not_connected">● 未连接</string>
-    <string name="config_group_power">功率设</string>
-    <string name="config_group_protocol">协议与模</string>
-    <string name="config_group_transport">传输方</string>
-    <string name="config_group_rate">速率设</string>
+    <string name="config_group_power">功率设置</string>
+    <string name="config_group_protocol">协议与模式</string>
+    <string name="config_group_transport">传输方式</string>
+    <string name="config_group_rate">速率设置</string>
     <string name="config_transmit_power">发射功率</string>
     <string name="config_power_min">0 dBm</string>
     <string name="config_power_max">33 dBm</string>
@@ -133,11 +133,44 @@
     <string name="inventory_stop_failed">停止盘点失败</string>
     <string name="inventory_exported">CSV 已导出</string>
     <string name="inventory_export_failed">导出失败：%1$s</string>
+    <string name="inventory_mask_title">掩码过滤</string>
+    <string name="inventory_mask_expand">展开或收起掩码设置</string>
+    <string name="inventory_mask_bank">存储区</string>
+    <string name="inventory_mask_offset">偏移（bit）</string>
+    <string name="inventory_mask_length">长度（bit）</string>
+    <string name="inventory_mask_hex">掩码 HEX</string>
+    <string name="inventory_mask_hex_hint">例如 E28011C0</string>
+    <string name="inventory_mask_apply">应用掩码</string>
+    <string name="inventory_mask_cancel">取消掩码</string>
+    <string name="inventory_mask_active" tools:ignore="PluralsCandidate">%1$s · 偏%2$d · %3$d bit</string>
+    <string name="inventory_mask_applied">掩码已应用</string>
+    <string name="inventory_mask_cleared">掩码已清除</string>
+    <string name="inventory_mask_apply_failed">应用掩码失败</string>
+    <string name="inventory_mask_clear_failed">清除掩码失败</string>
+    <string name="inventory_mask_number_invalid">%1$s必须是非负整数</string>
+    <string name="inventory_mask_length_positive">掩码长度必须大于 0</string>
+    <string name="inventory_mask_hex_required">请输入掩码 HEX</string>
+    <string name="inventory_mask_hex_invalid">掩码 HEX 必须是偶数位十六进制字符</string>
+    <string name="inventory_mask_too_long">掩码最长为 64 字节</string>
+    <string name="inventory_mask_length_exceeds_data">掩码长度不能超过 HEX 数据位数</string>
+    <string name="inventory_mask_6b_byte_aligned">6B 掩码长度必须是 8 的倍数</string>
+    <string name="inventory_mask_offset_range">当前协议的偏移不能超过 255 bit</string>
+    <string-array name="inventory_mask_bank_epc">
+        <item>EPC</item>
+    </string-array>
+    <string-array name="inventory_mask_bank_uid">
+        <item>UID</item>
+    </string-array>
     <string name="single_preview_epc">E2000017211E0018</string>
     <string name="single_preview_tid">E2801160600002041891F8C0</string>
     <string name="single_preview_chip">Impinj Monza R6</string>
     <string name="single_preview_rssi">-62 dBm</string>
+    <string name="single_page_title">单标签操作</string>
+    <string name="single_group_current">当前标签信息</string>
+    <string name="single_group_operations">标签操作</string>
     <string name="single_no_tag_hint">请先读取目标标签</string>
+    <string name="single_no_target_hint">暂无目标标签 · 点击“读取标签”扫描</string>
+    <string name="single_target_locked">目标 EPC：%1$s · 操作已定向此标签</string>
     <string name="single_reading">读取中&#8230;</string>
     <string name="single_read_tag">读取标签</string>
     <string name="single_read_failed">读取失败：%1$s</string>

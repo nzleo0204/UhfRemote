@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/inventory_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
@@ -96,6 +97,7 @@
             app:iconSize="@dimen/dp_16"
             app:iconTint="@null" />
     </LinearLayout>
+    <include layout="@layout/inventory_mask_panel" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_36"

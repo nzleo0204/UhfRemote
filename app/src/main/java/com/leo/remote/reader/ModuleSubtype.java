@@ -33,8 +33,13 @@ public enum ModuleSubtype {
         if (this == R2000 || this == R2000_PLUS) {
             return EnumSet.allOf(TagProtocol.class);
         }
-        if (this == MAGIC_RF || this == RM100X) {
+        if (this == MAGIC_RF) {
+            // MagicRF (RM8011) 仅支持 ISO 18000-6C
             return EnumSet.of(TagProtocol.ISO_18000_6C);
+        }
+        if (this == RM100X) {
+            // RM100X 支持 6C + GJB 7377.1
+            return EnumSet.of(TagProtocol.ISO_18000_6C, TagProtocol.GJB_7377_1);
         }
         return EnumSet.noneOf(TagProtocol.class);
     }

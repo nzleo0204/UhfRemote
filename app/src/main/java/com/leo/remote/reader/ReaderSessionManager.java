@@ -1,5 +1,6 @@
 package com.leo.remote.reader;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
 import android.os.Handler;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+@SuppressLint("LogNotTimber")
 public final class ReaderSessionManager {
     private static final String TAG = "UhfReader";
     public static final int WIFI_PORT = 1200;
@@ -43,6 +45,8 @@ public final class ReaderSessionManager {
     private volatile ReaderState state = ReaderState.disconnected();
     private volatile ReaderConfiguration configuration;
     private volatile ReaderTag currentTag;
+    private volatile InventoryMaskConfig inventoryMask;
+    private volatile TagProtocol inventoryMaskProtocol;
     private volatile int inventoryMode = 1;
     private boolean sdkInitialized;
     private boolean shuttingDown;
@@ -138,6 +142,7 @@ public final class ReaderSessionManager {
             observer.onReaderStateChanged(state);
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
             if (currentTag != null) { observer.onCurrentTagChanged(currentTag); }
+            observer.onInventoryMaskChanged(inventoryMask);
             observer.onInventoryChanged(inventory.snapshot(), inventory.getTotalReads());
         });
     }
@@ -303,6 +308,14 @@ public final class ReaderSessionManager {
             }
             int status = stopInventoryInternal();
             if (status != 0) { return status; }
+            if (inventoryMask != null) {
+                status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol()));
+                Log.i(TAG, "clear inventory mask before protocol switch status=" + status);
+                if (status != 0) { return status; }
+                inventoryMask = null;
+                inventoryMaskProtocol = null;
+                notifyMask(null);
+            }
             status = monitorSdkStatus(gateway.setProtocol(protocol));
             if (status == 0) { status = gateway.configureDefaultInventory(protocol); }
             status = monitorSdkStatus(status);
@@ -358,6 +371,18 @@ public final class ReaderSessionManager {
     public CompletableFuture<Integer> startInventory() {
         return submitConnected(() -> {
             int status = gateway.configureDefaultInventory(state.getProtocol());
+            InventoryMaskConfig activeMask = inventoryMask;
+            if (status == 0 && activeMask != null) {
+                if (inventoryMaskProtocol != state.getProtocol()) {
+                    inventoryMask = null;
+                    inventoryMaskProtocol = null;
+                    notifyMask(null);
+                    Log.i(TAG, "discard inventory mask after protocol mismatch");
+                } else {
+                    status = gateway.applyInventoryMask(state.getProtocol(), activeMask);
+                    Log.i(TAG, "inventory mask re-applied on start status=" + status);
+                }
+            }
             if (status == 0) { status = gateway.startInventory(inventoryMode, 0); }
             status = monitorSdkStatus(status);
             if (status == 0) {
@@ -377,6 +402,51 @@ public final class ReaderSessionManager {
     }
 
     public List<InventoryItem> getInventorySnapshot() { return inventory.snapshot(); }
+
+    /** Applies a manual inventory mask without changing power, BLF, or Q settings. */
+    public CompletableFuture<Integer> applyInventoryMask(@NonNull InventoryMaskConfig config) {
+        return submitConnected(() -> {
+            TagProtocol protocol = state.getProtocol();
+            int status = monitorSdkStatus(gateway.applyInventoryMask(protocol, config));
+            Log.i(TAG, "applyInventoryMask status=" + status + " bank=" + config.bank
+                    + " offsetBits=" + config.offsetBits + " lengthBits=" + config.lengthBits);
+            if (status == 0) {
+                inventoryMask = config;
+                inventoryMaskProtocol = protocol;
+                notifyMask(config);
+            }
+            return status;
+        });
+    }
+
+    /** Clears only the active inventory Select criteria. */
+    public CompletableFuture<Integer> clearInventoryMask() {
+        if (inventoryMask == null) {
+            return CompletableFuture.completedFuture(0);
+        }
+        if (!state.isConnected()) {
+            inventoryMask = null;
+            inventoryMaskProtocol = null;
+            notifyMask(null);
+            return CompletableFuture.completedFuture(0);
+        }
+        return submitConnected(() -> {
+            TagProtocol protocol = inventoryMaskProtocol == null
+                    ? state.getProtocol() : inventoryMaskProtocol;
+            int status = monitorSdkStatus(gateway.clearInventoryMask(protocol));
+            Log.i(TAG, "clearInventoryMask status=" + status);
+            if (status == 0) {
+                inventoryMask = null;
+                inventoryMaskProtocol = null;
+                notifyMask(null);
+            }
+            return status;
+        });
+    }
+
+    public boolean hasInventoryMask() {
+        return inventoryMask != null;
+    }
 
     public CompletableFuture<ReaderTag> readSingleTag() {
         return submitConnected(() -> {
@@ -451,6 +521,12 @@ public final class ReaderSessionManager {
             ReaderModuleInfo info = result.moduleInfo;
             inventoryMode = 1;
             configuration = result.configuration;
+            if (inventoryMask != null && inventoryMaskProtocol != TagProtocol.ISO_18000_6C) {
+                inventoryMask = null;
+                inventoryMaskProtocol = null;
+                notifyMask(null);
+                Log.i(TAG, "discard inventory mask because handshake restored 6C protocol");
+            }
             Log.i(TAG, "RM70XX handshake succeeded subtype=" + info.subtype
                     + " rawSubtype=" + info.rawSubtype + " boardSerial=" + info.boardSerial
                     + " boardVersion=" + info.boardVersion + " moduleSerial=" + info.moduleSerial
@@ -717,6 +793,11 @@ public final class ReaderSessionManager {
         List<InventoryItem> snapshot = inventory.snapshot();
         long total = inventory.getTotalReads();
         mainHandler.post(() -> observers.forEach(observer -> observer.onInventoryChanged(snapshot, total)));
+    }
+
+    private void notifyMask(@Nullable InventoryMaskConfig config) {
+        mainHandler.post(() -> observers.forEach(observer ->
+                observer.onInventoryMaskChanged(config)));
     }
 
     private static String resolveChipModel(String data) {

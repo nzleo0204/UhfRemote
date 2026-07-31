@@ -1,77 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
-    android:fillViewport="true"
+    android:orientation="vertical"
     tools:context=".ui.fragment.home.SingleTagFragment">
 
-    <LinearLayout
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/dp_16">
+        android:layout_height="@dimen/dp_56"
+        android:background="@color/rfid_nav_bg"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="@string/single_page_title"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/sp_18" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_56"
-            android:background="@color/rfid_nav_bg"
-            android:gravity="center"
-            android:fontFamily="sans-serif"
-            android:text="单标签操作"
-            android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_18" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dp_16"
-            style="@style/RfidCard"
             android:orientation="vertical"
-            >
+            android:paddingBottom="@dimen/dp_16">
 
-            <TextView
-                style="@style/RfidGroupTitle"
-                android:text="当前标签信" />
-
-            <include layout="@layout/rfid_single_info_epc" />
-            <include layout="@layout/rfid_single_info_tid" />
-            <include layout="@layout/rfid_single_info_chip" />
-            <include layout="@layout/rfid_single_info_rssi" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/tv_single_read"
-                style="@style/RfidPrimaryButton"
+            <LinearLayout
+                style="@style/RfidCard"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_44"
-                android:layout_marginTop="@dimen/dp_12"
-                android:fontFamily="sans-serif-medium"
-                android:text="读取标签"
-                android:textSize="@dimen/sp_15"
-                app:icon="@drawable/rfid_scan_ic"
-                app:iconPadding="@dimen/dp_8"
-                app:iconSize="@dimen/dp_20"
-                app:iconTint="@null" />
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_16"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/RfidGroupTitle"
+                    android:text="@string/single_group_current" />
+
+                <include layout="@layout/rfid_single_info_epc" />
+                <include layout="@layout/rfid_single_info_tid" />
+                <include layout="@layout/rfid_single_info_chip" />
+                <include layout="@layout/rfid_single_info_rssi" />
+
+                <TextView
+                    android:id="@+id/tv_single_target_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_44"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:background="@drawable/rfid_field_bg"
+                    android:gravity="center_vertical"
+                    android:maxLines="2"
+                    android:paddingHorizontal="@dimen/dp_12"
+                    android:text="@string/single_no_target_hint"
+                    android:textColor="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_13" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/tv_single_read"
+                    style="@style/RfidPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_44"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/single_read_tag"
+                    android:textSize="@dimen/sp_15"
+                    app:icon="@drawable/rfid_scan_ic"
+                    app:iconPadding="@dimen/dp_8"
+                    app:iconSize="@dimen/dp_20"
+                    app:iconTint="@null" />
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/RfidCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_16"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/RfidGroupTitle"
+                    android:text="@string/single_group_operations" />
+
+                <include layout="@layout/rfid_single_action_write" />
+                <include layout="@layout/rfid_single_action_epc" />
+                <include layout="@layout/rfid_single_action_lock" />
+                <include layout="@layout/rfid_single_action_destroy" />
+            </LinearLayout>
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/dp_16"
-            style="@style/RfidCard"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                style="@style/RfidGroupTitle"
-                android:text="标签操" />
-
-            <include layout="@layout/rfid_single_action_write" />
-            <include layout="@layout/rfid_single_action_epc" />
-            <include layout="@layout/rfid_single_action_lock" />
-            <include layout="@layout/rfid_single_action_destroy" />
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

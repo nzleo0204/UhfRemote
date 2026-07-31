@@ -63,6 +63,8 @@ public class ReaderHandshakeTest {
         @Override public int setQueryGroup(int session, int target) { return 0; }
         @Override public int setQ(boolean dynamic, int qValue) { return 0; }
         @Override public int setMagicQuery(int session, int target, int qValue) { return 0; }
+        @Override public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) { return 0; }
+        @Override public int clearInventoryMask(TagProtocol protocol) { return 0; }
         @Override public int setTargetMask(TagProtocol protocol, ReaderTag tag) { return 0; }
         @Override public int clearTargetMask(TagProtocol protocol) { return 0; }
         @Override public byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password, int timeoutMs) { return new byte[0]; }

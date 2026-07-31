@@ -174,6 +174,35 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
+    public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) {
+        byte[] mask = config.getMask();
+        if (protocol == TagProtocol.ISO_18000_6B) {
+            Select6BCriteria criteria = new Select6BCriteria();
+            criteria.status = 1;
+            int byteLength = (config.lengthBits + 7) / 8;
+            criteria.length = byteLength;
+            System.arraycopy(mask, 0, criteria.maskData, 0,
+                    Math.min(byteLength, criteria.maskData.length));
+            return linkage.set18K6BSelectCriteria(criteria);
+        }
+        SelectCriteria criteria = new SelectCriteria();
+        criteria.selectorIdx = 0;
+        criteria.status = 1;
+        criteria.bank = config.bank;
+        criteria.offset = ProtocolEncoding.encodeMaskOffset(protocol, config.offsetBits);
+        criteria.length = config.lengthBits;
+        criteria.session = 4;
+        criteria.action = 0;
+        criteria.maskData = Arrays.copyOf(mask, Math.max(64, mask.length));
+        return linkage.set18K6CSelectCriteria(criteria);
+    }
+
+    @Override
+    public int clearInventoryMask(TagProtocol protocol) {
+        return clearTargetMask(protocol);
+    }
+
+    @Override
     public int setTargetMask(TagProtocol protocol, ReaderTag tag) {
         byte[] id = HexCodec.decode(tag.id);
         if (protocol == TagProtocol.ISO_18000_6B) {
