@@ -26,6 +26,10 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.bugly.library.Bugly;
 import com.tencent.bugly.library.BuglyBuilder;
 import com.tencent.mmkv.MMKV;
+import cn.wandersnail.ble.EasyBLE;
+import cn.wandersnail.ble.ScanConfiguration;
+import cn.wandersnail.ble.ScannerType;
+import cn.wandersnail.commons.poster.ThreadMode;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -48,6 +52,18 @@ public final class InitManager {
     public static void preInitSdk(@NonNull Application application) {
         MMKV.initialize(application);
         ThemeModeManager.applyStoredMode();
+
+        ScanConfiguration scanConfiguration = new ScanConfiguration()
+                .setScannerType(ScannerType.LE)
+                .setScanPeriodMillis(15_000)
+                .setOnlyAcceptBleDevice(true)
+                .setAcceptSysConnectedDevice(true);
+        EasyBLE easyBle = EasyBLE.getBuilder()
+                .setScanConfiguration(scanConfiguration)
+                .setMethodDefaultThreadMode(ThreadMode.BACKGROUND)
+                .build();
+        easyBle.setLogEnabled(AppConfig.isDebug());
+        easyBle.initialize(application);
 
         if (AppConfig.isLogEnable()) {
             Timber.plant(new DebugLoggerTree());

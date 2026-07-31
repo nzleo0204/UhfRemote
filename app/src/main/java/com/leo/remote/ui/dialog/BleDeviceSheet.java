@@ -36,6 +36,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
     private static final String TAG = "UhfBleScan";
     private static final int REQUEST_BLE_PERMISSIONS = 201;
     private static final long LIST_UPDATE_INTERVAL_MS = 150L;
+    private static final AtomicBoolean ACTIVE_SCAN_OWNER = new AtomicBoolean();
 
     public interface Listener { void onDeviceSelected(Device device); }
 
@@ -50,6 +51,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
     private long activeGeneration;
     private boolean finishing;
     private boolean listUpdatePending;
+    private boolean ownsScan;
 
     private final Runnable publishDevices = () -> {
         listUpdatePending = false;
@@ -92,10 +94,17 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(null);
         recyclerView.setAdapter(adapter);
-        view.findViewById(R.id.btn_ble_rescan).setOnClickListener(ignored -> startScanWithPermission());
+        View rescanView = view.findViewById(R.id.btn_ble_rescan);
+        rescanView.setOnClickListener(ignored -> startScanWithPermission());
         view.findViewById(R.id.btn_ble_close).setOnClickListener(ignored -> closeSheet());
         easyBle = EasyBLE.getInstance();
-        startScanWithPermission();
+        ownsScan = ACTIVE_SCAN_OWNER.compareAndSet(false, true);
+        if (ownsScan) {
+            startScanWithPermission();
+        } else {
+            statusView.setText(R.string.ble_scan_already_running);
+            rescanView.setEnabled(false);
+        }
     }
 
     @Override
@@ -120,7 +129,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
     @Override
     public void onDestroyView() {
         finishing = true;
-        stopScanAndRemoveListener();
+        releaseScanOwner();
         mainHandler.removeCallbacks(publishDevices);
         statusView = null;
         adapter = null;
@@ -146,7 +155,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
     }
 
     private void startScanWithPermission() {
-        if (finishing) { return; }
+        if (finishing || !ownsScan) { return; }
         List<String> missing = new ArrayList<>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             addIfMissing(missing, Manifest.permission.BLUETOOTH_SCAN);
@@ -252,7 +261,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
 
     private void finishSheet(@Nullable Device selectedDevice) {
         finishing = true;
-        stopScanAndRemoveListener();
+        releaseScanOwner();
         dismissAllowingStateLoss();
         if (selectedDevice != null && listener != null) {
             listener.onDeviceSelected(selectedDevice);
@@ -270,6 +279,13 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
             easyBle.removeScanListener(scanListener);
             scanListener = null;
         }
+    }
+
+    private void releaseScanOwner() {
+        if (!ownsScan) { return; }
+        stopScanAndRemoveListener();
+        ownsScan = false;
+        ACTIVE_SCAN_OWNER.set(false);
     }
 
     private void addIfMissing(List<String> missing, String permission) {

@@ -2,11 +2,14 @@ package com.leo.remote.ui.fragment.home;
 
 import android.annotation.SuppressLint;
 import android.net.Uri;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -16,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
@@ -26,6 +30,7 @@ import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.HexCodec;
 import com.leo.remote.reader.InventoryMaskConfig;
 import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.ProtocolEncoding;
 import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
 import com.leo.remote.reader.ReaderState;
@@ -57,6 +62,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private EditText maskHexView;
     private MaterialButton maskApplyButton;
     private MaterialButton maskClearButton;
+    private TextView maskLengthHintView;
     private TextView maskStatusView;
     private ImageView maskExpandView;
     private SwitchMaterial maskSwitch;
@@ -64,6 +70,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
     private boolean bindingMaskSwitch;
+    private boolean maskOperationInFlight;
     private List<InventoryItem> exportItems = List.of();
 
     private final ActivityResultLauncher<String> createCsv = registerForActivityResult(
@@ -86,6 +93,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         maskHexView = findViewById(R.id.et_inventory_mask_hex);
         maskApplyButton = findViewById(R.id.btn_inventory_mask_apply);
         maskClearButton = findViewById(R.id.btn_inventory_mask_clear);
+        maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
         maskStatusView = findViewById(R.id.tv_inventory_mask_status);
         maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
         maskSwitch = findViewById(R.id.sw_inventory_mask);
@@ -96,6 +104,31 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         adapter = new InventoryAdapter();
         recyclerView.setAdapter(adapter);
 
+        maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(
+                        readerState.getProtocol(), position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        TextWatcher maskFormWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence text, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable editable) { updateMaskControls(); }
+        };
+        maskHexView.addTextChangedListener(maskFormWatcher);
+        maskLengthView.addTextChangedListener(maskFormWatcher);
+        maskHexView.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) { return; }
+            int bitLength = maskHexView.getText().toString().trim().length() * 4;
+            if (readerState.getProtocol() == TagProtocol.ISO_18000_6B) {
+                bitLength -= bitLength % 8;
+            }
+            maskLengthView.setText(bitLength == 0 ? "" : String.valueOf(bitLength));
+        });
         updateMaskBanks(readerState.getProtocol());
         startButton.setOnClickListener(view -> toggleInventory());
         findViewById(R.id.btn_inventory_clear).setOnClickListener(view -> session.clearInventory());
@@ -111,12 +144,21 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         });
         maskSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (bindingMaskSwitch) { return; }
-            maskExpanded = checked;
-            if (!checked && activeMask != null) {
+            if (checked) {
+                maskExpanded = true;
+                applyMask(true);
+            } else if (activeMask != null) {
                 clearMask(true);
             } else {
                 updateMaskControls();
             }
+        });
+        findViewById(R.id.fl_inventory_mask_switch_target).setOnClickListener(view -> {
+            if (!readerState.isConnected()) {
+                requireReaderOnline();
+                return;
+            }
+            if (!maskOperationInFlight) { maskSwitch.performClick(); }
         });
         maskApplyButton.setOnClickListener(view -> applyMask());
         maskClearButton.setOnClickListener(view -> clearMask());
@@ -175,10 +217,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @SingleClick
     private void toggleInventory() {
         ReaderState state = session.getState();
-        if (!state.isConnected()) {
-            toast(R.string.inventory_connect_first);
-            return;
-        }
+        if (!state.isConnected() && !requireReaderOnline()) { return; }
         if (state.isInventoryRunning()) {
             session.stopInventory().whenComplete((status, error) ->
                     showResult(status, error, R.string.inventory_stop_failed));
@@ -202,8 +241,8 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onInventoryMaskChanged(@Nullable InventoryMaskConfig config) {
         activeMask = config;
+        setMaskSwitchChecked(config != null);
         if (config != null) {
-            setMaskSwitchChecked(true);
             maskExpanded = true;
             bindMaskForm(config);
         }
@@ -213,16 +252,27 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     /** Applies only a manually submitted mask after protocol-specific validation. */
     @SingleClick
     private void applyMask() {
+        applyMask(false);
+    }
+
+    private void applyMask(boolean switchedOn) {
         if (!readerState.isConnected()) {
-            toast(R.string.inventory_connect_first);
+            if (switchedOn) { setMaskSwitchChecked(false); }
+            requireReaderOnline();
             return;
         }
         try {
             InventoryMaskConfig config = parseMaskForm();
+            maskOperationInFlight = true;
+            updateMaskControls();
             session.applyInventoryMask(config).whenComplete((status, error) ->
                     showMaskResult(status, error, R.string.inventory_mask_applied,
-                            R.string.inventory_mask_apply_failed, false));
+                            R.string.inventory_mask_apply_failed, true, switchedOn));
         } catch (IllegalArgumentException error) {
+            setMaskSwitchChecked(false);
+            maskExpanded = true;
+            focusInvalidMaskField();
+            updateMaskControls();
             toast(error.getMessage());
         }
     }
@@ -234,34 +284,59 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     }
 
     private void clearMask(boolean restoreSwitchOnFailure) {
+        if (!readerState.isConnected()) {
+            requireReaderOnline();
+            restoreMaskSwitch(restoreSwitchOnFailure);
+            return;
+        }
+        maskOperationInFlight = true;
+        updateMaskControls();
         session.clearInventoryMask().whenComplete((status, error) ->
                 showMaskResult(status, error, R.string.inventory_mask_cleared,
-                        R.string.inventory_mask_clear_failed, restoreSwitchOnFailure));
+                        R.string.inventory_mask_clear_failed, false, restoreSwitchOnFailure));
     }
 
     private void showMaskResult(Integer status, Throwable error, @StringRes int successMessage,
-            @StringRes int failureMessage, boolean restoreSwitchOnFailure) {
+            @StringRes int failureMessage, boolean applying, boolean restoreSwitchOnFailure) {
         requireActivity().runOnUiThread(() -> {
+            maskOperationInFlight = false;
             if (error != null) {
                 Log.e(TAG, getString(failureMessage), error);
                 toast(rootMessage(error));
-                restoreMaskSwitch(restoreSwitchOnFailure);
+                restoreMaskSwitch(applying ? false : restoreSwitchOnFailure);
             } else if (status != null && status != 0) {
                 Log.e(TAG, getString(failureMessage) + " status=" + status);
                 toast(getString(R.string.config_error_code, getString(failureMessage), status));
-                restoreMaskSwitch(restoreSwitchOnFailure);
+                restoreMaskSwitch(applying ? false : restoreSwitchOnFailure);
             } else {
+                setMaskSwitchChecked(applying);
                 Log.i(TAG, getString(successMessage));
                 toast(successMessage);
             }
+            updateMaskControls();
         });
     }
 
     private void restoreMaskSwitch(boolean restore) {
-        if (!restore) { return; }
-        setMaskSwitchChecked(true);
-        maskExpanded = true;
+        setMaskSwitchChecked(restore);
+        if (restore) { maskExpanded = true; }
         updateMaskControls();
+    }
+
+    private void focusInvalidMaskField() {
+        EditText target = maskHexView;
+        String hex = maskHexView.getText().toString().trim();
+        if (hex.matches("[0-9A-Fa-f]+") && (hex.length() & 1) == 0) {
+            target = maskLengthView;
+            try {
+                if (Integer.parseInt(maskLengthView.getText().toString()) > 0) {
+                    target = maskOffsetView;
+                }
+            } catch (NumberFormatException ignored) {
+                target = maskLengthView;
+            }
+        }
+        target.requestFocus();
     }
 
     private InventoryMaskConfig parseMaskForm() {
@@ -328,7 +403,8 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         maskBankSpinner.setAdapter(bankAdapter);
         maskBankSpinner.setSelection(protocol == TagProtocol.ISO_18000_6C
                 || protocol == TagProtocol.GB_T_29768 ? 1 : 0);
-        if (protocol == TagProtocol.ISO_18000_6B) { maskOffsetView.setText("0"); }
+        maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(protocol,
+                maskBankSpinner.getSelectedItemPosition())));
         updateMaskControls();
         Log.d(TAG, "mask banks updated protocol=" + protocol);
     }
@@ -348,7 +424,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     }
 
     private void updateMaskControls() {
-        boolean formEnabled = maskSwitch.isChecked();
+        boolean connected = readerState.isConnected();
+        boolean formEnabled = connected && !maskOperationInFlight;
+        boolean formValid = updateMaskLengthHint();
         maskPanelContent.setVisibility(maskExpanded ? View.VISIBLE : View.GONE);
         maskPanelContent.setAlpha(formEnabled ? 1f : 0.48f);
         maskExpandView.setImageResource(maskExpanded
@@ -356,8 +434,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         setEnabledRecursively(maskPanelContent, formEnabled);
         maskOffsetView.setEnabled(formEnabled
                 && readerState.getProtocol() != TagProtocol.ISO_18000_6B);
-        maskApplyButton.setEnabled(formEnabled && readerState.isConnected());
-        maskClearButton.setEnabled(formEnabled && readerState.isConnected() && activeMask != null);
+        maskSwitch.setEnabled(connected && !maskOperationInFlight);
+        maskApplyButton.setEnabled(formEnabled && formValid);
+        maskClearButton.setEnabled(formEnabled && activeMask != null);
         maskStatusView.setVisibility(activeMask == null ? View.GONE : View.VISIBLE);
         if (activeMask != null) {
             Object bank = maskBankSpinner.getSelectedItem();
@@ -365,6 +444,48 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
             maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
                     activeMask.offsetBits, activeMask.lengthBits));
         }
+    }
+
+    private boolean updateMaskLengthHint() {
+        String hex = maskHexView.getText().toString().trim();
+        if (hex.isEmpty()) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_empty, false);
+            return false;
+        }
+        if ((hex.length() & 1) != 0 || !hex.matches("[0-9A-Fa-f]+")) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_odd, true, hex.length());
+            return false;
+        }
+        int dataBits = hex.length() * 4;
+        int length;
+        try {
+            length = Integer.parseInt(maskLengthView.getText().toString());
+        } catch (NumberFormatException error) {
+            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
+            return false;
+        }
+        if (length <= 0) {
+            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
+            return false;
+        }
+        if (length > dataBits) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_short, true, length, dataBits);
+            return false;
+        }
+        if (readerState.getProtocol() == TagProtocol.ISO_18000_6B && (length & 7) != 0) {
+            setMaskLengthHint(R.string.inventory_mask_6b_byte_aligned, true);
+            return false;
+        }
+        setMaskLengthHint(R.string.inventory_mask_length_hint_ok, false,
+                hex.length() / 2, dataBits, length);
+        return true;
+    }
+
+    private void setMaskLengthHint(@StringRes int message, boolean warning, Object... arguments) {
+        maskLengthHintView.setText(arguments.length == 0
+                ? getString(message) : getString(message, arguments));
+        maskLengthHintView.setTextColor(ContextCompat.getColor(requireContext(),
+                warning ? R.color.rfid_warning : R.color.rfid_text_muted));
     }
 
     private void setEnabledRecursively(View view, boolean enabled) {

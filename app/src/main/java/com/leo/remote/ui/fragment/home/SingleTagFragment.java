@@ -100,7 +100,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     @SingleClick
     private void readTag() {
         if (session == null || !session.getState().isConnected()) {
-            toast(R.string.inventory_connect_first);
+            requireReaderOnline();
             return;
         }
         readButton.setEnabled(false);
@@ -262,7 +262,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     private boolean ensureTarget() {
         if (readerState == null || !readerState.isConnected()) {
-            toast(R.string.inventory_connect_first);
+            requireReaderOnline();
             return false;
         }
         if (currentTag == null) {

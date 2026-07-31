@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,12 +32,13 @@ public final class ReaderSessionManager {
 
     private final UhfSdkGateway gateway;
     private final Application application;
-    private final ExecutorService sdkExecutor;
+    private volatile ExecutorService sdkExecutor;
     private final Handler mainHandler;
     private final CopyOnWriteArraySet<ReaderObserver> observers = new CopyOnWriteArraySet<>();
     private final InventoryAccumulator inventory = new InventoryAccumulator();
     private final AtomicBoolean inventoryUpdateScheduled = new AtomicBoolean();
     private final AtomicLong connectionGeneration = new AtomicLong();
+    private final CopyOnWriteArraySet<CompletableFuture<?>> pendingOperations = new CopyOnWriteArraySet<>();
     private final BleTransport bleTransport;
     private final WifiNetworkMonitor wifiMonitor;
     private final MMKV storage;
@@ -48,12 +49,21 @@ public final class ReaderSessionManager {
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
     private volatile int inventoryMode = 1;
-    private boolean sdkInitialized;
-    private boolean shuttingDown;
+    private volatile boolean pendingDisconnectAlert;
+    private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
+    private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
+    private volatile boolean sdkInitialized;
+    private volatile boolean shuttingDown;
     private final Object serviceLock = new Object();
-    private volatile ReaderBleService bleService;
-    private ReaderBleService serviceStopRequested;
-    private long pendingBleHandshake = -1;
+    private volatile ReaderConnectionService connectionService;
+
+    private static ExecutorService createSdkExecutor() {
+        return Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "uhf-sdk");
+            thread.setDaemon(true);
+            return thread;
+        });
+    }
 
     public static void initialize(@NonNull Application application) {
         ReaderSessionManager manager = getInstance(application);
@@ -78,14 +88,10 @@ public final class ReaderSessionManager {
     private ReaderSessionManager(Application application, UhfSdkGateway gateway) {
         this.application = application;
         this.gateway = gateway;
-        sdkExecutor = Executors.newSingleThreadExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "uhf-sdk");
-            thread.setDaemon(true);
-            return thread;
-        });
+        sdkExecutor = createSdkExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
         storage = MMKV.mmkvWithID(MMKV_ID);
-        bleTransport = new BleTransport(application, new BleTransport.Listener() {
+        bleTransport = new BleTransport(new BleTransport.Listener() {
             @Override
             public void onPhase(long attemptId, ConnectionPhase phase, String message) {
                 if (isCurrentConnection(attemptId)) {
@@ -96,17 +102,16 @@ public final class ReaderSessionManager {
             @Override
             public void onReady(long attemptId) {
                 if (!isCurrentConnection(attemptId)) { return; }
-                Log.i(TAG, "BLE data channel ready, starting foreground service");
+                Log.i(TAG, "BLE data channel ready, starting handshake");
                 publish(state.buildUpon().phase(ConnectionPhase.CONNECTING_DATA_CHANNEL)
                         .message("BLE 数据通道已建立").build());
-                startBleServiceAfterNotify(attemptId);
+                sdkExecutor.execute(() -> performHandshake(attemptId));
             }
 
             @Override
             public void onInboundData(long attemptId, byte[] data) {
                 if (isCurrentConnection(attemptId)) {
-                    // BLE service forwards Notify data to JNI while SDK calls wait for it.
-                    forwardInboundDataToService(data);
+                    if (data != null && data.length > 0) { gateway.pushRemoteData(data); }
                 }
             }
 
@@ -129,12 +134,16 @@ public final class ReaderSessionManager {
             inventory.add(tag.id, tag.data, tag.rssi, tag.count, resolveChipModel(tag.data));
             scheduleInventoryUpdate();
         });
+        wifiMonitor.start();
     }
 
     public ReaderState getState() { return state; }
     public ReaderConfiguration getConfiguration() { return configuration; }
     public ReaderTag getCurrentTag() { return currentTag; }
     public int getInventoryMode() { return inventoryMode; }
+    public boolean isPendingDisconnectAlert() { return pendingDisconnectAlert; }
+    public DisconnectReason getLastUnexpectedReason() { return lastUnexpectedReason; }
+    public void acknowledgeDisconnect() { pendingDisconnectAlert = false; }
 
     public void addObserver(@NonNull ReaderObserver observer) {
         observers.add(observer);
@@ -183,6 +192,7 @@ public final class ReaderSessionManager {
                     previousState.isInventoryRunning()));
             return;
         }
+        startConnectionService();
         configuration = null;
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.WIFI)
@@ -207,7 +217,6 @@ public final class ReaderSessionManager {
                     return;
                 }
                 if (storage != null) { storage.encode(KEY_WIFI_ADDRESS, normalized); }
-                wifiMonitor.start();
                 performHandshake(generation);
             } catch (ReaderException error) {
                 disconnectTransportInternal();
@@ -228,6 +237,7 @@ public final class ReaderSessionManager {
         publish(new ReaderState.Builder().transport(TransportType.BLE)
                 .phase(ConnectionPhase.CONNECTING).device(device.getName(), device.getAddress())
                 .message("Connecting to BLE device").build());
+        startConnectionService();
         sdkExecutor.execute(() -> {
             try {
                 disconnectTransportInternal(previousState.getTransport(), previousState.isInventoryRunning());
@@ -235,6 +245,7 @@ public final class ReaderSessionManager {
                 ensureSdkInitialized();
                 gateway.setTransport(TransportType.BLE);
                 gateway.useRm70xx();
+                gateway.setOutboundDataListener(bleTransport::write);
                 mainHandler.post(() -> {
                     if (isCurrentConnection(generation)) { bleTransport.connect(device, generation); }
                 });
@@ -261,6 +272,7 @@ public final class ReaderSessionManager {
             if (state.getTransport() != TransportType.NONE || state.getDisconnectReason() != DisconnectReason.NONE) {
                 publish(new ReaderState.Builder().disconnectReason(reason).build());
             }
+            stopConnectionService();
             return;
         }
         long generation = connectionGeneration.incrementAndGet();
@@ -273,32 +285,40 @@ public final class ReaderSessionManager {
             if (isCurrentConnection(generation)) {
                 publish(new ReaderState.Builder().disconnectReason(reason).build());
             }
+            stopConnectionService();
         });
     }
 
     public void shutdown() {
         shuttingDown = true;
+        releaseNative();
+    }
+
+    /** Releases native resources while leaving this session reusable in the live process. */
+    public void releaseNative() {
         connectionGeneration.incrementAndGet();
+        ExecutorService executor = sdkExecutor;
         CompletableFuture<Void> future = new CompletableFuture<>();
-        sdkExecutor.execute(() -> {
+        Runnable release = () -> {
             disconnectTransportInternal();
             if (sdkInitialized) {
                 gateway.deinitialize();
                 sdkInitialized = false;
-                Log.i(TAG, "UHF SDK deinitialized source=application exit");
+                Log.i(TAG, "UHF SDK deinitialized source=explicit release");
             }
             future.complete(null);
-        });
-        sdkExecutor.shutdown();
-        try {
-            future.get(5000, java.util.concurrent.TimeUnit.MILLISECONDS);
-        } catch (Exception ignored) {
-            // Process teardown will release native and transport resources.
+        };
+        if (Thread.currentThread().getName().equals("uhf-sdk")) {
+            release.run();
+        } else {
+            try { executor.execute(release); }
+            catch (RuntimeException error) { release.run(); }
+            try { future.get(5000, TimeUnit.MILLISECONDS); }
+            catch (Exception ignored) { Log.w(TAG, "Timed out releasing UHF SDK", ignored); }
         }
-        mainHandler.post(bleTransport::release);
-        synchronized (ReaderSessionManager.class) {
-            if (instance == this) { instance = null; }
-        }
+        executor.shutdownNow();
+        sdkExecutor = createSdkExecutor();
+        stopConnectionService();
     }
 
     public CompletableFuture<Integer> setProtocol(@NonNull TagProtocol protocol) {
@@ -536,7 +556,10 @@ public final class ReaderSessionManager {
                     .protocol(TagProtocol.ISO_18000_6C)
                     .versions(info.boardSerial, info.boardVersion, info.moduleSerial, info.moduleVersion)
                     .message("").errorCode(0).inventoryRunning(false).build());
+            pendingDisconnectAlert = false;
+            lastUnexpectedReason = DisconnectReason.NONE;
             notifyConfiguration();
+            if (state.getTransport() == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
         } catch (ReaderException error) {
             Log.e(TAG, "RM70XX handshake failed code=" + error.getErrorCode()
                     + " message=" + error.getMessage(), error);
@@ -549,8 +572,16 @@ public final class ReaderSessionManager {
     }
 
     private void ensureSdkInitialized() throws ReaderException {
-        if (!sdkInitialized) {
-            throw new ReaderException("UHF SDK was not initialized in Application", -60);
+        synchronized (serviceLock) {
+            if (sdkInitialized) { return; }
+            if (sdkExecutor.isShutdown()) { sdkExecutor = createSdkExecutor(); }
+            int status = gateway.initialize();
+            Log.i(TAG, "UHF SDK lazy initialize status=" + status + " source=session");
+            if (status != 0) {
+                throw new ReaderException("Unable to initialize UHF SDK", status);
+            }
+            gateway.useRm70xx();
+            sdkInitialized = true;
         }
     }
 
@@ -566,78 +597,34 @@ public final class ReaderSessionManager {
         }
     }
 
-    private void startBleServiceAfterNotify(long generation) {
-        ReaderBleService service;
-        synchronized (serviceLock) {
-            pendingBleHandshake = generation;
-            service = bleService;
-            if (service != null) { pendingBleHandshake = -1; }
-        }
-        if (service != null) {
-            sdkExecutor.execute(() -> performHandshake(generation));
-            return;
-        }
+    private void startConnectionService() {
         try {
-            Intent intent = new Intent(application, ReaderBleService.class)
-                    .setAction(ReaderBleService.ACTION_START);
+            Intent intent = new Intent(application, ReaderConnectionService.class)
+                    .setAction(ReaderConnectionService.ACTION_START);
             ContextCompat.startForegroundService(application, intent);
         } catch (Throwable error) {
-            synchronized (serviceLock) { pendingBleHandshake = -1; }
-            handleConnectionLost("BLE foreground service failed to start", -61,
-                    DisconnectReason.SDK_ERROR);
+            Log.e(TAG, "Unable to start reader connection service", error);
         }
     }
 
-    void onBleServiceCreated(@NonNull ReaderBleService service) {
-        long generation;
+    private void stopConnectionService() {
+        application.stopService(new Intent(application, ReaderConnectionService.class));
+    }
+
+    void onConnectionServiceCreated(@NonNull ReaderConnectionService service) {
         synchronized (serviceLock) {
-            bleService = service;
-            serviceStopRequested = null;
-            gateway.setOutboundDataListener(service::writeToBle);
-            generation = pendingBleHandshake;
-            pendingBleHandshake = -1;
+            connectionService = service;
         }
-        Log.i(TAG, "BLE foreground service created; JNI listener registered");
-        if (generation >= 0 && isCurrentConnection(generation)) {
-            sdkExecutor.execute(() -> performHandshake(generation));
-        } else {
-            application.stopService(new Intent(application, ReaderBleService.class));
-        }
+        service.updateReaderState(state);
+        Log.i(TAG, "reader connection foreground service created");
     }
 
-    void onBleServiceDestroyed(@NonNull ReaderBleService service) {
-        boolean unexpected;
+    void onConnectionServiceDestroyed(@NonNull ReaderConnectionService service) {
         synchronized (serviceLock) {
-            boolean expected = serviceStopRequested == service;
-            unexpected = bleService == service && !expected;
-            if (bleService == service) {
-                bleService = null;
-                gateway.setOutboundDataListener(null);
-            }
-            if (expected) { serviceStopRequested = null; }
+            if (connectionService == service) { connectionService = null; }
         }
-        if (unexpected && !shuttingDown
-                && state.getTransport() == TransportType.BLE
-                && state.getPhase() != ConnectionPhase.DISCONNECTING) {
-            handleConnectionLost("BLE foreground service stopped", -62, DisconnectReason.SDK_ERROR);
-        }
-        Log.i(TAG, "BLE foreground service destroyed");
+        Log.i(TAG, "reader connection foreground service destroyed");
     }
-
-    private void forwardInboundDataToService(byte[] data) {
-        ReaderBleService service = bleService;
-        if (service != null) {
-            service.pushNotifyToJni(data);
-        } else {
-            Log.e(TAG, "Dropping BLE Notify data because foreground service is not ready");
-        }
-    }
-
-    void pushInboundDataToSdk(byte[] data) {
-        if (data != null && data.length > 0) { gateway.pushRemoteData(data); }
-    }
-
-    void writeBleData(byte[] data) { bleTransport.write(data); }
 
     private int stopInventoryInternal() {
         if (!state.isInventoryRunning()) { return 0; }
@@ -651,16 +638,11 @@ public final class ReaderSessionManager {
     }
 
     private void disconnectTransportInternal(TransportType transport, boolean inventoryRunning) {
+        mainHandler.removeCallbacks(wifiHeartbeat);
         if (inventoryRunning) { gateway.stopInventory(); }
-        wifiMonitor.stop();
         if (transport == TransportType.WIFI) { gateway.closeNetwork(); }
         if (transport == TransportType.BLE) {
             disconnectBleTransportAndWait();
-            synchronized (serviceLock) {
-                pendingBleHandshake = -1;
-                serviceStopRequested = bleService;
-            }
-            application.stopService(new Intent(application, ReaderBleService.class));
         }
         gateway.setOutboundDataListener(null);
     }
@@ -683,22 +665,48 @@ public final class ReaderSessionManager {
         if (shuttingDown) { return; }
         ReaderState lostState = state;
         TransportType transport = lostState.getTransport();
-        boolean wasConnected = lostState.isConnected();
+        if (reason.isUnexpected() && lostState.getPhase() != ConnectionPhase.DISCONNECTED
+                && lostState.getPhase() != ConnectionPhase.FAILED) {
+            handleUnexpectedDisconnect(message, errorCode, reason);
+            sdkExecutor.execute(() -> disconnectTransportInternal(transport, false));
+            return;
+        }
         long generation = connectionGeneration.incrementAndGet();
         sdkExecutor.execute(() -> {
-            disconnectTransportInternal();
+            disconnectTransportInternal(transport, lostState.isInventoryRunning());
             configuration = null;
             clearCurrentTag();
             if (isCurrentConnection(generation)) {
-                if (wasConnected) {
-                    publish(lostState.buildUpon().phase(ConnectionPhase.DISCONNECTED)
-                            .inventoryRunning(false).message(message).errorCode(errorCode)
-                            .disconnectReason(reason).build());
-                } else {
-                    publishFailure(transport, message, errorCode, reason);
-                }
+                publishFailure(transport, message, errorCode, reason);
             }
         });
+    }
+
+    /** Forces local state to stopped before any dead-link cleanup can block on native calls. */
+    void handleUnexpectedDisconnect(@NonNull DisconnectReason reason) {
+        handleUnexpectedDisconnect("Reader connection lost", -63, reason);
+    }
+
+    private void handleUnexpectedDisconnect(String message, int errorCode,
+            @NonNull DisconnectReason reason) {
+        if (!reason.isUnexpected()) { return; }
+        connectionGeneration.incrementAndGet();
+        mainHandler.removeCallbacks(wifiHeartbeat);
+        ReaderException failure = new ReaderException(message, errorCode);
+        for (CompletableFuture<?> pending : pendingOperations) {
+            pending.completeExceptionally(failure);
+        }
+        inventoryMask = null;
+        inventoryMaskProtocol = null;
+        notifyMask(null);
+        configuration = null;
+        clearCurrentTag();
+        pendingDisconnectAlert = true;
+        lastUnexpectedReason = reason;
+        publish(state.buildUpon().phase(ConnectionPhase.DISCONNECTED).inventoryRunning(false)
+                .message(message).errorCode(errorCode).disconnectReason(reason).build());
+        mainHandler.post(() -> observers.forEach(observer ->
+                observer.onReaderUnexpectedDisconnect(reason)));
     }
 
     private boolean isCurrentConnection(long generation) {
@@ -721,18 +729,28 @@ public final class ReaderSessionManager {
 
     private <T> CompletableFuture<T> submitConnected(Callable<T> operation) {
         CompletableFuture<T> future = new CompletableFuture<>();
-        sdkExecutor.execute(() -> {
-            try {
-                if (!state.isConnected()) { throw new ReaderException("Reader is not connected", -50); }
-                future.complete(operation.call());
-            } catch (Throwable error) {
-                if (error instanceof ReaderException readerError
-                        && readerError.getErrorCode() != -40 && readerError.getErrorCode() != -50) {
-                    probeConnectionAfterError();
+        pendingOperations.add(future);
+        future.whenComplete((value, error) -> pendingOperations.remove(future));
+        try {
+            sdkExecutor.execute(() -> {
+                try {
+                    if (!state.isConnected()) {
+                        throw new ReaderException("Reader is not connected", -50);
+                    }
+                    future.complete(operation.call());
+                } catch (Throwable error) {
+                    if (error instanceof ReaderException readerError
+                            && readerError.getErrorCode() != -40 && readerError.getErrorCode() != -50
+                            && readerError.getErrorCode() != -41) {
+                        handleConnectionLost("Reader operation failed", readerError.getErrorCode(),
+                                DisconnectReason.SDK_ERROR);
+                    }
+                    future.completeExceptionally(error);
                 }
-                future.completeExceptionally(error);
-            }
-        });
+            });
+        } catch (RuntimeException error) {
+            future.completeExceptionally(error);
+        }
         return future;
     }
 
@@ -746,28 +764,40 @@ public final class ReaderSessionManager {
     }
 
     private int monitorSdkStatus(int status) {
-        if (status != 0) { probeConnectionAfterError(); }
+        if (status != 0 && state.isConnected()) {
+            handleConnectionLost("Reader SDK returned an error", status, DisconnectReason.SDK_ERROR);
+        }
         return status;
     }
 
-    private void probeConnectionAfterError() {
-        if (!state.isConnected()) { return; }
-        try {
-            gateway.readModuleInfo();
-        } catch (ReaderException connectionError) {
-            TransportType transport = state.getTransport();
-            connectionGeneration.incrementAndGet();
-            disconnectTransportInternal(transport, false);
-            configuration = null;
-            clearCurrentTag();
-            publish(state.buildUpon().phase(ConnectionPhase.DISCONNECTED)
-                    .message("Reader connection lost").errorCode(connectionError.getErrorCode())
-                    .disconnectReason(DisconnectReason.SDK_ERROR).inventoryRunning(false).build());
-        }
+    private void scheduleWifiHeartbeat(long generation) {
+        if (!isCurrentConnection(generation)) { return; }
+        mainHandler.removeCallbacks(wifiHeartbeat);
+        mainHandler.postDelayed(wifiHeartbeat, 8_000);
+    }
+
+    private void runWifiHeartbeat() {
+        if (!state.isConnected() || state.getTransport() != TransportType.WIFI) { return; }
+        long generation = connectionGeneration.get();
+        sdkExecutor.execute(() -> {
+            if (!isCurrentConnection(generation) || state.isInventoryRunning()) {
+                scheduleWifiHeartbeat(generation);
+                return;
+            }
+            try {
+                gateway.readModuleInfo();
+                scheduleWifiHeartbeat(generation);
+            } catch (ReaderException error) {
+                handleConnectionLost("Wi-Fi reader heartbeat failed", error.getErrorCode(),
+                        DisconnectReason.SDK_ERROR);
+            }
+        });
     }
 
     private void publish(ReaderState updated) {
         state = updated;
+        ReaderConnectionService service = connectionService;
+        if (service != null) { service.updateReaderState(updated); }
         mainHandler.post(() -> observers.forEach(observer -> observer.onReaderStateChanged(updated)));
     }
 

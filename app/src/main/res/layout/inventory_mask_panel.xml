@@ -56,15 +56,27 @@
             android:textSize="@dimen/sp_11"
             android:visibility="gone" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/sw_inventory_mask"
+        <FrameLayout
+            android:id="@+id/fl_inventory_mask_switch_target"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dp_8"
-            android:contentDescription="@string/inventory_mask_title"
-            android:minWidth="0dp"
-            android:padding="0dp"
-            android:text="" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_inventory_mask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:contentDescription="@string/inventory_mask_title"
+                android:focusable="false"
+                android:minWidth="0dp"
+                android:padding="0dp"
+                android:text="" />
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -140,30 +152,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_10"
-            android:text="@string/inventory_mask_length"
-            android:textColor="@color/rfid_text_muted"
-            android:textSize="@dimen/sp_12" />
-
-        <EditText
-            android:id="@+id/et_inventory_mask_length"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_44"
-            android:layout_marginTop="@dimen/dp_4"
-            android:background="@drawable/rfid_field_bg"
-            android:gravity="center_vertical"
-            android:importantForAutofill="no"
-            android:inputType="number"
-            android:maxLength="3"
-            android:paddingHorizontal="@dimen/dp_12"
-            android:singleLine="true"
-            android:text="32"
-            android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_14" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_10"
             android:text="@string/inventory_mask_hex"
             android:textColor="@color/rfid_text_muted"
             android:textSize="@dimen/sp_12" />
@@ -185,6 +173,38 @@
             android:textColor="@color/rfid_text"
             android:textColorHint="@color/rfid_text_muted"
             android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/inventory_mask_length"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_12" />
+
+        <EditText
+            android:id="@+id/et_inventory_mask_length"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_44"
+            android:layout_marginTop="@dimen/dp_4"
+            android:background="@drawable/rfid_field_bg"
+            android:gravity="center_vertical"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:maxLength="3"
+            android:paddingHorizontal="@dimen/dp_12"
+            android:singleLine="true"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:id="@+id/tv_inventory_mask_length_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_4"
+            android:text="@string/inventory_mask_length_hint_empty"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_11" />
 
         <LinearLayout
             android:layout_width="match_parent"

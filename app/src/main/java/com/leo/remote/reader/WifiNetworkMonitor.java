@@ -18,10 +18,26 @@ final class WifiNetworkMonitor {
         connectivityManager = application.getSystemService(ConnectivityManager.class);
         callback = new ConnectivityManager.NetworkCallback() {
             @Override
+            public void onAvailable(@NonNull Network network) {
+                networkCapabilitiesChanged(network);
+            }
+
+            @Override
+            public void onCapabilitiesChanged(@NonNull Network network,
+                    @NonNull NetworkCapabilities capabilities) {
+                networkCapabilitiesChanged(network);
+            }
+
+            @Override
             public void onLost(@NonNull Network network) {
                 if (!hasWifiNetwork()) {
                     listener.onWifiLost();
                 }
+            }
+
+            private void networkCapabilitiesChanged(Network network) {
+                NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+                if (capabilities == null && !hasWifiNetwork()) { listener.onWifiLost(); }
             }
         };
     }
@@ -49,12 +65,9 @@ final class WifiNetworkMonitor {
         if (connectivityManager == null) {
             return false;
         }
-        for (Network network : connectivityManager.getAllNetworks()) {
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-            if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                return true;
-            }
-        }
-        return false;
+        Network active = connectivityManager.getActiveNetwork();
+        NetworkCapabilities capabilities = active == null
+                ? null : connectivityManager.getNetworkCapabilities(active);
+        return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
     }
 }

@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ll_home_root"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_nav_bg"
-    android:orientation="vertical"
     tools:context=".ui.activity.HomeActivity">
 
-    <com.hjq.custom.widget.layout.NoScrollViewPager
-        android:id="@+id/vp_home_pager"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0px"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_home_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/rfid_nav_bg"
-        android:elevation="0dp"
-        android:orientation="vertical"
-        app:spanCount="4"
-        tools:itemCount="4"
-        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/home_navigation_item" />
+        <com.hjq.custom.widget.layout.NoScrollViewPager
+            android:id="@+id/vp_home_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1" />
 
-</LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_home_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/rfid_nav_bg"
+            android:elevation="0dp"
+            android:orientation="vertical"
+            app:spanCount="4"
+            tools:itemCount="4"
+            tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/home_navigation_item" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_home_reader_status"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_30"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="@dimen/dp_13"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:background="@drawable/rfid_chip_gray_bg"
+        android:elevation="@dimen/dp_4"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/dp_10"
+        android:text="@string/config_status_not_connected"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/sp_12" />
+
+</FrameLayout>

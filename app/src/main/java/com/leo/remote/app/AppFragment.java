@@ -44,4 +44,10 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
         activity.hideLoadingDialog();
     }
 
+    /** Delegates reader-dependent action gating to the current activity. */
+    protected boolean requireReaderOnline() {
+        A activity = getAttachActivity();
+        return activity != null && activity.requireReaderOnline();
+    }
+
 }

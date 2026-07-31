@@ -9,4 +9,6 @@ public interface ReaderObserver {
     default void onInventoryChanged(List<InventoryItem> items, long totalReads) {}
     default void onInventoryMaskChanged(@Nullable InventoryMaskConfig config) {}
     default void onCurrentTagChanged(ReaderTag tag) {}
+    /** Called when a live reader link disappears without a user disconnect request. */
+    default void onReaderUnexpectedDisconnect(DisconnectReason reason) {}
 }

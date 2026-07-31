@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BasePagerAdapter;
-import com.hjq.core.manager.ActivityManager;
 import com.hjq.core.tools.DoubleClickHelper;
 import com.leo.remote.R;
 import com.leo.remote.app.AppActivity;
@@ -24,10 +23,7 @@ import com.leo.remote.ui.fragment.home.InventoryFragment;
 import com.leo.remote.ui.fragment.home.MineFragment;
 import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
 import com.leo.remote.ui.fragment.home.SingleTagFragment;
-import com.leo.remote.reader.ConnectionPhase;
-import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
-import com.leo.remote.reader.ReaderState;
 
 /**
  *    author : Android 轮子哥
@@ -36,7 +32,7 @@ import com.leo.remote.reader.ReaderState;
  *    desc   : 首页界面
  */
 public final class HomeActivity extends AppActivity
-        implements NavigationAdapter.OnNavigationListener, ReaderObserver {
+        implements NavigationAdapter.OnNavigationListener {
 
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
@@ -107,7 +103,6 @@ public final class HomeActivity extends AppActivity
     @Override
     protected void initData() {
         mReaderSession = ReaderSessionManager.getInstance(getApplication());
-        mReaderSession.addObserver(this);
         mPagerAdapter = new BasePagerAdapter<>(this);
         mPagerAdapter.addFragment(ReaderConfigFragment.newInstance());
         mPagerAdapter.addFragment(InventoryFragment.newInstance());
@@ -174,6 +169,10 @@ public final class HomeActivity extends AppActivity
         }
     }
 
+    public void showReaderConfig() {
+        switchFragment(0);
+    }
+
     /**
      * {@link NavigationAdapter.OnNavigationListener}
      */
@@ -207,34 +206,17 @@ public final class HomeActivity extends AppActivity
             return;
         }
 
-        if (mReaderSession != null) {
-            mReaderSession.shutdown();
-        }
         // 移动到上一个任务栈
         moveTaskToBack(false);
-        postDelayed(() -> {
-            // 进行内存优化，销毁掉所有的界面
-            ActivityManager.getInstance().finishAllActivities();
-        }, 200);
     }
 
     @Override
     protected void onDestroy() {
-        if (mReaderSession != null) {
-            mReaderSession.removeObserver(this);
-        }
         super.onDestroy();
         mViewPager.removeOnPageChangeListener(mPageChangeListener);
         mViewPager.setAdapter(null);
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
-    }
-
-    @Override
-    public void onReaderStateChanged(ReaderState state) {
-        if (state.getPhase() == ConnectionPhase.FAILED || state.getPhase() == ConnectionPhase.DISCONNECTED) {
-            switchFragment(0);
-        }
     }
 
 }

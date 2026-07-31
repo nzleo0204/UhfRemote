@@ -44,6 +44,14 @@ public final class ProtocolEncoding {
         return encodeMaskOffset(protocol, protocol == TagProtocol.ISO_18000_6C ? 32 : 0);
     }
 
+    /** Returns the protocol-specific initial bit offset for a selected mask bank. */
+    public static int defaultMaskOffsetBits(TagProtocol protocol, int bankPosition) {
+        return switch (protocol) {
+            case ISO_18000_6C -> bankPosition == 1 ? 32 : 0;
+            case ISO_18000_6B, GJB_7377_1, GB_T_29768 -> 0;
+        };
+    }
+
     public static int encodeMaskOffset(TagProtocol protocol, int offset) {
         if (offset < 0 || offset > 0x00FFFFFF) {
             throw new IllegalArgumentException("Mask offset is out of range");

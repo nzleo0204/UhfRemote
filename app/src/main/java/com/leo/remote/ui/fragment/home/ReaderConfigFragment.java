@@ -2,6 +2,7 @@ package com.leo.remote.ui.fragment.home;
 
 import android.annotation.SuppressLint;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.hjq.permissions.XXPermissions;
+import com.hjq.permissions.permission.PermissionLists;
 import com.leo.remote.R;
+import com.leo.remote.app.AppActivity;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.ConnectionPhase;
 import com.leo.remote.reader.DisconnectReason;
@@ -49,6 +53,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private ReaderSessionManager session;
     private TextView statusView;
     private TextView connectionTargetView;
+    private TextView disconnectReasonView;
     private TextView powerValueView;
     private TextView protocolView;
     private TextView workModeView;
@@ -86,6 +91,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     protected void initView() {
         statusView = findViewById(R.id.tv_config_status);
         connectionTargetView = findViewById(R.id.tv_config_connection_target);
+        disconnectReasonView = findViewById(R.id.tv_config_disconnect_reason);
         powerValueView = findViewById(R.id.tv_config_power_value);
         protocolView = findViewById(R.id.tv_config_protocol);
         workModeView = findViewById(R.id.tv_config_work_mode);
@@ -197,6 +203,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
             @Override
             public void onStopTrackingTouch(@NonNull SeekBar seekBar) {
+                if (!requireReaderOnline()) { return; }
                 handleResult(session.setPower(seekBar.getProgress() * 10), R.string.config_power_set_failed);
             }
         });
@@ -219,9 +226,15 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         readerState = state;
         boolean connected = state.isConnected();
         ReaderConnectionStatus connectionStatus = state.getConnectionStatus();
-        statusView.setText(statusText(connectionStatus));
-        statusView.setBackgroundResource(statusBackground(connectionStatus));
+        statusView.setText(AppActivity.readerStatusText(connectionStatus));
+        statusView.setBackgroundResource(AppActivity.readerStatusBackground(connectionStatus));
         statusView.setEnabled(connected);
+        if (!connected && state.getDisconnectReason().isUnexpected()) {
+            disconnectReasonView.setText(AppActivity.disconnectReasonText(state.getDisconnectReason()));
+            disconnectReasonView.setVisibility(View.VISIBLE);
+        } else {
+            disconnectReasonView.setVisibility(View.GONE);
+        }
         bindConnectionTarget(state);
         if (state.getTransport() == TransportType.BLE) {
             bindingUi = true;
@@ -272,7 +285,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         BleDeviceSheet sheet = new BleDeviceSheet();
         sheet.setListener(device -> {
             bleDeviceView.setText(bleDisplayName(device.getName()));
-            session.connectBle(device);
+            requestNotificationPermission(() -> session.connectBle(device));
         });
         sheet.show(getParentFragmentManager(), "ble_devices");
     }
@@ -308,7 +321,22 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         wifiAddressView.clearError();
         dismissWifiKeyboard();
-        session.connectWifi(address);
+        requestNotificationPermission(() -> session.connectWifi(address));
+    }
+
+    private void requestNotificationPermission(Runnable connectAction) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            connectAction.run();
+            return;
+        }
+        XXPermissions.with(this).permission(PermissionLists.getPostNotificationsPermission())
+                .request((grantedList, deniedList) -> {
+                    if (!deniedList.isEmpty()) {
+                        Log.w(TAG, "POST_NOTIFICATIONS denied; foreground notification may be hidden");
+                        toast(R.string.reader_notification_permission_denied);
+                    }
+                    connectAction.run();
+                });
     }
 
     private void dismissWifiKeyboard() {
@@ -374,6 +402,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showProtocolDialog() {
+        if (!requireReaderOnline()) { return; }
         List<TagProtocol> protocols = new ArrayList<>(readerState.getModuleSubtype().supportedProtocols());
         String[] labels = protocols.stream().map(TagProtocol::getDisplayName).toArray(String[]::new);
         int selected = Math.max(0, protocols.indexOf(readerState.getProtocol()));
@@ -386,6 +415,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showWorkModeDialog() {
+        if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
         int selected = configuration == null ? 1 : configuration.inventoryMode;
         new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_work_mode)
@@ -397,6 +427,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showSessionDialog() {
+        if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_session_labels);
         int selected = configuration == null ? 0 : configuration.session * 2 + configuration.target;
         new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_session_target)
@@ -407,6 +438,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showBlfDialog() {
+        if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_blf_labels);
         int selected = configuration == null ? 1 : configuration.blfProfile;
         new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_blf_rate)
@@ -417,6 +449,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showQDialog() {
+        if (!requireReaderOnline()) { return; }
         String[] labels = new String[32];
         for (int i = 0; i < 16; i++) {
             labels[i] = getString(R.string.config_fixed_q, i);
@@ -436,6 +469,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showMagicPowerDialog() {
+        if (!requireReaderOnline()) { return; }
         int[] levels = MagicPowerLevels.levels();
         String[] values = new String[levels.length];
         for (int i = 0; i < values.length; i++) { values[i] = formatPower(levels[i]); }
@@ -514,24 +548,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
                 || phase == ConnectionPhase.VERIFYING_MODULE || phase == ConnectionPhase.CONNECTED
                 || phase == ConnectionPhase.FAILED || phase == ConnectionPhase.DISCONNECTING;
-    }
-
-    @StringRes
-    private static int statusText(ReaderConnectionStatus status) {
-        return switch (status) {
-            case CONNECTED -> R.string.config_status_connected;
-            case DISCONNECTED -> R.string.config_status_disconnected;
-            case FAILED -> R.string.config_status_failed;
-            case NOT_CONNECTED -> R.string.config_status_not_connected;
-        };
-    }
-
-    private static int statusBackground(ReaderConnectionStatus status) {
-        return switch (status) {
-            case CONNECTED -> R.drawable.rfid_chip_green_bg;
-            case DISCONNECTED, FAILED -> R.drawable.rfid_chip_red_bg;
-            case NOT_CONNECTED -> R.drawable.rfid_chip_gray_bg;
-        };
     }
 
     private String blfLabel(int profile) {

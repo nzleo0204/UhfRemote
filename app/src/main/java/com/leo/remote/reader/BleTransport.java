@@ -1,10 +1,10 @@
 package com.leo.remote.reader;
 
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
+import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import cn.wandersnail.ble.Connection;
@@ -18,8 +18,8 @@ import cn.wandersnail.ble.RequestBuilderFactory;
 import cn.wandersnail.ble.RequestType;
 import cn.wandersnail.ble.WriteOptions;
 import cn.wandersnail.ble.callback.IndicationChangeCallback;
+import cn.wandersnail.ble.callback.MtuChangeCallback;
 import cn.wandersnail.ble.callback.NotificationChangeCallback;
-import com.leo.remote.BuildConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,20 +37,19 @@ final class BleTransport implements EventObserver {
 
     private final EasyBLE easyBle;
     private final Listener listener;
-    private Connection connection;
-    private Device device;
-    private UUID serviceUuid;
-    private UUID writeUuid;
-    private UUID receiveUuid;
-    private int writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
-    private boolean disconnecting;
-    private long attemptId;
+    private volatile Connection connection;
+    private volatile Device device;
+    private volatile UUID serviceUuid;
+    private volatile UUID writeUuid;
+    private volatile UUID receiveUuid;
+    private volatile int writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+    private volatile int mtuPayloadSize = 20;
+    private volatile boolean disconnecting;
+    private volatile long attemptId;
 
-    BleTransport(Application application, Listener listener) {
+    BleTransport(Listener listener) {
         this.listener = listener;
         easyBle = EasyBLE.getInstance();
-        easyBle.setLogEnabled(BuildConfig.DEBUG);
-        easyBle.initialize(application);
         easyBle.registerObserver(this);
     }
 
@@ -62,6 +61,7 @@ final class BleTransport implements EventObserver {
         writeUuid = null;
         receiveUuid = null;
         writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+        mtuPayloadSize = 20;
         Log.i(TAG, "connect attempt=" + attemptId + " name=" + target.getName()
                 + " address=" + target.getAddress());
         ConnectionConfiguration configuration = new ConnectionConfiguration()
@@ -77,11 +77,10 @@ final class BleTransport implements EventObserver {
 
     void disconnect() {
         disconnecting = true;
-        if (connection != null) {
-            connection.clearRequestQueue();
-            connection.disconnect();
-            connection.releaseNoEvent();
-        }
+        Connection currentConnection = connection;
+        Device currentDevice = device;
+        if (currentConnection != null) { currentConnection.clearRequestQueue(); }
+        if (currentDevice != null) { easyBle.releaseConnection(currentDevice); }
         connection = null;
         device = null;
     }
@@ -92,23 +91,30 @@ final class BleTransport implements EventObserver {
     }
 
     void write(byte[] data) {
-        if (connection == null || serviceUuid == null || writeUuid == null || data == null || data.length == 0) {
+        Connection currentConnection = connection;
+        UUID currentService = serviceUuid;
+        UUID currentWrite = writeUuid;
+        int currentWriteType = writeType;
+        int currentPayloadSize = mtuPayloadSize;
+        long currentAttempt = attemptId;
+        if (currentConnection == null || currentService == null || currentWrite == null
+                || data == null || data.length == 0) {
             notifyDisconnected("BLE data channel is unavailable", -2, DisconnectReason.SDK_ERROR);
             return;
         }
         WriteOptions options = new WriteOptions.Builder()
-                .setPackageSize(20)
+                .setPackageSize(currentPayloadSize)
                 .setPackageWriteDelayMillis(5)
                 .setRequestWriteDelayMillis(10)
-                .setWaitWriteResult(writeType == BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-                .setWriteType(writeType)
+                .setWaitWriteResult(currentWriteType == BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                .setWriteType(currentWriteType)
                 .build();
         Request request = new RequestBuilderFactory()
-                .getWriteCharacteristicBuilder(serviceUuid, writeUuid, data)
+                .getWriteCharacteristicBuilder(currentService, currentWrite, data)
                 .setWriteOptions(options)
-                .setTag(requestTag(attemptId))
+                .setTag(requestTag(currentAttempt))
                 .build();
-        connection.execute(request);
+        currentConnection.execute(request);
     }
 
     @Override
@@ -133,8 +139,10 @@ final class BleTransport implements EventObserver {
 
     @Override
     public void onBluetoothAdapterStateChanged(int state) {
-        if (state == BluetoothAdapter.STATE_OFF && device != null) {
+        if (state == BluetoothAdapter.STATE_OFF) {
             notifyDisconnected("Bluetooth is turned off", state, DisconnectReason.BLUETOOTH_OFF);
+        } else if (state == BluetoothAdapter.STATE_ON) {
+            Log.d(TAG, "Bluetooth adapter is available; waiting for explicit connection");
         }
     }
 
@@ -219,7 +227,7 @@ final class BleTransport implements EventObserver {
                     : BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
             Log.i(TAG, "data channel attempt=" + attemptId + " service=" + serviceUuid
                     + " write=" + writeUuid + " receive=" + receiveUuid + " writeType=" + writeType);
-            enableReceive(preferred.receive);
+            requestMtuAndEnable(preferred.receive);
             return;
         }
         notifyDisconnected(hasHidDataChannel
@@ -307,6 +315,38 @@ final class BleTransport implements EventObserver {
                         + " properties=0x" + Integer.toHexString(characteristic.getProperties()));
             }
         }
+    }
+
+    private void requestMtuAndEnable(BluetoothGattCharacteristic characteristic) {
+        long requestAttempt = attemptId;
+        Connection currentConnection = connection;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || currentConnection == null) {
+            enableReceive(characteristic);
+            return;
+        }
+        Request request = new RequestBuilderFactory().getChangeMtuBuilder(512)
+                .setTag(requestTag(requestAttempt))
+                .setCallback(new MtuChangeCallback() {
+                    @Override
+                    public void onMtuChanged(@NonNull Request request, int mtu) {
+                        if (requestAttempt != attemptId) { return; }
+                        mtuPayloadSize = Math.max(20, mtu - 3);
+                        Log.i(TAG, "MTU negotiated attempt=" + requestAttempt + " mtu=" + mtu
+                                + " payload=" + mtuPayloadSize);
+                        enableReceive(characteristic);
+                    }
+
+                    @Override
+                    public void onRequestFailed(@NonNull Request request, int failType,
+                            int gattStatus, @Nullable Object value) {
+                        if (requestAttempt != attemptId) { return; }
+                        mtuPayloadSize = 20;
+                        Log.w(TAG, "MTU negotiation failed attempt=" + requestAttempt
+                                + " failType=" + failType + " gattStatus=" + gattStatus);
+                        enableReceive(characteristic);
+                    }
+                }).build();
+        currentConnection.execute(request);
     }
 
     private void enableReceive(BluetoothGattCharacteristic characteristic) {

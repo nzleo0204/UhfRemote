@@ -37,6 +37,19 @@ public class ReaderDomainTest {
     }
 
     @Test
+    public void classifiesEveryDisconnectReason() {
+        assertFalse(DisconnectReason.NONE.isUnexpected());
+        assertFalse(DisconnectReason.USER.isUnexpected());
+        assertFalse(DisconnectReason.TRANSPORT_SWITCH.isUnexpected());
+        assertFalse(DisconnectReason.CANCELED.isUnexpected());
+        assertFalse(DisconnectReason.APP_EXIT.isUnexpected());
+        assertTrue(DisconnectReason.LINK_LOST.isUnexpected());
+        assertTrue(DisconnectReason.BLUETOOTH_OFF.isUnexpected());
+        assertTrue(DisconnectReason.WIFI_LOST.isUnexpected());
+        assertTrue(DisconnectReason.SDK_ERROR.isUnexpected());
+    }
+
+    @Test
     public void validatesAndRoundTripsHex() {
         byte[] bytes = HexCodec.decode("E2 80 11 60");
         assertArrayEquals(new byte[]{(byte) 0xE2, (byte) 0x80, 0x11, 0x60}, bytes);
@@ -64,6 +77,18 @@ public class ReaderDomainTest {
         assertEquals(0x35, ProtocolEncoding.encodeBank(TagProtocol.GB_T_29768, 3, 5));
         assertEquals(32, ProtocolEncoding.encodeMaskOffset(TagProtocol.ISO_18000_6C, 32));
         assertEquals(0x07000000, ProtocolEncoding.encodeMaskOffset(TagProtocol.GB_T_29768, 7));
+    }
+
+    @Test
+    public void providesProtocolSpecificDefaultMaskOffsets() {
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.ISO_18000_6C, 0));
+        assertEquals(32, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.ISO_18000_6C, 1));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.ISO_18000_6C, 2));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.ISO_18000_6C, 3));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.ISO_18000_6B, 0));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.GJB_7377_1, 0));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.GB_T_29768, 0));
+        assertEquals(0, ProtocolEncoding.defaultMaskOffsetBits(TagProtocol.GB_T_29768, 3));
     }
 
     @Test
