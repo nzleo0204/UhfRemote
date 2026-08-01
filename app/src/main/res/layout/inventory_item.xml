@@ -9,6 +9,7 @@
         android:id="@+id/tv_inventory_index"
         android:layout_width="@dimen/dp_40"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:textColor="@color/rfid_text_muted"
         android:textSize="@dimen/sp_12" />
     <LinearLayout
@@ -37,18 +38,21 @@
         android:id="@+id/tv_inventory_count"
         android:layout_width="@dimen/dp_52"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:textColor="@color/rfid_text"
         android:textSize="@dimen/sp_13" />
     <TextView
         android:id="@+id/tv_inventory_rssi"
         android:layout_width="@dimen/dp_52"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:textColor="@color/rfid_success"
         android:textSize="@dimen/sp_13" />
     <TextView
         android:id="@+id/tv_inventory_chip"
         android:layout_width="@dimen/dp_72"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/rfid_text_muted"

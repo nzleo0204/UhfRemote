@@ -31,20 +31,4 @@
             tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             tools:listitem="@layout/home_navigation_item" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tv_home_reader_status"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/dp_30"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="@dimen/dp_13"
-        android:layout_marginEnd="@dimen/dp_20"
-        android:background="@drawable/rfid_chip_gray_bg"
-        android:elevation="@dimen/dp_4"
-        android:gravity="center"
-        android:paddingHorizontal="@dimen/dp_10"
-        android:text="@string/config_status_not_connected"
-        android:textColor="@color/rfid_text"
-        android:textSize="@dimen/sp_12" />
-
 </FrameLayout>

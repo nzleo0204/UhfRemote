@@ -78,13 +78,17 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
 
     private static void bindCounters(ViewHolder holder, InventoryItem item) {
         holder.count.setText(String.valueOf(item.getCount()));
-        holder.rssi.setText(String.valueOf(item.getRssi()));
+        int rssi = item.getRssi();
+        holder.rssi.setText(rssi == 0 ? "-" : rssi + " dBm");
         holder.rssi.setTextColor(ContextCompat.getColor(holder.itemView.getContext(),
-                rssiColor(item.getRssi())));
+                rssiColor(rssi)));
         holder.chip.setText(item.getChipModel().isEmpty() ? "-" : item.getChipModel());
     }
 
     private static int rssiColor(int rssi) {
+        if (rssi == 0) {
+            return R.color.rfid_text_muted;
+        }
         if (rssi >= -70) {
             return R.color.rfid_success;
         }

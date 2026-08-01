@@ -61,7 +61,10 @@ public class ReaderHandshakeTest {
         @Override public int setPowerTenthsDbm(int powerTenthsDbm) { return 0; }
         @Override public int setBlfProfile(int profile) { return 0; }
         @Override public int setQueryGroup(int session, int target) { return 0; }
-        @Override public int setQ(boolean dynamic, int qValue) { return 0; }
+        @Override public int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue,
+                int retryCount, int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags) {
+            return 0;
+        }
         @Override public int setMagicQuery(int session, int target, int qValue) { return 0; }
         @Override public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) { return 0; }
         @Override public int clearInventoryMask(TagProtocol protocol) { return 0; }

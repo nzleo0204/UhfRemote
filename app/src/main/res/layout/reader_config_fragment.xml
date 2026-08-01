@@ -37,6 +37,18 @@
                     android:textColor="@color/rfid_text"
                     android:textSize="@dimen/sp_18" />
 
+                <ImageButton
+                    android:id="@+id/ibtn_config_device_info"
+                    android:layout_width="@dimen/dp_30"
+                    android:layout_height="@dimen/dp_30"
+                    android:layout_marginEnd="@dimen/dp_8"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/config_device_info"
+                    android:padding="@dimen/dp_3"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/rfid_device_info_ic"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/tv_config_status"
                     android:layout_width="wrap_content"
@@ -46,8 +58,7 @@
                     android:paddingHorizontal="@dimen/dp_12"
                     android:text="@string/config_status_not_connected"
                     android:textColor="@color/rfid_text"
-                    android:textSize="@dimen/sp_12"
-                    android:visibility="invisible" />
+                    android:textSize="@dimen/sp_12" />
 
             </LinearLayout>
 
@@ -125,7 +136,7 @@
                 android:id="@+id/sb_config_power"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_36"
-                android:max="33"
+                android:max="30"
                 android:progress="26"
                 android:progressTint="@color/rfid_primary_soft"
                 android:thumbTint="@color/rfid_primary_soft" />

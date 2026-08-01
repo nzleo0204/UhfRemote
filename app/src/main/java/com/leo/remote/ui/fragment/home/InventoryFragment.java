@@ -181,6 +181,14 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         session.addObserver(this);
     }
 
+    /** Keeps the mask form collapsed whenever this ViewPager page becomes active. */
+    @Override
+    public void onResume() {
+        super.onResume();
+        maskExpanded = false;
+        updateMaskControls();
+    }
+
     @Override
     public void onDestroy() {
         if (session != null) {
@@ -243,7 +251,6 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         activeMask = config;
         setMaskSwitchChecked(config != null);
         if (config != null) {
-            maskExpanded = true;
             bindMaskForm(config);
         }
         updateMaskControls();
@@ -319,7 +326,6 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     private void restoreMaskSwitch(boolean restore) {
         setMaskSwitchChecked(restore);
-        if (restore) { maskExpanded = true; }
         updateMaskControls();
     }
 

@@ -1,21 +1,33 @@
 package com.leo.remote.ui.fragment.home;
 
+import android.annotation.SuppressLint;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputLayout;
+import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.HexCodec;
+import com.leo.remote.reader.InventoryMaskConfig;
 import com.leo.remote.reader.ProtocolEncoding;
 import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
@@ -23,10 +35,15 @@ import com.leo.remote.reader.ReaderState;
 import com.leo.remote.reader.ReaderTag;
 import com.leo.remote.reader.TagProtocol;
 import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.ui.dialog.common.MessageDialog;
 import java.util.concurrent.CompletableFuture;
 
 /** Single-target RFID operations. */
+@SuppressLint("LogNotTimber")
 public final class SingleTagFragment extends AppFragment<HomeActivity> implements ReaderObserver {
+    private static final String TAG = "UhfReader/SingleTag";
+
+    // ========== Fields ==========
     private ReaderSessionManager session;
     private TextView readButton;
     private TextView epcView;
@@ -38,8 +55,22 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private View updateEpcAction;
     private View lockAction;
     private View destroyAction;
+    private View maskPanelContent;
+    private Spinner maskBankSpinner;
+    private EditText maskOffsetView;
+    private EditText maskLengthView;
+    private EditText maskHexView;
+    private MaterialButton maskApplyButton;
+    private MaterialButton maskClearButton;
+    private TextView maskLengthHintView;
+    private TextView maskStatusView;
+    private ImageView maskExpandView;
+    private SwitchMaterial maskSwitch;
     private ReaderTag currentTag;
-    private ReaderState readerState;
+    private ReaderState readerState = ReaderState.disconnected();
+    private InventoryMaskConfig activeMask;
+    private boolean maskExpanded;
+    private boolean bindingMaskSwitch;
 
     public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
@@ -58,14 +89,78 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateEpcAction = findViewById(R.id.ll_single_update_epc);
         lockAction = findViewById(R.id.ll_single_lock);
         destroyAction = findViewById(R.id.ll_single_destroy);
+        maskPanelContent = findViewById(R.id.ll_inventory_mask_content);
+        maskBankSpinner = findViewById(R.id.sp_inventory_mask_bank);
+        maskOffsetView = findViewById(R.id.et_inventory_mask_offset);
+        maskLengthView = findViewById(R.id.et_inventory_mask_length);
+        maskHexView = findViewById(R.id.et_inventory_mask_hex);
+        maskApplyButton = findViewById(R.id.btn_inventory_mask_apply);
+        maskClearButton = findViewById(R.id.btn_inventory_mask_clear);
+        maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
+        maskStatusView = findViewById(R.id.tv_inventory_mask_status);
+        maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
+        maskSwitch = findViewById(R.id.sw_inventory_mask);
+
+        maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(
+                        readerState.getProtocol(), position)));
+            }
+
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        TextWatcher maskFormWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence text, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable editable) { updateMaskControls(); }
+        };
+        maskHexView.addTextChangedListener(maskFormWatcher);
+        maskLengthView.addTextChangedListener(maskFormWatcher);
+        maskHexView.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) { return; }
+            int bitLength = maskHexView.getText().toString().trim().length() * 4;
+            if (readerState.getProtocol() == TagProtocol.ISO_18000_6B) {
+                bitLength -= bitLength % 8;
+            }
+            maskLengthView.setText(bitLength == 0 ? "" : String.valueOf(bitLength));
+        });
+        updateMaskBanks(readerState.getProtocol());
 
         readButton.setOnClickListener(view -> readTag());
         writeAction.setOnClickListener(view -> showWriteDialog(false));
         updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
         lockAction.setOnClickListener(view -> showLockDialog());
         destroyAction.setOnClickListener(view -> showKillDialog());
+        findViewById(R.id.row_inventory_mask_toggle).setOnClickListener(view -> {
+            dismissMaskKeyboard();
+            maskExpanded = !maskExpanded;
+            updateMaskControls();
+        });
+        maskSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingMaskSwitch) { return; }
+            if (checked) {
+                maskExpanded = true;
+                applyMask(true);
+            } else if (activeMask != null) {
+                clearMask();
+            } else {
+                updateMaskControls();
+            }
+        });
+        findViewById(R.id.fl_inventory_mask_switch_target).setOnClickListener(view -> {
+            if (!readerState.isConnected()) {
+                requireReaderOnline();
+                return;
+            }
+            maskSwitch.performClick();
+        });
+        maskApplyButton.setOnClickListener(view -> applyMask());
+        maskClearButton.setOnClickListener(view -> clearMask());
+        findViewById(R.id.single_tag_root).setOnClickListener(view -> dismissMaskKeyboard());
         bindTag(null);
         refreshOperations();
+        updateMaskControls();
     }
 
     @Override
@@ -82,12 +177,17 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onReaderStateChanged(ReaderState state) {
+        TagProtocol previousProtocol = readerState.getProtocol();
         readerState = state;
+        if (previousProtocol != state.getProtocol()) {
+            updateMaskBanks(state.getProtocol());
+        }
         if (!state.isConnected()) {
             currentTag = null;
             bindTag(null);
         }
         refreshOperations();
+        updateMaskControls();
     }
 
     @Override
@@ -95,6 +195,14 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         currentTag = tag;
         bindTag(tag);
         refreshOperations();
+    }
+
+    @Override
+    public void onSingleTagMaskChanged(@Nullable InventoryMaskConfig config) {
+        activeMask = config;
+        setMaskSwitchChecked(config != null);
+        if (config != null) { bindMaskForm(config); }
+        updateMaskControls();
     }
 
     @SingleClick
@@ -178,9 +286,13 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                             address = ProtocolEncoding.encodeAddress(protocol, address, blockOrRetry);
                             writeLength = ProtocolEncoding.writeLength(protocol, inputData);
                         }
-                        executeStatus(session.writeCurrentTag(writeLength, address, bank, password, writeData),
+                        int finalWriteLength = writeLength;
+                        int finalAddress = address;
+                        byte[] finalWriteData = writeData;
+                        confirmSingleTagMask(() -> executeStatus(session.writeCurrentTag(
+                                        finalWriteLength, finalAddress, bank, password, finalWriteData),
                                 updateEpc ? R.string.single_update_epc_operation
-                                        : R.string.single_write_operation, dialog);
+                                        : R.string.single_write_operation, dialog));
                     } catch (IllegalArgumentException error) {
                         toast(error.getMessage());
                     }
@@ -206,9 +318,12 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
-                        executeStatus(session.lockCurrentTag(parsePassword(password.getText().toString()),
-                                bank.getSelectedItemPosition(), policy.getSelectedItemPosition()),
-                                R.string.single_lock_operation, dialog);
+                        byte[] parsedPassword = parsePassword(password.getText().toString());
+                        int selectedBank = bank.getSelectedItemPosition();
+                        int selectedPolicy = policy.getSelectedItemPosition();
+                        confirmSingleTagMask(() -> executeStatus(session.lockCurrentTag(parsedPassword,
+                                        selectedBank, selectedPolicy),
+                                R.string.single_lock_operation, dialog));
                     } catch (IllegalArgumentException error) { toast(error.getMessage()); }
                 }));
         dialog.show();
@@ -234,13 +349,259 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                                 .setMessage(R.string.single_kill_confirm_message)
                                 .setNegativeButton(R.string.common_cancel, null)
                                 .setPositiveButton(R.string.single_kill_confirm, (dialog, which) -> {
-                                    form.dismiss();
-                                    executeStatus(session.killCurrentTag(access, kill),
-                                            R.string.single_kill_operation, null);
+                                    confirmSingleTagMask(() -> {
+                                        form.dismiss();
+                                        executeStatus(session.killCurrentTag(access, kill),
+                                                R.string.single_kill_operation, null);
+                                    });
                                 }).show();
                     } catch (IllegalArgumentException error) { toast(error.getMessage()); }
                 }));
         form.show();
+    }
+
+    private void confirmSingleTagMask(Runnable action) {
+        if (session.getSingleTagMask() != null) {
+            action.run();
+            return;
+        }
+        new MessageDialog.Builder(requireActivity())
+                .setTitle(R.string.single_tag_no_mask_warning_title)
+                .setMessage(R.string.single_tag_no_mask_warning)
+                .setCancel(R.string.common_cancel)
+                .setConfirm(R.string.common_confirm)
+                .setListener(new MessageDialog.OnListener() {
+                    @Override
+                    public void onConfirm(@NonNull BaseDialog dialog) {
+                        action.run();
+                    }
+                })
+                .show();
+    }
+
+    // ========== Mask management ==========
+
+    @SingleClick
+    private void applyMask() {
+        applyMask(false);
+    }
+
+    private void applyMask(boolean switchedOn) {
+        if (!readerState.isConnected()) {
+            if (switchedOn) { setMaskSwitchChecked(false); }
+            requireReaderOnline();
+            return;
+        }
+        try {
+            InventoryMaskConfig config = parseMaskForm();
+            session.setSingleTagMask(config);
+            setMaskSwitchChecked(true);
+            Log.i(TAG, "single-tag mask set bank=" + config.bank + " offsetBits="
+                    + config.offsetBits + " lengthBits=" + config.lengthBits);
+            toast(R.string.inventory_mask_applied);
+        } catch (IllegalArgumentException error) {
+            setMaskSwitchChecked(false);
+            maskExpanded = true;
+            focusInvalidMaskField();
+            toast(error.getMessage());
+        }
+        updateMaskControls();
+    }
+
+    @SingleClick
+    private void clearMask() {
+        session.setSingleTagMask(null);
+        setMaskSwitchChecked(false);
+        Log.i(TAG, "single-tag mask cleared");
+        toast(R.string.inventory_mask_cleared);
+        updateMaskControls();
+    }
+
+    private void focusInvalidMaskField() {
+        EditText target = maskHexView;
+        String hex = maskHexView.getText().toString().trim();
+        if (hex.matches("[0-9A-Fa-f]+") && (hex.length() & 1) == 0) {
+            target = maskLengthView;
+            try {
+                if (Integer.parseInt(maskLengthView.getText().toString()) > 0) {
+                    target = maskOffsetView;
+                }
+            } catch (NumberFormatException ignored) {
+                target = maskLengthView;
+            }
+        }
+        target.requestFocus();
+    }
+
+    private InventoryMaskConfig parseMaskForm() {
+        TagProtocol protocol = readerState.getProtocol();
+        int offset = parseMaskInteger(maskOffsetView, R.string.inventory_mask_offset);
+        int length = parseMaskInteger(maskLengthView, R.string.inventory_mask_length);
+        if (length == 0) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_length_positive));
+        }
+        String hex = maskHexView.getText().toString().trim();
+        if (hex.isEmpty()) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_hex_required));
+        }
+        if ((hex.length() & 1) != 0 || !hex.matches("[0-9A-Fa-f]+")) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_hex_invalid));
+        }
+        byte[] mask = HexCodec.decode(hex);
+        if (mask.length > 64) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_too_long));
+        }
+        if (length > mask.length * 8) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_length_exceeds_data));
+        }
+        if (protocol == TagProtocol.ISO_18000_6B && (length & 7) != 0) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_6b_byte_aligned));
+        }
+        if ((protocol == TagProtocol.GJB_7377_1 || protocol == TagProtocol.GB_T_29768)
+                && offset > 0xFF) {
+            throw new IllegalArgumentException(getString(R.string.inventory_mask_offset_range));
+        }
+        return new InventoryMaskConfig(maskBank(protocol), offset, length, mask);
+    }
+
+    private int parseMaskInteger(EditText view, @StringRes int label) {
+        try {
+            int value = Integer.parseInt(view.getText().toString());
+            if (value < 0) { throw new NumberFormatException(); }
+            return value;
+        } catch (NumberFormatException error) {
+            throw new IllegalArgumentException(getString(
+                    R.string.inventory_mask_number_invalid, getString(label)));
+        }
+    }
+
+    private int maskBank(TagProtocol protocol) {
+        return switch (protocol) {
+            case ISO_18000_6C, GB_T_29768 -> maskBankSpinner.getSelectedItemPosition();
+            case ISO_18000_6B -> 0;
+            case GJB_7377_1 -> 1;
+        };
+    }
+
+    /** Rebuilds bank choices because each RFID protocol exposes different memory areas. */
+    private void updateMaskBanks(TagProtocol protocol) {
+        int labels = switch (protocol) {
+            case ISO_18000_6C -> R.array.single_bank_labels_6c;
+            case ISO_18000_6B -> R.array.inventory_mask_bank_uid;
+            case GJB_7377_1 -> R.array.inventory_mask_bank_epc;
+            case GB_T_29768 -> R.array.single_bank_labels_gb;
+        };
+        ArrayAdapter<CharSequence> bankAdapter = ArrayAdapter.createFromResource(requireContext(),
+                labels, android.R.layout.simple_spinner_item);
+        bankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        maskBankSpinner.setAdapter(bankAdapter);
+        maskBankSpinner.setSelection(protocol == TagProtocol.ISO_18000_6C
+                || protocol == TagProtocol.GB_T_29768 ? 1 : 0);
+        maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(protocol,
+                maskBankSpinner.getSelectedItemPosition())));
+        updateMaskControls();
+        Log.d(TAG, "single-tag mask banks updated protocol=" + protocol);
+    }
+
+    private void bindMaskForm(InventoryMaskConfig config) {
+        TagProtocol protocol = readerState.getProtocol();
+        int position = switch (protocol) {
+            case ISO_18000_6C, GB_T_29768 -> config.bank;
+            case ISO_18000_6B, GJB_7377_1 -> 0;
+        };
+        if (position >= 0 && position < maskBankSpinner.getCount()) {
+            maskBankSpinner.setSelection(position);
+        }
+        maskOffsetView.setText(String.valueOf(config.offsetBits));
+        maskLengthView.setText(String.valueOf(config.lengthBits));
+        maskHexView.setText(HexCodec.encode(config.getMask(), config.getMaskByteLength()));
+    }
+
+    private void updateMaskControls() {
+        if (maskPanelContent == null) { return; }
+        boolean connected = readerState.isConnected();
+        boolean formValid = updateMaskLengthHint();
+        maskPanelContent.setVisibility(maskExpanded ? View.VISIBLE : View.GONE);
+        maskPanelContent.setAlpha(connected ? 1f : 0.48f);
+        maskExpandView.setImageResource(maskExpanded
+                ? R.drawable.arrows_top_ic : R.drawable.arrows_bottom_ic);
+        setEnabledRecursively(maskPanelContent, connected);
+        maskOffsetView.setEnabled(connected
+                && readerState.getProtocol() != TagProtocol.ISO_18000_6B);
+        maskSwitch.setEnabled(connected);
+        maskApplyButton.setEnabled(connected && formValid);
+        maskClearButton.setEnabled(connected && activeMask != null);
+        maskStatusView.setVisibility(activeMask == null ? View.GONE : View.VISIBLE);
+        if (activeMask != null) {
+            Object bank = maskBankSpinner.getSelectedItem();
+            String bankLabel = bank == null ? "" : bank.toString();
+            maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
+                    activeMask.offsetBits, activeMask.lengthBits));
+        }
+    }
+
+    private boolean updateMaskLengthHint() {
+        String hex = maskHexView.getText().toString().trim();
+        if (hex.isEmpty()) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_empty, false);
+            return false;
+        }
+        if ((hex.length() & 1) != 0 || !hex.matches("[0-9A-Fa-f]+")) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_odd, true, hex.length());
+            return false;
+        }
+        int dataBits = hex.length() * 4;
+        int length;
+        try {
+            length = Integer.parseInt(maskLengthView.getText().toString());
+        } catch (NumberFormatException error) {
+            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
+            return false;
+        }
+        if (length <= 0) {
+            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
+            return false;
+        }
+        if (length > dataBits) {
+            setMaskLengthHint(R.string.inventory_mask_length_hint_short, true, length, dataBits);
+            return false;
+        }
+        if (readerState.getProtocol() == TagProtocol.ISO_18000_6B && (length & 7) != 0) {
+            setMaskLengthHint(R.string.inventory_mask_6b_byte_aligned, true);
+            return false;
+        }
+        setMaskLengthHint(R.string.inventory_mask_length_hint_ok, false,
+                hex.length() / 2, dataBits, length);
+        return true;
+    }
+
+    private void setMaskLengthHint(@StringRes int message, boolean warning, Object... arguments) {
+        maskLengthHintView.setText(arguments.length == 0
+                ? getString(message) : getString(message, arguments));
+        maskLengthHintView.setTextColor(ContextCompat.getColor(requireContext(),
+                warning ? R.color.rfid_warning : R.color.rfid_text_muted));
+    }
+
+    private void setEnabledRecursively(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        if (!(view instanceof ViewGroup group)) { return; }
+        for (int i = 0; i < group.getChildCount(); i++) {
+            setEnabledRecursively(group.getChildAt(i), enabled);
+        }
+    }
+
+    private void setMaskSwitchChecked(boolean checked) {
+        bindingMaskSwitch = true;
+        maskSwitch.setChecked(checked);
+        bindingMaskSwitch = false;
+    }
+
+    private void dismissMaskKeyboard() {
+        View focused = requireActivity().getCurrentFocus();
+        if (focused != null) {
+            hideKeyboard(focused);
+            focused.clearFocus();
+        }
     }
 
     private void executeStatus(CompletableFuture<Integer> future, @StringRes int operationRes,

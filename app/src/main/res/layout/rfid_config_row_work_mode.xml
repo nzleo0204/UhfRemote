@@ -10,5 +10,5 @@
     <TextView
         android:id="@+id/tv_config_work_mode"
         style="@style/RfidValueChip"
-        android:text="@string/config_work_mode_continuous" />
+        android:text="@string/config_work_mode_module" />
 </LinearLayout>

@@ -1,5 +1,7 @@
 package com.leo.remote.reader;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
 import com.uhf.linkage.Linkage;
 import com.uhf.structures.DynamicQParams;
 import com.uhf.structures.FixedQParams;
@@ -14,7 +16,9 @@ import com.uhf.structures.TagGroup;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+@SuppressLint("LogNotTimber")
 public final class NativeUhfSdkGateway implements UhfSdkGateway {
+    private static final String TAG = "UhfReader";
     private static final int STATUS_OK = 0;
     private final Linkage linkage = new Linkage();
 
@@ -121,17 +125,32 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
         check(linkage.Radio_GetQueryTagGroup(group), "Radio_GetQueryTagGroup");
         check(linkage.Radio_getCurrentSingulationAlgorithm(algorithm), "Radio_getCurrentSingulationAlgorithm");
         int q;
+        int minQ = 0;
+        int maxQ = 15;
+        int retryCount;
+        int thresholdMultiplier = 1;
+        int toggleTarget;
+        int repeatUntilNoTags = 0;
         if (algorithm.value == 1) {
             DynamicQParams params = new DynamicQParams();
             check(linkage.Radio_GetSingulationAlgorithmDyParameters(params), "Radio_GetSingulationAlgorithmDyParameters");
             q = params.startQValue;
+            minQ = params.minQValue;
+            maxQ = params.maxQValue;
+            retryCount = params.retryCount;
+            thresholdMultiplier = params.thresholdMultiplier;
+            toggleTarget = params.toggleTarget;
         } else {
             FixedQParams params = new FixedQParams();
             check(linkage.Radio_GetSingulationAlgorithmFixedParameters(params), "Radio_GetSingulationAlgorithmFixedParameters");
             q = params.qValue;
+            retryCount = params.retryCount;
+            toggleTarget = params.toggleTarget;
+            repeatUntilNoTags = params.repeatUntiNoTags;
         }
         return new ReaderConfiguration(power.value, 1, profile.value, group.session,
-                group.target, algorithm.value == 1, q);
+                group.target, algorithm.value == 1, q, minQ, maxQ, retryCount,
+                thresholdMultiplier, toggleTarget, repeatUntilNoTags);
     }
 
     @Override
@@ -153,15 +172,19 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public int setQ(boolean dynamic, int qValue) {
+    public int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue,
+            int retryCount, int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags) {
         int status = linkage.Radio_setCurrentSingulationAlgorithm(dynamic ? 1 : 0);
         if (status != STATUS_OK) { return status; }
         if (dynamic) {
-            return linkage.Radio_SetSingulationAlgorithmDyParameters(
-                    new DynamicQParams(qValue, 0, 15, 0, 1, 1));
+            DynamicQParams params = new DynamicQParams();
+            params.setValue(qValue, minQValue, maxQValue, retryCount, toggleTarget,
+                    thresholdMultiplier);
+            return linkage.Radio_SetSingulationAlgorithmDyParameters(params);
         }
-        return linkage.Radio_SetSingulationAlgorithmFixedParameters(
-                new FixedQParams(qValue, 0, 1, 0));
+        FixedQParams params = new FixedQParams();
+        params.setValue(qValue, retryCount, toggleTarget, repeatUntilNoTags);
+        return linkage.Radio_SetSingulationAlgorithmFixedParameters(params);
     }
 
     @Override
@@ -272,6 +295,11 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     private static ReaderTag toReaderTag(InventoryData data) {
+        Log.d(TAG, "inventory tag epcLength=" + data.getEpcLength()
+                + " dataLength=" + data.getDataLength()
+                + " rssi=" + data.getRSSI()
+                + " tagType=" + data.getTagType()
+                + " inventoriedTimes=" + data.getTagInventoriedTimes());
         String id = HexCodec.encode(data.getEpc(), data.getEpcLength());
         String extra = HexCodec.encode(data.getData(), data.getDataLength());
         return new ReaderTag(id, extra, data.getRSSI(), data.getTagType(), data.getTagInventoriedTimes());

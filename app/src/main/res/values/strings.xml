@@ -48,13 +48,15 @@
     <string name="config_status_disconnected">● 已断开</string>
     <string name="config_status_failed">● 连接失败</string>
     <string name="config_status_not_connected">● 未连接</string>
+    <string name="config_device_info">设备信息</string>
+    <string name="config_initializing">正在初始化设备&#8230;</string>
     <string name="config_group_power">功率设置</string>
     <string name="config_group_protocol">协议与模式</string>
     <string name="config_group_transport">传输方式</string>
     <string name="config_group_rate">速率设置</string>
     <string name="config_transmit_power">发射功率</string>
     <string name="config_power_min">0 dBm</string>
-    <string name="config_power_max">33 dBm</string>
+    <string name="config_power_max">30 dBm</string>
     <string name="config_bluetooth">蓝牙</string>
     <string name="config_wifi">WiFi</string>
     <string name="config_no_device">未选择设备</string>
@@ -67,24 +69,41 @@
     <string name="config_protocol">射频协议</string>
     <string name="config_protocol_iso_18000_6c">ISO 18000-6C</string>
     <string name="config_work_mode">工作模式</string>
-    <string name="config_work_mode_single">单次触发</string>
-    <string name="config_work_mode_continuous">连续触发</string>
-    <string name="config_work_mode_low_power">低功耗</string>
+    <string name="config_work_mode_single">单次盘点</string>
+    <string name="config_work_mode_module">模块持续盘点</string>
+    <string name="config_work_mode_user">库控持续盘点</string>
     <string name="config_session">Session</string>
     <string name="config_session_s0">S0</string>
     <string name="config_session_value">S%1$d</string>
     <string name="config_session_target">Session / Target</string>
     <string name="config_blf_rate">Blf 速率</string>
-    <string name="config_blf_40">40 kHz</string>
-    <string name="config_blf_256">256 kHz</string>
-    <string name="config_blf_300">300 kHz</string>
-    <string name="config_blf_400">400 kHz</string>
+    <string name="config_blf_fm0_40">DSB_ASK/FM0 · 40 kHz</string>
+    <string name="config_blf_m2_250">PR_ASK/M2 · 250 kHz</string>
+    <string name="config_blf_m2_300">PR_ASK/M2 · 300 kHz</string>
+    <string name="config_blf_fm0_400">DSB_ASK/FM0 · 400 kHz</string>
     <string name="config_q_value_label">Q 值</string>
     <string name="config_adaptive">自适应</string>
     <string name="config_fixed_q">固定 Q%1$d</string>
     <string name="config_dynamic_q">动态 Q%1$d</string>
     <string name="config_q_value">Q%1$d</string>
     <string name="config_q_parameter">Q 参数</string>
+    <string name="config_q_min_value">最小 Q（0-15）</string>
+    <string name="config_q_max_value">最大 Q（0-15）</string>
+    <string name="config_q_retry_count">重试次数（0-10）</string>
+    <string name="config_q_threshold">门限系数（0-255）</string>
+    <string name="config_q_value_invalid">请输入有效的 Q 参数</string>
+    <string name="config_q_range_invalid">Q 值范围应为 0-15，且最小值不能大于最大值</string>
+    <string name="config_q_retry_invalid">重试次数应为 0-10</string>
+    <string name="config_q_threshold_invalid">门限系数应为 0-255</string>
+    <string name="config_power_confirm_title">修改功率</string>
+    <string name="config_power_confirm_message">是否将功率修改为 %1$s？</string>
+    <string name="config_power_set_wait">正在设置功率&#8230;</string>
+    <string name="config_power_set_success">功率已设为 %1$s</string>
+    <string name="config_setting_confirm_title">修改设置</string>
+    <string name="config_setting_confirm_message">是否将「%1$s」修改为「%2$s」？</string>
+    <string name="config_setting_wait">正在设置&#8230;</string>
+    <string name="config_setting_success">「%1$s」已设为「%2$s」</string>
+    <string name="config_work_mode_deferred_hint">工作模式将在下次开始盘点时生效</string>
     <string name="config_magic_power">MagicRF 功率</string>
     <string name="config_power_set_failed">功率设置失败</string>
     <string name="config_protocol_set_failed">协议切换失败</string>
@@ -96,8 +115,8 @@
     <string name="config_power_decimal">%1$d.%2$d dBm</string>
     <string-array name="config_work_mode_labels">
         <item>@string/config_work_mode_single</item>
-        <item>@string/config_work_mode_continuous</item>
-        <item>@string/config_work_mode_low_power</item>
+        <item>@string/config_work_mode_module</item>
+        <item>@string/config_work_mode_user</item>
     </string-array>
     <string-array name="config_session_labels">
         <item>S0 / A</item>
@@ -110,10 +129,10 @@
         <item>S3 / B</item>
     </string-array>
     <string-array name="config_blf_labels">
-        <item>@string/config_blf_40</item>
-        <item>@string/config_blf_256</item>
-        <item>@string/config_blf_300</item>
-        <item>@string/config_blf_400</item>
+        <item>@string/config_blf_fm0_40</item>
+        <item>@string/config_blf_m2_250</item>
+        <item>@string/config_blf_m2_300</item>
+        <item>@string/config_blf_fm0_400</item>
     </string-array>
     <string name="inventory_title">标签盘点</string>
     <string name="inventory_total">%1$d 条</string>
@@ -159,6 +178,8 @@
     <string name="inventory_mask_length_hint_short">长度 %1$d bit 超过数据 %2$d bit，请补足掩码数据</string>
     <string name="inventory_mask_length_hint_odd">掩码 HEX 需为偶数位，当前 %1$d 位</string>
     <string name="inventory_mask_length_hint_empty">请输入掩码数据</string>
+    <string name="single_tag_no_mask_warning_title">未设置掩码</string>
+    <string name="single_tag_no_mask_warning">当前未设置掩码，操作将作用于场内所有标签。确认继续？</string>
     <string name="reader_disconnected_title">读写器已断开</string>
     <string name="reader_disconnected_link_lost">与读写器的连接已丢失，请检查设备电源与距离后重新连接。</string>
     <string name="reader_disconnected_bluetooth_off">蓝牙已关闭，请开启蓝牙后重新连接。</string>
@@ -166,6 +187,7 @@
     <string name="reader_disconnected_sdk_error">读写器通信异常，请重新连接。</string>
     <string name="reader_offline_action_blocked">读写器未连接，无法执行该操作。</string>
     <string name="reader_goto_connect">去连接</string>
+    <string name="reader_acknowledged">知道了</string>
     <string name="reader_service_channel_name">读写器连接</string>
     <string name="reader_service_connected">已连接 · %1$s</string>
     <string name="reader_service_connecting">连接中&#8230;</string>

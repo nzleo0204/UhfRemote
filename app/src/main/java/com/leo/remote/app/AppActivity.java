@@ -2,16 +2,12 @@ package com.leo.remote.app;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.graphics.Insets;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -31,7 +27,6 @@ import com.leo.remote.reader.DisconnectReason;
 import com.leo.remote.reader.ReaderConnectionStatus;
 import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
-import com.leo.remote.reader.ReaderState;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
 import com.leo.remote.util.ThemeModeManager;
@@ -58,7 +53,6 @@ public abstract class AppActivity extends BaseActivity
     /** 对话框数量 */
     private int mDialogCount;
     private ReaderSessionManager mReaderSession;
-    private TextView mReaderStatusView;
     private MessageDialog.Builder mDisconnectDialog;
 
     @Override
@@ -66,7 +60,6 @@ public abstract class AppActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         if (!ActivityManager.isMainProcess(this)) { return; }
         mReaderSession = ReaderSessionManager.getInstance(getApplication());
-        setupReaderStatusView();
         mReaderSession.addObserver(this);
     }
 
@@ -314,33 +307,6 @@ public abstract class AppActivity extends BaseActivity
 
     // ========== Reader state ==========
 
-    private void setupReaderStatusView() {
-        mReaderStatusView = findViewById(R.id.tv_home_reader_status);
-        if (mReaderStatusView != null) { return; }
-        View title = findViewById(R.id.ll_title_bar);
-        if (!(title instanceof LinearLayout titleLayout)) { return; }
-        TextView chip = new TextView(this);
-        chip.setGravity(Gravity.CENTER);
-        chip.setMaxLines(1);
-        chip.setTextSize(12);
-        chip.setPadding(dp(10), 0, dp(10), 0);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, dp(30));
-        params.setMarginStart(dp(8));
-        titleLayout.addView(chip, params);
-        mReaderStatusView = chip;
-    }
-
-    @Override
-    public void onReaderStateChanged(ReaderState state) {
-        if (mReaderStatusView == null) { return; }
-        ReaderConnectionStatus status = state.getConnectionStatus();
-        mReaderStatusView.setText(readerStatusText(status));
-        mReaderStatusView.setBackgroundResource(readerStatusBackground(status));
-        mReaderStatusView.setTextColor(ContextCompat.getColor(this,
-                status == ReaderConnectionStatus.NOT_CONNECTED ? R.color.rfid_text : R.color.white));
-    }
-
     @Override
     public void onReaderUnexpectedDisconnect(DisconnectReason reason) {
         if (sResumedActivity.get() == this) { showDisconnectDialog(reason); }
@@ -366,7 +332,7 @@ public abstract class AppActivity extends BaseActivity
                 .setCancelable(false)
                 .setCanceledOnTouchOutside(false)
                 .setCancel(R.string.reader_goto_connect)
-                .setConfirm(R.string.common_confirm)
+                .setConfirm(R.string.reader_acknowledged)
                 .setListener(new MessageDialog.OnListener() {
                     @Override
                     public void onConfirm(@NonNull BaseDialog dialog) {
@@ -423,10 +389,6 @@ public abstract class AppActivity extends BaseActivity
             case SDK_ERROR -> R.string.reader_disconnected_sdk_error;
             default -> R.string.reader_offline_action_blocked;
         };
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @Override

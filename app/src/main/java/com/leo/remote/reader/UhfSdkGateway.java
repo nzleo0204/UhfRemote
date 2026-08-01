@@ -23,7 +23,8 @@ public interface UhfSdkGateway {
     int setPowerTenthsDbm(int powerTenthsDbm);
     int setBlfProfile(int profile);
     int setQueryGroup(int session, int target);
-    int setQ(boolean dynamic, int qValue);
+    int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue, int retryCount,
+            int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags);
     int setMagicQuery(int session, int target, int qValue);
     int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config);
     int clearInventoryMask(TagProtocol protocol);

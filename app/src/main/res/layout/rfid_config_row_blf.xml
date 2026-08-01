@@ -11,5 +11,5 @@
     <TextView
         android:id="@+id/tv_config_blf"
         style="@style/RfidValueChip"
-        android:text="@string/config_blf_256" />
+        android:text="@string/config_blf_m2_250" />
 </LinearLayout>

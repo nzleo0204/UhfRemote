@@ -48,6 +48,7 @@ public final class ReaderSessionManager {
     private volatile ReaderTag currentTag;
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
+    private volatile InventoryMaskConfig singleTagMask;
     private volatile int inventoryMode = 1;
     private volatile boolean pendingDisconnectAlert;
     private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
@@ -152,6 +153,7 @@ public final class ReaderSessionManager {
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
             if (currentTag != null) { observer.onCurrentTagChanged(currentTag); }
             observer.onInventoryMaskChanged(inventoryMask);
+            observer.onSingleTagMaskChanged(singleTagMask);
             observer.onInventoryChanged(inventory.snapshot(), inventory.getTotalReads());
         });
     }
@@ -357,13 +359,19 @@ public final class ReaderSessionManager {
         return submitConnected(() -> updateConfiguration(monitorSdkStatus(
                 gateway.setPowerTenthsDbm(powerTenthsDbm)),
                 new ReaderConfiguration(powerTenthsDbm, inventoryMode, configuration.blfProfile,
-                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue)));
+                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue,
+                        configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
+                        configuration.qThresholdMultiplier, configuration.qToggleTarget,
+                        configuration.qRepeatUntilNoTags)));
     }
 
     public CompletableFuture<Integer> setBlf(int profile) {
         return submitConnected(() -> updateConfiguration(monitorSdkStatus(gateway.setBlfProfile(profile)),
                 new ReaderConfiguration(configuration.powerTenthsDbm, inventoryMode, profile,
-                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue)));
+                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue,
+                        configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
+                        configuration.qThresholdMultiplier, configuration.qToggleTarget,
+                        configuration.qRepeatUntilNoTags)));
     }
 
     public CompletableFuture<Integer> setSessionTarget(int session, int target) {
@@ -373,18 +381,26 @@ public final class ReaderSessionManager {
                     : gateway.setQueryGroup(session, target);
             return updateConfiguration(monitorSdkStatus(status), new ReaderConfiguration(configuration.powerTenthsDbm,
                     inventoryMode, configuration.blfProfile, session, target,
-                    configuration.dynamicQ, configuration.qValue));
+                    configuration.dynamicQ, configuration.qValue, configuration.qMinValue,
+                    configuration.qMaxValue, configuration.qRetryCount,
+                    configuration.qThresholdMultiplier, configuration.qToggleTarget,
+                    configuration.qRepeatUntilNoTags));
         });
     }
 
-    public CompletableFuture<Integer> setQ(boolean dynamic, int qValue) {
+    public CompletableFuture<Integer> setQ(boolean dynamic, int qValue, int minQValue,
+            int maxQValue, int retryCount, int thresholdMultiplier) {
         return submitConnected(() -> {
             int status = state.getModuleSubtype() == ModuleSubtype.MAGIC_RF
                     ? gateway.setMagicQuery(configuration.session, configuration.target, qValue)
-                    : gateway.setQ(dynamic, qValue);
+                    : gateway.setQ(dynamic, qValue, minQValue, maxQValue, retryCount,
+                    thresholdMultiplier, configuration.qToggleTarget,
+                    configuration.qRepeatUntilNoTags);
             return updateConfiguration(monitorSdkStatus(status), new ReaderConfiguration(configuration.powerTenthsDbm,
                     inventoryMode, configuration.blfProfile, configuration.session,
-                    configuration.target, state.getModuleSubtype() != ModuleSubtype.MAGIC_RF && dynamic, qValue));
+                    configuration.target, state.getModuleSubtype() != ModuleSubtype.MAGIC_RF && dynamic, qValue,
+                    minQValue, maxQValue, retryCount, thresholdMultiplier,
+                    configuration.qToggleTarget, configuration.qRepeatUntilNoTags));
         });
     }
 
@@ -468,6 +484,16 @@ public final class ReaderSessionManager {
         return inventoryMask != null;
     }
 
+    public void setSingleTagMask(@Nullable InventoryMaskConfig config) {
+        singleTagMask = config;
+        notifySingleTagMask(config);
+    }
+
+    @Nullable
+    public InventoryMaskConfig getSingleTagMask() {
+        return singleTagMask;
+    }
+
     public CompletableFuture<ReaderTag> readSingleTag() {
         return submitConnected(() -> {
             int status = stopInventoryInternal();
@@ -516,14 +542,21 @@ public final class ReaderSessionManager {
             }
             int status = stopInventoryInternal();
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
-            status = monitorSdkStatus(gateway.setTargetMask(state.getProtocol(), currentTag));
-            if (status != 0) { throw new ReaderException("Unable to set target mask", status); }
+            TagProtocol protocol = state.getProtocol();
+            if (inventoryMask != null) {
+                status = monitorSdkStatus(gateway.clearInventoryMask(protocol));
+                if (status != 0) { throw new ReaderException("Unable to clear inventory mask", status); }
+            }
+            InventoryMaskConfig activeMask = singleTagMask;
+            if (activeMask == null) { return operation.call(); }
+            status = monitorSdkStatus(gateway.applyInventoryMask(protocol, activeMask));
+            if (status != 0) { throw new ReaderException("Unable to set single-tag mask", status); }
             try {
                 return operation.call();
             } finally {
-                int clearStatus = monitorSdkStatus(gateway.clearTargetMask(state.getProtocol()));
+                int clearStatus = monitorSdkStatus(gateway.clearInventoryMask(protocol));
                 if (clearStatus != 0) {
-                    throw new ReaderException("Unable to restore target mask", clearStatus);
+                    throw new ReaderException("Unable to clear single-tag mask", clearStatus);
                 }
             }
         });
@@ -714,9 +747,11 @@ public final class ReaderSessionManager {
     }
 
     private void clearCurrentTag() {
-        if (currentTag == null) { return; }
-        currentTag = null;
-        mainHandler.post(() -> observers.forEach(observer -> observer.onCurrentTagChanged(null)));
+        if (singleTagMask != null) { setSingleTagMask(null); }
+        if (currentTag != null) {
+            currentTag = null;
+            mainHandler.post(() -> observers.forEach(observer -> observer.onCurrentTagChanged(null)));
+        }
     }
 
     private int updateConfiguration(int status, ReaderConfiguration updated) {
@@ -805,7 +840,9 @@ public final class ReaderSessionManager {
         ReaderConfiguration current = configuration;
         if (current == null) { return; }
         ReaderConfiguration updated = new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
-                current.blfProfile, current.session, current.target, current.dynamicQ, current.qValue);
+                current.blfProfile, current.session, current.target, current.dynamicQ, current.qValue,
+                current.qMinValue, current.qMaxValue, current.qRetryCount,
+                current.qThresholdMultiplier, current.qToggleTarget, current.qRepeatUntilNoTags);
         configuration = updated;
         mainHandler.post(() -> observers.forEach(observer -> observer.onReaderConfigurationChanged(updated)));
     }
@@ -828,6 +865,11 @@ public final class ReaderSessionManager {
     private void notifyMask(@Nullable InventoryMaskConfig config) {
         mainHandler.post(() -> observers.forEach(observer ->
                 observer.onInventoryMaskChanged(config)));
+    }
+
+    private void notifySingleTagMask(@Nullable InventoryMaskConfig config) {
+        mainHandler.post(() -> observers.forEach(observer ->
+                observer.onSingleTagMaskChanged(config)));
     }
 
     private static String resolveChipModel(String data) {
