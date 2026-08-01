@@ -94,6 +94,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private boolean readerStateInitialized;
     private boolean pendingConfigInit;
     private boolean configInitReady;
+    private boolean connectionFailureDialogDismissed;
     private long configInitShownAt;
     private WaitDialog.Builder configInitDialog;
     private WaitDialog.Builder settingWaitDialog;
@@ -269,6 +270,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         statusView.setBackgroundResource(AppActivity.readerStatusBackground(connectionStatus));
         statusView.setTextColor(ContextCompat.getColor(requireContext(),
                 connectionStatus == ReaderConnectionStatus.CONNECTED
+                        || connectionStatus == ReaderConnectionStatus.DISCONNECTED
+                        || connectionStatus == ReaderConnectionStatus.FAILED
                         ? R.color.white : R.color.rfid_text));
         deviceInfoButton.setVisibility(connected ? View.VISIBLE : View.GONE);
         if (!connected && state.getDisconnectReason().isUnexpected()) {
@@ -278,18 +281,16 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             disconnectReasonView.setVisibility(View.GONE);
         }
         bindConnectionTarget(state);
-        if (isActiveConnectionPhase(state.getPhase()) && state.getTransport() == TransportType.BLE) {
+        if (state.getTransport() == TransportType.BLE) {
             bindingUi = true;
             bleSwitch.setChecked(true);
             wifiSwitch.setChecked(false);
             bindingUi = false;
-        } else if (isActiveConnectionPhase(state.getPhase()) && state.getTransport() == TransportType.WIFI) {
+        } else if (state.getTransport() == TransportType.WIFI) {
             bindingUi = true;
             bleSwitch.setChecked(false);
             wifiSwitch.setChecked(true);
             bindingUi = false;
-        } else {
-            selectBluetoothTransport();
         }
         bindTransportRows(bleSwitch.isChecked(), connected);
         setHardwareEnabled(connected);
@@ -297,7 +298,11 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
         }
 
-        if (isConnectionDialogPhase(state.getPhase())) {
+        if (isConnectingPhase(state.getPhase())) {
+            connectionFailureDialogDismissed = false;
+            showOrUpdateConnectionDialog(state);
+        } else if (state.getPhase() == ConnectionPhase.FAILED
+                && !connectionFailureDialogDismissed) {
             showOrUpdateConnectionDialog(state);
         } else {
             dismissConnectionDialog();
@@ -380,13 +385,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void bindTransportRows(boolean ble, boolean connected) {
         bleActions.setVisibility(!connected && ble ? View.VISIBLE : View.GONE);
         wifiActions.setVisibility(!connected && !ble ? View.VISIBLE : View.GONE);
-    }
-
-    private void selectBluetoothTransport() {
-        bindingUi = true;
-        bleSwitch.setChecked(true);
-        wifiSwitch.setChecked(false);
-        bindingUi = false;
     }
 
     private void showBleDevices() {
@@ -826,6 +824,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             dialog = new ReaderConnectionDialog();
             dialog.show(getParentFragmentManager(), CONNECTION_DIALOG_TAG);
         }
+        dialog.setOnFailureDismissed(() -> connectionFailureDialogDismissed = true);
         dialog.update(state.getPhase(), state.getMessage(), state.getErrorCode());
     }
 
@@ -835,19 +834,11 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         if (dialog != null) { dialog.dismissAllowingStateLoss(); }
     }
 
-    private static boolean isConnectionDialogPhase(ConnectionPhase phase) {
+    private static boolean isConnectingPhase(ConnectionPhase phase) {
         return phase == ConnectionPhase.CONNECTING || phase == ConnectionPhase.DISCOVERING_SERVICES
                 || phase == ConnectionPhase.ENABLING_NOTIFICATIONS
                 || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
-                || phase == ConnectionPhase.VERIFYING_MODULE
-                || phase == ConnectionPhase.FAILED || phase == ConnectionPhase.DISCONNECTING;
-    }
-
-    private static boolean isActiveConnectionPhase(ConnectionPhase phase) {
-        return phase == ConnectionPhase.CONNECTING || phase == ConnectionPhase.DISCOVERING_SERVICES
-                || phase == ConnectionPhase.ENABLING_NOTIFICATIONS
-                || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
-                || phase == ConnectionPhase.VERIFYING_MODULE || phase == ConnectionPhase.CONNECTED;
+                || phase == ConnectionPhase.VERIFYING_MODULE;
     }
 
     private String blfLabel(int profile) {

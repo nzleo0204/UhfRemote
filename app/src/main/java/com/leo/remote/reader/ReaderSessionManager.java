@@ -800,6 +800,7 @@ public final class ReaderSessionManager {
         publish(state.buildUpon().transport(transport).phase(ConnectionPhase.FAILED)
                 .message(message).errorCode(errorCode).disconnectReason(reason)
                 .inventoryRunning(false).build());
+        stopConnectionService();
     }
 
     private int monitorSdkStatus(int status) {

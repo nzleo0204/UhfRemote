@@ -194,6 +194,13 @@
     <string name="reader_service_disconnected">连接已断开</string>
     <string name="reader_service_action_disconnect">断开</string>
     <string name="reader_notification_permission_denied">通知权限未开启，后台连接通知将不可见</string>
+    <string name="reader_connecting_detail">正在连接读写器，请稍候</string>
+    <string name="reader_discovering_detail">正在发现读写器服务</string>
+    <string name="reader_notifications_detail">正在启用数据通知</string>
+    <string name="reader_data_channel_detail">正在建立数据通道</string>
+    <string name="reader_verifying_detail">正在验证 RM70XX 设备</string>
+    <string name="reader_failed_detail">读写器连接失败，请检查设备后重试</string>
+    <string name="reader_disconnecting_detail">正在取消连接</string>
     <string name="ble_scan_already_running">已有蓝牙扫描任务正在运行</string>
     <string-array name="inventory_mask_bank_epc">
         <item>EPC</item>

@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.airbnb.lottie.LottieAnimationView;
 import com.leo.remote.R;
@@ -27,6 +28,8 @@ public final class ReaderConnectionDialog extends DialogFragment {
     private ConnectionPhase currentPhase = ConnectionPhase.CONNECTING;
     private String currentDetail = "";
     private int currentErrorCode;
+    @Nullable
+    private Runnable onFailureDismissed;
     private final Runnable dismissSuccess = this::dismissAllowingStateLoss;
 
     public ReaderConnectionDialog() {
@@ -51,7 +54,12 @@ public final class ReaderConnectionDialog extends DialogFragment {
             ReaderSessionManager.getInstance(requireActivity().getApplication())
                     .disconnect(DisconnectReason.CANCELED);
         });
-        closeButton.setOnClickListener(ignored -> dismissAllowingStateLoss());
+        closeButton.setOnClickListener(ignored -> {
+            if (currentPhase == ConnectionPhase.FAILED && onFailureDismissed != null) {
+                onFailureDismissed.run();
+            }
+            dismissAllowingStateLoss();
+        });
         dialog.setContentView(view);
         dialog.setCanceledOnTouchOutside(false);
         Window window = dialog.getWindow();
@@ -104,12 +112,25 @@ public final class ReaderConnectionDialog extends DialogFragment {
             case DISCONNECTING -> "正在取消连接";
             default -> "正在连接读写器";
         });
-        String message = currentDetail;
+        String message = getString(switch (phase) {
+            case CONNECTING -> R.string.reader_connecting_detail;
+            case DISCOVERING_SERVICES -> R.string.reader_discovering_detail;
+            case ENABLING_NOTIFICATIONS -> R.string.reader_notifications_detail;
+            case CONNECTING_DATA_CHANNEL -> R.string.reader_data_channel_detail;
+            case VERIFYING_MODULE -> R.string.reader_verifying_detail;
+            case FAILED -> R.string.reader_failed_detail;
+            case DISCONNECTING -> R.string.reader_disconnecting_detail;
+            default -> R.string.reader_connecting_detail;
+        });
         if (failure && currentErrorCode != 0) {
             message = message + (message.isEmpty() ? "" : "\n") + "错误码：" + currentErrorCode;
         }
         detailView.setText(message);
         if (success && rootView != null) { rootView.postDelayed(dismissSuccess, 1000); }
+    }
+
+    public void setOnFailureDismissed(@Nullable Runnable listener) {
+        onFailureDismissed = listener;
     }
 
     @Override
