@@ -356,13 +356,12 @@ public final class ReaderSessionManager {
     }
 
     public CompletableFuture<Integer> setPower(int powerTenthsDbm) {
-        return submitConnected(() -> updateConfiguration(monitorSdkStatus(
-                gateway.setPowerTenthsDbm(powerTenthsDbm)),
+        return submitConnected(() -> updateConfiguration(gateway.setPowerTenthsDbm(powerTenthsDbm),
                 new ReaderConfiguration(powerTenthsDbm, inventoryMode, configuration.blfProfile,
                         configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue,
                         configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
                         configuration.qThresholdMultiplier, configuration.qToggleTarget,
-                        configuration.qRepeatUntilNoTags)));
+                        configuration.qRepeatUntilNoTags)), false);
     }
 
     public CompletableFuture<Integer> setBlf(int profile) {
@@ -763,6 +762,11 @@ public final class ReaderSessionManager {
     }
 
     private <T> CompletableFuture<T> submitConnected(Callable<T> operation) {
+        return submitConnected(operation, true);
+    }
+
+    private <T> CompletableFuture<T> submitConnected(Callable<T> operation,
+            boolean disconnectOnReaderError) {
         CompletableFuture<T> future = new CompletableFuture<>();
         pendingOperations.add(future);
         future.whenComplete((value, error) -> pendingOperations.remove(future));
@@ -774,7 +778,7 @@ public final class ReaderSessionManager {
                     }
                     future.complete(operation.call());
                 } catch (Throwable error) {
-                    if (error instanceof ReaderException readerError
+                    if (disconnectOnReaderError && error instanceof ReaderException readerError
                             && readerError.getErrorCode() != -40 && readerError.getErrorCode() != -50
                             && readerError.getErrorCode() != -41) {
                         handleConnectionLost("Reader operation failed", readerError.getErrorCode(),

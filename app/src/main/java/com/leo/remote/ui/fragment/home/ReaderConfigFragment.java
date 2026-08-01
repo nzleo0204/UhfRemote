@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -266,6 +267,9 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         ReaderConnectionStatus connectionStatus = state.getConnectionStatus();
         statusView.setText(AppActivity.readerStatusText(connectionStatus));
         statusView.setBackgroundResource(AppActivity.readerStatusBackground(connectionStatus));
+        statusView.setTextColor(ContextCompat.getColor(requireContext(),
+                connectionStatus == ReaderConnectionStatus.CONNECTED
+                        ? R.color.white : R.color.rfid_text));
         deviceInfoButton.setVisibility(connected ? View.VISIBLE : View.GONE);
         if (!connected && state.getDisconnectReason().isUnexpected()) {
             disconnectReasonView.setText(AppActivity.disconnectReasonText(state.getDisconnectReason()));
@@ -274,16 +278,18 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             disconnectReasonView.setVisibility(View.GONE);
         }
         bindConnectionTarget(state);
-        if (state.getTransport() == TransportType.BLE) {
+        if (isActiveConnectionPhase(state.getPhase()) && state.getTransport() == TransportType.BLE) {
             bindingUi = true;
             bleSwitch.setChecked(true);
             wifiSwitch.setChecked(false);
             bindingUi = false;
-        } else if (state.getTransport() == TransportType.WIFI) {
+        } else if (isActiveConnectionPhase(state.getPhase()) && state.getTransport() == TransportType.WIFI) {
             bindingUi = true;
             bleSwitch.setChecked(false);
             wifiSwitch.setChecked(true);
             bindingUi = false;
+        } else {
+            selectBluetoothTransport();
         }
         bindTransportRows(bleSwitch.isChecked(), connected);
         setHardwareEnabled(connected);
@@ -374,6 +380,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void bindTransportRows(boolean ble, boolean connected) {
         bleActions.setVisibility(!connected && ble ? View.VISIBLE : View.GONE);
         wifiActions.setVisibility(!connected && !ble ? View.VISIBLE : View.GONE);
+    }
+
+    private void selectBluetoothTransport() {
+        bindingUi = true;
+        bleSwitch.setChecked(true);
+        wifiSwitch.setChecked(false);
+        bindingUi = false;
     }
 
     private void showBleDevices() {
@@ -826,8 +839,15 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         return phase == ConnectionPhase.CONNECTING || phase == ConnectionPhase.DISCOVERING_SERVICES
                 || phase == ConnectionPhase.ENABLING_NOTIFICATIONS
                 || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
-                || phase == ConnectionPhase.VERIFYING_MODULE || phase == ConnectionPhase.CONNECTED
+                || phase == ConnectionPhase.VERIFYING_MODULE
                 || phase == ConnectionPhase.FAILED || phase == ConnectionPhase.DISCONNECTING;
+    }
+
+    private static boolean isActiveConnectionPhase(ConnectionPhase phase) {
+        return phase == ConnectionPhase.CONNECTING || phase == ConnectionPhase.DISCOVERING_SERVICES
+                || phase == ConnectionPhase.ENABLING_NOTIFICATIONS
+                || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
+                || phase == ConnectionPhase.VERIFYING_MODULE || phase == ConnectionPhase.CONNECTED;
     }
 
     private String blfLabel(int profile) {
