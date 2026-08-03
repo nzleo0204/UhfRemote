@@ -30,7 +30,10 @@ import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.HexCodec;
 import com.leo.remote.reader.InventoryMaskConfig;
 import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.InventoryArea;
+import com.leo.remote.reader.ModuleSubtype;
 import com.leo.remote.reader.ProtocolEncoding;
+import com.leo.remote.reader.ReaderConfiguration;
 import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
 import com.leo.remote.reader.ReaderState;
@@ -55,6 +58,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private MaterialButton startButton;
     private TextView totalView;
     private TextView emptyView;
+    private TextView dataHeader;
+    private TextView rssiHeader;
+    private TextView chipHeader;
     private View maskPanelContent;
     private Spinner maskBankSpinner;
     private EditText maskOffsetView;
@@ -67,6 +73,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private ImageView maskExpandView;
     private SwitchMaterial maskSwitch;
     private ReaderState readerState = ReaderState.disconnected();
+    private ReaderConfiguration configuration;
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
     private boolean bindingMaskSwitch;
@@ -86,6 +93,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         startButton = findViewById(R.id.btn_inventory_start);
         totalView = findViewById(R.id.tv_inventory_total);
         emptyView = findViewById(R.id.tv_inventory_empty);
+        dataHeader = findViewById(R.id.tv_inventory_column_data);
+        rssiHeader = findViewById(R.id.tv_inventory_column_rssi);
+        chipHeader = findViewById(R.id.tv_inventory_column_chip);
         maskPanelContent = findViewById(R.id.ll_inventory_mask_content);
         maskBankSpinner = findViewById(R.id.sp_inventory_mask_bank);
         maskOffsetView = findViewById(R.id.et_inventory_mask_offset);
@@ -103,6 +113,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         recyclerView.setItemAnimator(null);
         adapter = new InventoryAdapter();
         recyclerView.setAdapter(adapter);
+        applyColumnVisibility();
 
         maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -205,6 +216,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         if (previousProtocol != state.getProtocol()) {
             updateMaskBanks(state.getProtocol());
         }
+        applyColumnVisibility();
         startButton.setEnabled(true);
         startButton.setText(state.isInventoryRunning()
                 ? R.string.inventory_stop : R.string.inventory_start);
@@ -218,6 +230,28 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         adapter.submitList(items);
         totalView.setText(getString(R.string.inventory_total, items.size()));
         emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onReaderConfigurationChanged(ReaderConfiguration value) {
+        configuration = value;
+        applyColumnVisibility();
+    }
+
+    private void applyColumnVisibility() {
+        if (adapter == null) { return; }
+        ModuleSubtype subtype = readerState.getModuleSubtype();
+        boolean rssiVisible = subtype == ModuleSubtype.R2000 || subtype == ModuleSubtype.R2000_PLUS;
+        InventoryArea area = InventoryArea.of(readerState.getProtocol(),
+                configuration == null ? 0 : configuration.inventoryArea);
+        boolean chipVisible = readerState.getProtocol() == TagProtocol.ISO_18000_6C
+                && area == InventoryArea.C_EPC_TID
+                && (configuration == null || configuration.inventoryAddress == 0);
+        adapter.setModuleSubtype(subtype);
+        adapter.setChipVisible(chipVisible);
+        rssiHeader.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
+        chipHeader.setVisibility(chipVisible ? View.VISIBLE : View.GONE);
+        dataHeader.setText(area.getColumnHeader());
     }
 
     // ========== Inventory controls ==========

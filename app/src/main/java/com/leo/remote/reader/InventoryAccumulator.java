@@ -16,8 +16,9 @@ public final class InventoryAccumulator {
         InventoryItem previous = items.get(key);
         long increment = Math.max(1, reportedCount);
         long count = previous == null ? increment : previous.getCount() + increment;
-        items.put(key, new InventoryItem(safeId, safeData, rssi, count,
-                chipModel == null ? "" : chipModel));
+        String safeChip = chipModel == null ? "" : chipModel;
+        if (safeChip.isEmpty() && previous != null) { safeChip = previous.getChipModel(); }
+        items.put(key, new InventoryItem(safeId, safeData, rssi, count, safeChip));
         totalReads += increment;
     }
 

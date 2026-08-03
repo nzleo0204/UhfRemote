@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_56"
+    android:layout_height="@dimen/dp_64"
     android:background="@color/rfid_panel_bg"
     android:gravity="center_vertical"
     android:paddingHorizontal="@dimen/dp_16">
@@ -21,16 +21,18 @@
             android:id="@+id/tv_inventory_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="middle"
             android:maxLines="1"
+            android:fontFamily="monospace"
+            android:singleLine="true"
             android:textColor="@color/rfid_primary_soft"
             android:textSize="@dimen/sp_13" />
         <TextView
             android:id="@+id/tv_inventory_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="middle"
             android:maxLines="1"
+            android:fontFamily="monospace"
+            android:singleLine="true"
             android:textColor="@color/rfid_text_muted"
             android:textSize="@dimen/sp_10" />
     </LinearLayout>

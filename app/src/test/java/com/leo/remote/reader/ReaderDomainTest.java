@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Locale;
 import org.junit.Test;
 
 public class ReaderDomainTest {
@@ -13,9 +14,9 @@ public class ReaderDomainTest {
     @Test
     public void mapsRm70xxSubtypesExactly() {
         assertEquals(ModuleSubtype.R2000, ModuleSubtype.fromRawValue(0));
-        assertEquals(ModuleSubtype.MAGIC_RF, ModuleSubtype.fromRawValue(1));
+        assertEquals(ModuleSubtype.RM8011, ModuleSubtype.fromRawValue(1));
         assertEquals(ModuleSubtype.R2000_PLUS, ModuleSubtype.fromRawValue(3));
-        assertEquals(ModuleSubtype.RM100X, ModuleSubtype.fromRawValue(6));
+        assertEquals(ModuleSubtype.RM610, ModuleSubtype.fromRawValue(6));
         assertEquals(ModuleSubtype.UNKNOWN, ModuleSubtype.fromRawValue(2));
     }
 
@@ -23,9 +24,9 @@ public class ReaderDomainTest {
     public void exposesProtocolCapabilityMatrix() {
         assertEquals(4, ModuleSubtype.R2000.supportedProtocols().size());
         assertEquals(4, ModuleSubtype.R2000_PLUS.supportedProtocols().size());
-        assertEquals(List.of(TagProtocol.ISO_18000_6C), List.copyOf(ModuleSubtype.MAGIC_RF.supportedProtocols()));
+        assertEquals(List.of(TagProtocol.ISO_18000_6C), List.copyOf(ModuleSubtype.RM8011.supportedProtocols()));
         assertEquals(List.of(TagProtocol.ISO_18000_6C, TagProtocol.GJB_7377_1),
-                List.copyOf(ModuleSubtype.RM100X.supportedProtocols()));
+                List.copyOf(ModuleSubtype.RM610.supportedProtocols()));
     }
 
     @Test
@@ -101,10 +102,21 @@ public class ReaderDomainTest {
     }
 
     @Test
-    public void exposesMagicRfDiscretePowerLevelsInTenthsOfDbm() {
-        int[] expected = new int[21];
-        for (int i = 0; i <= 20; i++) { expected[i] = i * 10; }
-        assertArrayEquals(expected, MagicPowerLevels.levels());
+    public void exposesRm8011PowerLevelsAndPreservesHalfDbm() {
+        assertArrayEquals(new int[]{130, 145, 155, 170, 185, 200},
+                Rm8011PowerLevels.levels("RM-20dBm", "V1.0"));
+        assertEquals("14.5 dBm", Rm8011PowerLevels.format(145));
+        assertEquals(21, Rm8011PowerLevels.levels("unknown", "").length);
+    }
+
+    @Test
+    public void selectsRm610PowerModeAndNonCmtLabels() {
+        assertTrue(Rm610PowerLevels.isCmtVersion("RM610-CMT-01"));
+        assertFalse(Rm610PowerLevels.isCmtVersion("RM610-01"));
+        assertEquals(21, Rm610PowerLevels.cmtValues().length);
+        assertEquals("20 dBm", Rm610PowerLevels.formatCmt(200));
+        assertEquals("14 dBm", Rm610PowerLevels.formatNonCmt(5));
+        assertEquals(5, Rm610PowerLevels.nonCmtIndex("14 dBm"));
     }
 
     @Test
@@ -144,6 +156,55 @@ public class ReaderDomainTest {
         assertEquals(4, accumulator.getTotalReads());
         assertEquals(3, items.get(0).getCount());
         assertEquals(-55, items.get(0).getRssi());
+    }
+
+    @Test
+    public void preservesRecognizedChipWhenLaterReportOmitsIt() {
+        InventoryAccumulator accumulator = new InventoryAccumulator();
+        accumulator.add("EPC1", "TID1", -60, 1, "芯片 A");
+        accumulator.add("EPC1", "TID1", -58, 1, "");
+        assertEquals("芯片 A", accumulator.snapshot().get(0).getChipModel());
+    }
+
+    @Test
+    public void formatsSdkChipNameAndUnknownTidPrefix() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.CHINA);
+            assertEquals("中文型号", ChipModelFormatter.format(
+                    new ReaderTag("EPC", "TID", -50, 0, 1,
+                            "English model|中文型号", 0xE2801160)));
+            assertEquals("未知(E2801160)", ChipModelFormatter.format(
+                    new ReaderTag("EPC", "TID", -50, 0, 1, "", 0xE2801160)));
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    public void fallsBackWhenLocalizedChipNameIsMissing() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.CHINA);
+            assertEquals("English model", ChipModelFormatter.format(
+                    new ReaderTag("EPC", "TID", -50, 0, 1, "English model|", 0)));
+            Locale.setDefault(Locale.US);
+            assertEquals("中文型号", ChipModelFormatter.format(
+                    new ReaderTag("EPC", "TID", -50, 0, 1, "|中文型号", 0)));
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    public void exposesProtocolSpecificInventoryAreas() {
+        assertEquals(4, InventoryArea.forProtocol(TagProtocol.ISO_18000_6C).size());
+        assertEquals(2, InventoryArea.forProtocol(TagProtocol.ISO_18000_6B).size());
+        assertEquals(3, InventoryArea.forProtocol(TagProtocol.GJB_7377_1).size());
+        assertEquals(InventoryArea.B_UID_ONLY,
+                InventoryArea.of(TagProtocol.ISO_18000_6B, 3));
+        assertEquals("EPC/TID",
+                InventoryArea.C_EPC_TID.getColumnHeader());
     }
 
     @Test

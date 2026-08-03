@@ -11,10 +11,12 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.ModuleSubtype;
 import java.util.List;
 
 public final class InventoryAdapter extends ListAdapter<InventoryItem, InventoryAdapter.ViewHolder> {
     private static final Object PAYLOAD_COUNTERS = new Object();
+    private static final Object PAYLOAD_LAYOUT = new Object();
 
     private static final DiffUtil.ItemCallback<InventoryItem> DIFF =
             new DiffUtil.ItemCallback<InventoryItem>() {
@@ -40,11 +42,29 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
                             ? PAYLOAD_COUNTERS : null;
                 }
             };
+    private boolean rssiVisible;
+    private boolean chipVisible;
 
     public InventoryAdapter() { super(DIFF); }
 
     public void submitList(List<InventoryItem> values) {
         super.submitList(List.copyOf(values));
+    }
+
+    public void setModuleSubtype(ModuleSubtype subtype) {
+        setRssiVisible(subtype == ModuleSubtype.R2000 || subtype == ModuleSubtype.R2000_PLUS);
+    }
+
+    public void setRssiVisible(boolean visible) {
+        if (rssiVisible == visible) { return; }
+        rssiVisible = visible;
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
+    }
+
+    public void setChipVisible(boolean visible) {
+        if (chipVisible == visible) { return; }
+        chipVisible = visible;
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
     }
 
     @NonNull
@@ -62,6 +82,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.data.setText(item.getData());
         holder.data.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
         bindCounters(holder, item);
+        bindVisibility(holder);
         int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
         holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
     }
@@ -71,6 +92,11 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
                                  @NonNull List<Object> payloads) {
         if (payloads.contains(PAYLOAD_COUNTERS)) {
             bindCounters(holder, getItem(position));
+        }
+        if (payloads.contains(PAYLOAD_LAYOUT)) {
+            bindVisibility(holder);
+        }
+        if (!payloads.isEmpty()) {
             return;
         }
         super.onBindViewHolder(holder, position, payloads);
@@ -83,6 +109,11 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.rssi.setTextColor(ContextCompat.getColor(holder.itemView.getContext(),
                 rssiColor(rssi)));
         holder.chip.setText(item.getChipModel().isEmpty() ? "-" : item.getChipModel());
+    }
+
+    private void bindVisibility(ViewHolder holder) {
+        holder.rssi.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
+        holder.chip.setVisibility(chipVisible ? View.VISIBLE : View.GONE);
     }
 
     private static int rssiColor(int rssi) {

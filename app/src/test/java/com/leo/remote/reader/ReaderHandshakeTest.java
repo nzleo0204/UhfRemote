@@ -42,7 +42,8 @@ public class ReaderHandshakeTest {
             return moduleInfo;
         }
         @Override public int setProtocol(TagProtocol protocol) { protocolSelected = true; return protocolStatus; }
-        @Override public int configureDefaultInventory(TagProtocol protocol) { inventoryConfigured = true; return 0; }
+        @Override public int applyInventoryParams(TagProtocol protocol, int area, int address,
+                int wordLen) { inventoryConfigured = true; return 0; }
         @Override public ReaderConfiguration readConfiguration(ModuleSubtype subtype) {
             return new ReaderConfiguration(270, 1, 1, 1, 0, true, 4);
         }
@@ -66,6 +67,14 @@ public class ReaderHandshakeTest {
             return 0;
         }
         @Override public int setMagicQuery(int session, int target, int qValue) { return 0; }
+        @Override public Integer getPowerTenthsDbm() { return 270; }
+        @Override public Integer getBlfProfile() { return 1; }
+        @Override public int[] getQueryGroup(ModuleSubtype subtype) { return new int[]{1, 0}; }
+        @Override public ReaderQParams getQParams(ModuleSubtype subtype) {
+            return ReaderQParams.dynamic(4, 0, 15, 0, 1, 1);
+        }
+        @Override public int setInventoryArea(int area, int address, int wordLen) { return 0; }
+        @Override public int[] getInventoryArea() { return new int[]{0, 0, 0}; }
         @Override public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) { return 0; }
         @Override public int clearInventoryMask(TagProtocol protocol) { return 0; }
         @Override public int setTargetMask(TagProtocol protocol, ReaderTag tag) { return 0; }

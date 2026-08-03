@@ -14,7 +14,7 @@ public interface UhfSdkGateway {
     void pushRemoteData(byte[] data);
     ReaderModuleInfo readModuleInfo() throws ReaderException;
     int setProtocol(TagProtocol protocol);
-    int configureDefaultInventory(TagProtocol protocol);
+    int applyInventoryParams(TagProtocol protocol, int area, int address, int wordLen);
     int startInventory(int mode, int maskFlag);
     int stopInventory();
     void setInventoryListener(InventoryListener listener);
@@ -26,6 +26,12 @@ public interface UhfSdkGateway {
     int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue, int retryCount,
             int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags);
     int setMagicQuery(int session, int target, int qValue);
+    int setInventoryArea(int area, int address, int wordLen);
+    int[] getInventoryArea();
+    Integer getPowerTenthsDbm();
+    Integer getBlfProfile();
+    int[] getQueryGroup(ModuleSubtype subtype);
+    ReaderQParams getQParams(ModuleSubtype subtype);
     int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config);
     int clearInventoryMask(TagProtocol protocol);
     int setTargetMask(TagProtocol protocol, ReaderTag tag);

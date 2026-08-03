@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row_config_inventory_area"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_56"
+    android:gravity="center_vertical">
+    <TextView
+        style="@style/RfidRowLabel"
+        android:text="@string/config_inventory_area" />
+    <TextView
+        android:id="@+id/tv_config_inventory_area"
+        style="@style/RfidValueChip"
+        android:maxLines="2"
+        android:text="@string/config_inventory_area_epc_only" />
+</LinearLayout>

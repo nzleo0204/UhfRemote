@@ -5,9 +5,9 @@ import java.util.Set;
 
 public enum ModuleSubtype {
     R2000(0),
-    MAGIC_RF(1),
+    RM8011(1),
     R2000_PLUS(3),
-    RM100X(6),
+    RM610(6),
     UNKNOWN(Integer.MIN_VALUE);
 
     private final int rawValue;
@@ -33,27 +33,27 @@ public enum ModuleSubtype {
         if (this == R2000 || this == R2000_PLUS) {
             return EnumSet.allOf(TagProtocol.class);
         }
-        if (this == MAGIC_RF) {
-            // MagicRF (RM8011) 仅支持 ISO 18000-6C
+        if (this == RM8011) {
+            // RM8011 仅支持 ISO 18000-6C
             return EnumSet.of(TagProtocol.ISO_18000_6C);
         }
-        if (this == RM100X) {
-            // RM100X 支持 6C + GJB 7377.1
+        if (this == RM610) {
+            // RM610 支持 6C + GJB 7377.1
             return EnumSet.of(TagProtocol.ISO_18000_6C, TagProtocol.GJB_7377_1);
         }
         return EnumSet.noneOf(TagProtocol.class);
     }
 
     public boolean isR2000Style() {
-        return this == R2000 || this == R2000_PLUS || this == RM100X;
+        return this == R2000 || this == R2000_PLUS || this == RM610;
     }
 
     public String getDisplayName() {
         return switch (this) {
             case R2000 -> "R2000";
-            case MAGIC_RF -> "MagicRF";
+            case RM8011 -> "RM8011";
             case R2000_PLUS -> "R2000Plus";
-            case RM100X -> "RM100X";
+            case RM610 -> "RM610";
             case UNKNOWN -> "未知";
         };
     }

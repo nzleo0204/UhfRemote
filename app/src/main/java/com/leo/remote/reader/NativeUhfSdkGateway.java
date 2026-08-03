@@ -74,16 +74,22 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     public int setProtocol(TagProtocol protocol) { return linkage.setTagType(protocol.getSdkValue()); }
 
     @Override
-    public int configureDefaultInventory(TagProtocol protocol) {
+    public int applyInventoryParams(TagProtocol protocol, int area, int address, int wordLen) {
+        return setInventoryArea(area, address, wordLen);
+    }
+
+    @Override
+    public int setInventoryArea(int area, int address, int wordLen) {
         InventoryParams params = new InventoryParams();
-        if (protocol == TagProtocol.ISO_18000_6C) {
-            params.setValue(1, 0, 6);
-        } else if (protocol == TagProtocol.ISO_18000_6B) {
-            params.setValue(0, 0, 8);
-        } else {
-            params.setValue(0, 0, 6);
-        }
+        params.setValue(area, address, wordLen);
         return linkage.Radio_SetInventoryParams(params);
+    }
+
+    @Override
+    public int[] getInventoryArea() {
+        InventoryParams params = new InventoryParams();
+        if (linkage.Radio_GetInventoryParams(params) != STATUS_OK) { return null; }
+        return new int[]{params.inventoryArea, params.address, params.len};
     }
 
     @Override
@@ -110,47 +116,67 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
 
     @Override
     public ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException {
-        Rfid_Value power = new Rfid_Value();
-        check(linkage.Radio_GetAntennaPower(power), "Radio_GetAntennaPower");
-        if (subtype == ModuleSubtype.MAGIC_RF) {
-            Parameters params = new Parameters();
-            check(linkage.get_Query(params), "get_Query");
-            return new ReaderConfiguration(power.value, 1, 0, params.getSession(),
-                    params.getTarget(), false, params.getQ());
+        Integer power = getPowerTenthsDbm();
+        Integer blf = subtype == ModuleSubtype.RM8011 ? 0 : getBlfProfile();
+        int[] group = getQueryGroup(subtype);
+        ReaderQParams q = getQParams(subtype);
+        if (power == null || blf == null || group == null || q == null) {
+            throw new ReaderException("Unable to read reader configuration", -8);
         }
+        return new ReaderConfiguration(power, 1, blf, group[0], group[1], q.dynamic,
+                q.qValue, q.minQ, q.maxQ, q.retryCount, q.thresholdMultiplier,
+                q.toggleTarget, q.repeatUntilNoTags);
+    }
+
+    @Override
+    public Integer getPowerTenthsDbm() {
+        Rfid_Value power = new Rfid_Value();
+        return linkage.Radio_GetAntennaPower(power) == STATUS_OK ? power.value : null;
+    }
+
+    @Override
+    public Integer getBlfProfile() {
         Rfid_Value profile = new Rfid_Value();
+        return linkage.Radio_GetCurrentLinkProfile(profile) == STATUS_OK ? profile.value : null;
+    }
+
+    @Override
+    public int[] getQueryGroup(ModuleSubtype subtype) {
+        if (subtype == ModuleSubtype.RM8011) {
+            Parameters params = new Parameters();
+            if (linkage.get_Query(params) != STATUS_OK) { return null; }
+            return new int[]{params.getSession(), params.getTarget()};
+        }
         TagGroup group = new TagGroup();
+        if (linkage.Radio_GetQueryTagGroup(group) != STATUS_OK) { return null; }
+        return new int[]{group.session, group.target};
+    }
+
+    @Override
+    public ReaderQParams getQParams(ModuleSubtype subtype) {
+        if (subtype == ModuleSubtype.RM8011) {
+            Parameters params = new Parameters();
+            if (linkage.get_Query(params) != STATUS_OK) { return null; }
+            return ReaderQParams.fixed(params.getQ(), 0, 1, 0);
+        }
         Rfid_Value algorithm = new Rfid_Value();
-        check(linkage.Radio_GetCurrentLinkProfile(profile), "Radio_GetCurrentLinkProfile");
-        check(linkage.Radio_GetQueryTagGroup(group), "Radio_GetQueryTagGroup");
-        check(linkage.Radio_getCurrentSingulationAlgorithm(algorithm), "Radio_getCurrentSingulationAlgorithm");
-        int q;
-        int minQ = 0;
-        int maxQ = 15;
-        int retryCount;
-        int thresholdMultiplier = 1;
-        int toggleTarget;
-        int repeatUntilNoTags = 0;
+        if (linkage.Radio_getCurrentSingulationAlgorithm(algorithm) != STATUS_OK) {
+            return null;
+        }
         if (algorithm.value == 1) {
             DynamicQParams params = new DynamicQParams();
-            check(linkage.Radio_GetSingulationAlgorithmDyParameters(params), "Radio_GetSingulationAlgorithmDyParameters");
-            q = params.startQValue;
-            minQ = params.minQValue;
-            maxQ = params.maxQValue;
-            retryCount = params.retryCount;
-            thresholdMultiplier = params.thresholdMultiplier;
-            toggleTarget = params.toggleTarget;
-        } else {
-            FixedQParams params = new FixedQParams();
-            check(linkage.Radio_GetSingulationAlgorithmFixedParameters(params), "Radio_GetSingulationAlgorithmFixedParameters");
-            q = params.qValue;
-            retryCount = params.retryCount;
-            toggleTarget = params.toggleTarget;
-            repeatUntilNoTags = params.repeatUntiNoTags;
+            if (linkage.Radio_GetSingulationAlgorithmDyParameters(params) != STATUS_OK) {
+                return null;
+            }
+            return ReaderQParams.dynamic(params.startQValue, params.minQValue, params.maxQValue,
+                    params.retryCount, params.thresholdMultiplier, params.toggleTarget);
         }
-        return new ReaderConfiguration(power.value, 1, profile.value, group.session,
-                group.target, algorithm.value == 1, q, minQ, maxQ, retryCount,
-                thresholdMultiplier, toggleTarget, repeatUntilNoTags);
+        FixedQParams params = new FixedQParams();
+        if (linkage.Radio_GetSingulationAlgorithmFixedParameters(params) != STATUS_OK) {
+            return null;
+        }
+        return ReaderQParams.fixed(params.qValue, params.retryCount, params.toggleTarget,
+                params.repeatUntiNoTags);
     }
 
     @Override
@@ -302,7 +328,8 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
                 + " inventoriedTimes=" + data.getTagInventoriedTimes());
         String id = HexCodec.encode(data.getEpc(), data.getEpcLength());
         String extra = HexCodec.encode(data.getData(), data.getDataLength());
-        return new ReaderTag(id, extra, data.getRSSI(), data.getTagType(), data.getTagInventoriedTimes());
+        return new ReaderTag(id, extra, data.getRSSI(), data.getTagType(),
+                data.getTagInventoriedTimes(), data.getChipModel(), data.getTidPrefix());
     }
 
     private String readString(ValueReader reader, String operation) throws ReaderException {

@@ -99,6 +99,7 @@ public final class ReaderConnectionDialog extends DialogFragment {
         }
 
         cancelButton.setVisibility(!terminal && phase != ConnectionPhase.DISCONNECTING
+                && phase != ConnectionPhase.VERIFYING_MODULE
                 ? View.VISIBLE : View.GONE);
         closeButton.setVisibility(failure ? View.VISIBLE : View.GONE);
         phaseView.setText(switch (phase) {
@@ -124,6 +125,9 @@ public final class ReaderConnectionDialog extends DialogFragment {
         });
         if (failure && currentErrorCode != 0) {
             message = message + (message.isEmpty() ? "" : "\n") + "错误码：" + currentErrorCode;
+        }
+        if (phase == ConnectionPhase.VERIFYING_MODULE && !currentDetail.isEmpty()) {
+            message = currentDetail;
         }
         detailView.setText(message);
         if (success && rootView != null) { rootView.postDelayed(dismissSuccess, 1000); }

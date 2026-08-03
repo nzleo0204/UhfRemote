@@ -3,11 +3,11 @@ package com.leo.remote.ui.fragment.home;
 import android.annotation.SuppressLint;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.SystemClock;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.LayoutInflater;
 import android.text.TextUtils;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -31,7 +31,9 @@ import com.leo.remote.app.AppActivity;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.ConnectionPhase;
 import com.leo.remote.reader.DisconnectReason;
-import com.leo.remote.reader.MagicPowerLevels;
+import com.leo.remote.reader.InventoryArea;
+import com.leo.remote.reader.Rm8011PowerLevels;
+import com.leo.remote.reader.Rm610PowerLevels;
 import com.leo.remote.reader.ModuleSubtype;
 import com.leo.remote.reader.ReaderConfiguration;
 import com.leo.remote.reader.ReaderConnectionStatus;
@@ -71,10 +73,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private TextView sessionView;
     private TextView blfView;
     private TextView qView;
+    private TextView inventoryAreaView;
     private TextView bleDeviceView;
     private View deviceInfoButton;
     private IpAddressInputView wifiAddressView;
     private SeekBar powerSeekBar;
+    private View powerRangeView;
+    private TextView powerMaxView;
     private View hardwareSection;
     private View protocolSection;
     private View rateSection;
@@ -91,15 +96,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
-    private boolean readerStateInitialized;
-    private boolean pendingConfigInit;
-    private boolean configInitReady;
     private boolean connectionFailureDialogDismissed;
-    private long configInitShownAt;
-    private WaitDialog.Builder configInitDialog;
     private WaitDialog.Builder settingWaitDialog;
-    private final Runnable showConfigInitAction = this::showConfigInitialization;
-    private final Runnable completeConfigInitAction = this::completeConfigInitialization;
     private int powerProgressBeforeDrag;
     private int imeInsetBottom;
     private int configScrollBaseBottomPadding;
@@ -120,10 +118,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         sessionView = findViewById(R.id.tv_config_session);
         blfView = findViewById(R.id.tv_config_blf);
         qView = findViewById(R.id.tv_config_q);
+        inventoryAreaView = findViewById(R.id.tv_config_inventory_area);
         bleDeviceView = findViewById(R.id.tv_config_ble_device);
         deviceInfoButton = findViewById(R.id.ibtn_config_device_info);
         wifiAddressView = findViewById(R.id.et_config_wifi_ip);
         powerSeekBar = findViewById(R.id.sb_config_power);
+        powerRangeView = findViewById(R.id.row_config_power_range);
+        powerMaxView = findViewById(R.id.tv_config_power_max);
         hardwareSection = findViewById(R.id.ll_config_hardware);
         protocolSection = findViewById(R.id.ll_config_protocol);
         rateSection = findViewById(R.id.ll_config_rate);
@@ -208,12 +209,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             }
         });
         findViewById(R.id.row_config_protocol).setOnClickListener(view -> showProtocolDialog());
+        findViewById(R.id.row_config_inventory_area)
+                .setOnClickListener(view -> showInventoryAreaDialog());
         workModeRow.setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
         blfRow.setOnClickListener(view -> showBlfDialog());
         findViewById(R.id.row_config_q).setOnClickListener(view -> showQDialog());
+        findViewById(R.id.btn_config_refresh).setOnClickListener(view -> refreshParameters());
         powerValueView.setOnClickListener(view -> {
-            if (readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF) { showMagicPowerDialog(); }
+            if (readerState.getModuleSubtype() == ModuleSubtype.RM8011) {
+                showRm8011PowerDialog();
+            } else if (readerState.getModuleSubtype() == ModuleSubtype.RM610
+                    && !Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial())) {
+                showRm610PowerDialog();
+            }
         });
 
         powerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -252,7 +261,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     @Override
     public void onDestroy() {
-        cancelConfigInitialization();
         dismissSettingWaitDialog();
         if (session != null) { session.removeObserver(this); }
         super.onDestroy();
@@ -260,10 +268,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     @Override
     public void onReaderStateChanged(ReaderState state) {
-        boolean wasConnected = readerState.isConnected();
-        boolean hadInitialState = readerStateInitialized;
         readerState = state;
-        readerStateInitialized = true;
         boolean connected = state.isConnected();
         ReaderConnectionStatus connectionStatus = state.getConnectionStatus();
         statusView.setText(AppActivity.readerStatusText(connectionStatus));
@@ -308,78 +313,40 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             dismissConnectionDialog();
         }
         applyModuleUi(state.getModuleSubtype());
-        if (hadInitialState && !wasConnected && connected
-                && state.getPhase() == ConnectionPhase.CONNECTED) {
-            beginConfigInitialization();
-        } else if (!connected) {
-            cancelConfigInitialization();
-        }
+        // ReaderConnectionDialog owns the complete handshake progress lifecycle.
     }
 
     @Override
     public void onReaderConfigurationChanged(ReaderConfiguration value) {
         configuration = value;
         bindingUi = true;
-        powerSeekBar.setProgress(value.powerTenthsDbm / 10);
-        powerValueView.setText(formatPower(value.powerTenthsDbm));
+        ModuleSubtype subtype = readerState.getModuleSubtype();
+        boolean rm610Cmt = subtype == ModuleSubtype.RM610
+                && Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial());
+        if (subtype == ModuleSubtype.RM8011) {
+            powerSeekBar.setVisibility(View.GONE);
+            powerRangeView.setVisibility(View.GONE);
+            powerValueView.setText(Rm8011PowerLevels.format(value.powerTenthsDbm));
+        } else if (subtype == ModuleSubtype.RM610 && !rm610Cmt) {
+            powerSeekBar.setVisibility(View.GONE);
+            powerRangeView.setVisibility(View.GONE);
+            powerValueView.setText(Rm610PowerLevels.formatNonCmt(value.powerTenthsDbm));
+        } else {
+            powerSeekBar.setVisibility(View.VISIBLE);
+            powerRangeView.setVisibility(View.VISIBLE);
+            powerSeekBar.setProgress(Math.max(0, Math.min(powerSeekBar.getMax(),
+                    value.powerTenthsDbm / 10)));
+            powerValueView.setText(formatPower(value.powerTenthsDbm));
+        }
         blfView.setText(blfLabel(value.blfProfile));
-        sessionView.setText(getString(R.string.config_session_value, value.session));
+        sessionView.setText(getString(R.string.config_session_format, value.session,
+                value.target == 0 ? "A" : "B"));
         qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
                 : getString(R.string.config_q_value, value.qValue));
-        workModeView.setText(readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF
+        updateInventoryAreaView(value);
+        workModeView.setText(readerState.getModuleSubtype() == ModuleSubtype.RM8011
                 ? workModeLabel(1) : workModeLabel(value.inventoryMode));
         bindingUi = false;
-        if (pendingConfigInit) {
-            configInitReady = true;
-            finishConfigInitializationWhenReady();
-        }
-    }
-
-    private void beginConfigInitialization() {
-        if (pendingConfigInit) { return; }
-        pendingConfigInit = true;
-        configInitReady = false;
-        configRoot.removeCallbacks(showConfigInitAction);
-        configRoot.postDelayed(showConfigInitAction, 1050);
-    }
-
-    /** Starts only after the connection-success dialog has completed its one-second result state. */
-    private void showConfigInitialization() {
-        if (!pendingConfigInit || !readerState.isConnected() || getAttachActivity() == null) { return; }
-        dismissConnectionDialog();
-        configInitDialog = new WaitDialog.Builder(requireActivity())
-                .setMessage(R.string.config_initializing);
-        configInitDialog.show();
-        configInitShownAt = SystemClock.elapsedRealtime();
-        finishConfigInitializationWhenReady();
-    }
-
-    private void finishConfigInitializationWhenReady() {
-        if (!pendingConfigInit || !configInitReady || configInitDialog == null
-                || !configInitDialog.isShowing()) {
-            return;
-        }
-        long elapsed = SystemClock.elapsedRealtime() - configInitShownAt;
-        configRoot.removeCallbacks(completeConfigInitAction);
-        configRoot.postDelayed(completeConfigInitAction, Math.max(0, 600 - elapsed));
-    }
-
-    private void completeConfigInitialization() {
-        if (configInitDialog != null && configInitDialog.isShowing()) { configInitDialog.dismiss(); }
-        configInitDialog = null;
-        pendingConfigInit = false;
-        configInitReady = false;
-    }
-
-    private void cancelConfigInitialization() {
-        if (configRoot != null) {
-            configRoot.removeCallbacks(showConfigInitAction);
-            configRoot.removeCallbacks(completeConfigInitAction);
-        }
-        if (configInitDialog != null && configInitDialog.isShowing()) { configInitDialog.dismiss(); }
-        configInitDialog = null;
-        pendingConfigInit = false;
-        configInitReady = false;
     }
 
     private void bindTransportRows(boolean ble, boolean connected) {
@@ -523,6 +490,124 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
+    private void refreshParameters() {
+        if (!requireReaderOnline()) { return; }
+        dismissSettingWaitDialog();
+        settingWaitDialog = new WaitDialog.Builder(requireActivity())
+                .setMessage(R.string.config_refreshing);
+        settingWaitDialog.show();
+        session.refreshConfiguration().whenComplete((status, error) ->
+                requireActivity().runOnUiThread(() -> {
+                    dismissSettingWaitDialog();
+                    if (error != null) {
+                        Throwable cause = error;
+                        while (cause.getCause() != null) { cause = cause.getCause(); }
+                        toast(cause.getMessage() == null
+                                ? getString(R.string.config_refresh_params) : cause.getMessage());
+                    } else if (status != null && status != 0) {
+                        toast(getString(R.string.config_error_code,
+                                getString(R.string.config_refresh_params), status));
+                    } else {
+                        toast(R.string.config_refresh_success);
+                    }
+                }));
+    }
+
+    private void showInventoryAreaDialog() {
+        if (!requireReaderOnline()) { return; }
+        List<InventoryArea> areas = InventoryArea.forProtocol(readerState.getProtocol());
+        String[] labels = areas.stream().map(InventoryArea::getDisplayName).toArray(String[]::new);
+        int currentValue = configuration == null ? 0 : configuration.inventoryArea;
+        int selected = Math.max(0, areas.indexOf(InventoryArea.of(readerState.getProtocol(),
+                currentValue)));
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.config_inventory_area)
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    dialog.dismiss();
+                    InventoryArea target = areas.get(which);
+                    if (target.isBaseOnly()) {
+                        applyInventoryArea(target, 0, 0);
+                    } else {
+                        showInventoryRangeDialog(target);
+                    }
+                })
+                .setNegativeButton(R.string.common_cancel, null)
+                .show();
+    }
+
+    private void showInventoryRangeDialog(InventoryArea target) {
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_inventory_range, null, false);
+        EditText addressInput = content.findViewById(R.id.et_inventory_addr);
+        EditText lengthInput = content.findViewById(R.id.et_inventory_len);
+        addressInput.setText(String.valueOf(configuration == null
+                ? 0 : configuration.inventoryAddress));
+        lengthInput.setText(String.valueOf(configuration == null
+                || configuration.inventoryWordLen == 0
+                ? ReaderConfiguration.DEFAULT_INVENTORY_WORD_LEN
+                : configuration.inventoryWordLen));
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(target.getDisplayName())
+                .setMessage(R.string.config_inventory_range_hint)
+                .setView(content)
+                .setNegativeButton(R.string.common_cancel, null)
+                .setPositiveButton(R.string.common_confirm, null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    int address = parseInteger(addressInput.getText().toString(), -1);
+                    int length = parseInteger(lengthInput.getText().toString(), -1);
+                    if (address < 0 || length < 0
+                            || length > ReaderConfiguration.MAX_INVENTORY_WORD_LEN) {
+                        toast(getString(R.string.config_inventory_range_invalid,
+                                ReaderConfiguration.MAX_INVENTORY_WORD_LEN));
+                        return;
+                    }
+                    dialog.dismiss();
+                    if (length == 0) {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.config_inventory_len_zero_title)
+                                .setMessage(R.string.config_inventory_len_zero_warning)
+                                .setNegativeButton(R.string.common_cancel, null)
+                                .setPositiveButton(R.string.common_confirm,
+                                        (ignoredDialog, ignoredWhich) ->
+                                                applyInventoryArea(target, address, 0))
+                                .show();
+                    } else {
+                        applyInventoryArea(target, address, length);
+                    }
+                }));
+        dialog.show();
+    }
+
+    private void applyInventoryArea(InventoryArea target, int address, int length) {
+        String summary = target.isBaseOnly() ? target.getDisplayName()
+                : getString(R.string.config_inventory_area_summary, target.getDisplayName(),
+                address, length);
+        confirmAndApply(R.string.config_inventory_area, summary,
+                () -> session.setInventoryArea(target.getValue(), address, length)
+                        .thenApply(status -> {
+                            if (status == 0) { session.clearInventory(); }
+                            return status;
+                        }),
+                R.string.config_inventory_area_set_failed, () -> {});
+    }
+
+    private void updateInventoryAreaView(ReaderConfiguration value) {
+        InventoryArea area = InventoryArea.of(readerState.getProtocol(), value.inventoryArea);
+        inventoryAreaView.setText(area.isBaseOnly() ? area.getDisplayName()
+                : getString(R.string.config_inventory_area_summary, area.getDisplayName(),
+                value.inventoryAddress, value.inventoryWordLen));
+    }
+
+    private static int parseInteger(String value, int fallback) {
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (RuntimeException error) {
+            return fallback;
+        }
+    }
+
     private void showWorkModeDialog() {
         if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
@@ -567,7 +652,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private void showQDialog() {
         if (!requireReaderOnline()) { return; }
-        boolean magic = readerState.getModuleSubtype() == ModuleSubtype.MAGIC_RF;
+        boolean magic = readerState.getModuleSubtype() == ModuleSubtype.RM8011;
         String[] labels = new String[32];
         for (int i = 0; i < 16; i++) {
             labels[i] = getString(R.string.config_fixed_q, i);
@@ -661,9 +746,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         dialog.show();
     }
 
-    private void showMagicPowerDialog() {
+    private void showRm8011PowerDialog() {
         if (!requireReaderOnline()) { return; }
-        int[] levels = MagicPowerLevels.levels();
+        int[] levels = Rm8011PowerLevels.levels(
+                readerState.getModuleSerial(), readerState.getModuleVersion());
         String[] values = new String[levels.length];
         for (int i = 0; i < values.length; i++) { values[i] = formatPower(levels[i]); }
         int selected = -1;
@@ -683,6 +769,23 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
+    private void showRm610PowerDialog() {
+        if (!requireReaderOnline()) { return; }
+        String[] values = Rm610PowerLevels.nonCmtLabels();
+        int selected = configuration == null ? -1 : configuration.powerTenthsDbm;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.config_rm610_power)
+                .setSingleChoiceItems(values, selected, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == selected) { return; }
+                    confirmAndApply(R.string.config_transmit_power, values[which],
+                            () -> session.setPower(which), R.string.config_power_set_failed,
+                            () -> {});
+                })
+                .setNegativeButton(R.string.common_cancel, null)
+                .show();
+    }
+
     private EditText qParameterInput(@StringRes int hint, int value) {
         EditText input = new EditText(requireContext());
         input.setHint(hint);
@@ -696,17 +799,23 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     /** Keeps module-specific controls consistent after connection and subtype changes. */
     private void applyModuleUi(ModuleSubtype subtype) {
-        boolean isMagic = subtype == ModuleSubtype.MAGIC_RF;
+        boolean isRm8011 = subtype == ModuleSubtype.RM8011;
+        boolean isRm610Discrete = subtype == ModuleSubtype.RM610
+                && !Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial());
         boolean connected = readerState.isConnected();
-        powerSeekBar.setVisibility(isMagic ? View.GONE : View.VISIBLE);
-        powerValueView.setClickable(isMagic && connected);
-        blfRow.setVisibility(isMagic ? View.GONE : View.VISIBLE);
-        workModeRow.setEnabled(!isMagic && connected);
-        if (isMagic) {
+        powerSeekBar.setMax(subtype == ModuleSubtype.RM610 ? 20 : 30);
+        powerSeekBar.setVisibility(isRm8011 || isRm610Discrete ? View.GONE : View.VISIBLE);
+        powerRangeView.setVisibility(isRm8011 || isRm610Discrete ? View.GONE : View.VISIBLE);
+        powerMaxView.setText(subtype == ModuleSubtype.RM610
+                ? R.string.config_power_max_rm610 : R.string.config_power_max);
+        powerValueView.setClickable((isRm8011 || isRm610Discrete) && connected);
+        blfRow.setVisibility(isRm8011 ? View.GONE : View.VISIBLE);
+        workModeRow.setEnabled(!isRm8011 && connected);
+        if (isRm8011) {
             workModeView.setText(workModeLabel(1));
         }
         protocolView.setText(readerState.getProtocol().getDisplayName());
-        Log.d(TAG, "applyModuleUi subtype=" + subtype + " isMagic=" + isMagic
+        Log.d(TAG, "applyModuleUi subtype=" + subtype + " isRm8011=" + isRm8011
                 + " connected=" + connected);
     }
 
