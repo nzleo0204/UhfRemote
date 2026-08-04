@@ -1,6 +1,7 @@
 package com.leo.remote.ui.adapter.common;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hjq.base.BaseAdapter;
@@ -102,11 +105,16 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
         @Override
         public void onBindView(int position) {
             NavigationItem item = getItem(position);
-            mIconView.setImageDrawable(item.drawable);
+            boolean selected = mSelectedPosition == position;
+            Drawable icon = item.drawable == null ? null : item.drawable.mutate();
+            mIconView.setImageDrawable(icon);
             mTitleView.setText(item.text);
-            itemView.setSelected(mSelectedPosition == position);
-            mIconView.setSelected(mSelectedPosition == position);
-            mTitleView.setSelected(mSelectedPosition == position);
+            itemView.setSelected(selected);
+            mIconView.setSelected(selected);
+            mTitleView.setSelected(selected);
+            int tintColor = ContextCompat.getColor(getContext(),
+                    selected ? R.color.white : R.color.rfid_text_muted);
+            ImageViewCompat.setImageTintList(mIconView, ColorStateList.valueOf(tintColor));
         }
     }
 

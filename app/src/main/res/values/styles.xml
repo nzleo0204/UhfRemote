@@ -170,6 +170,22 @@
         <item name="android:textSize">@dimen/sp_13</item>
     </style>
 
+    <style name="InventoryDetailLabel" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">@dimen/dp_64</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/rfid_text_muted</item>
+        <item name="android:textSize">@dimen/sp_13</item>
+    </style>
+
+    <style name="InventoryDetailValue" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/rfid_text</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:textSize">@dimen/sp_13</item>
+    </style>
+
     <!-- 全屏主题样式 -->
     <style name="FullScreenTheme" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>

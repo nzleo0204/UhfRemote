@@ -40,6 +40,7 @@ import com.leo.remote.reader.ReaderState;
 import com.leo.remote.reader.TagProtocol;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.adapter.InventoryAdapter;
+import com.leo.remote.ui.dialog.InventoryDetailSheet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -111,7 +112,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(null);
-        adapter = new InventoryAdapter();
+        adapter = new InventoryAdapter(this::showItemDetail);
         recyclerView.setAdapter(adapter);
         applyColumnVisibility();
 
@@ -249,9 +250,28 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
                 && (configuration == null || configuration.inventoryAddress == 0);
         adapter.setModuleSubtype(subtype);
         adapter.setChipVisible(chipVisible);
+        adapter.setInventoryArea(area);
         rssiHeader.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
-        chipHeader.setVisibility(chipVisible ? View.VISIBLE : View.GONE);
+        chipHeader.setVisibility(View.GONE);
         dataHeader.setText(area.getColumnHeader());
+    }
+
+    private void showItemDetail(InventoryItem item) {
+        InventoryArea area = InventoryArea.of(readerState.getProtocol(),
+                configuration == null ? 0 : configuration.inventoryArea);
+        new InventoryDetailSheet(requireContext(), item, area, this::fillMaskFromItem).show();
+    }
+
+    private void fillMaskFromItem(int bank, String hexValue) {
+        if (bank < 0 || bank >= maskBankSpinner.getCount() || hexValue.isEmpty()) { return; }
+        dismissMaskKeyboard();
+        maskBankSpinner.setSelection(bank);
+        maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(
+                readerState.getProtocol(), bank)));
+        maskHexView.setText(hexValue);
+        maskLengthView.setText(String.valueOf(hexValue.length() * 4));
+        maskExpanded = true;
+        updateMaskControls();
     }
 
     // ========== Inventory controls ==========

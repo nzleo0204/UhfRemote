@@ -67,6 +67,7 @@
     <string name="config_reader_ip_hint">读写器 IP 地址</string>
     <string name="config_reader_ip_invalid">请输入有效的 IPv4 地址</string>
     <string name="config_connect">连接</string>
+    <string name="config_disconnect">断开连接</string>
     <string name="config_protocol">射频协议</string>
     <string name="config_protocol_iso_18000_6c">ISO 18000-6C</string>
     <string name="config_work_mode">工作模式</string>
@@ -78,6 +79,10 @@
     <string name="config_inventory_area_summary">%1$s · 地址 %2$d · %3$d 字</string>
     <string name="config_inventory_addr">起始地址（字）</string>
     <string name="config_inventory_len">盘点长度（字，0 = 全区）</string>
+    <string name="config_inventory_addr_default">起始地址（字，默认 %1$d）</string>
+    <string name="config_inventory_len_default">盘点长度（字，默认 %1$d）</string>
+    <string name="config_inventory_range_title">%1$s设置</string>
+    <string name="config_inventory_range_recommendation">推荐值：起始地址 %1$d，读取长度 %2$d 字</string>
     <string name="config_inventory_range_hint">起始地址非 0 时无法识别芯片型号。长度必须与标签实际长度匹配，超出会读取失败</string>
     <string name="config_inventory_range_invalid">长度需在 0 - %1$d 字之间</string>
     <string name="config_inventory_len_zero_title">读取全部区域</string>
@@ -162,6 +167,16 @@
     <string name="inventory_column_count">次数</string>
     <string name="inventory_column_rssi">RSSI</string>
     <string name="inventory_column_chip">芯片型号</string>
+    <string name="inventory_item_epc">EPC</string>
+    <string name="inventory_item_chip">芯片</string>
+    <string name="inventory_detail_title">标签详情</string>
+    <string name="inventory_detail_fill_epc">填充 EPC 掩码</string>
+    <string name="inventory_detail_fill_tid">填充 TID 掩码</string>
+    <string name="inventory_detail_fill_user">填充 USER 掩码</string>
+    <string name="inventory_detail_fill_reserved">填充 RSRV 掩码</string>
+    <string name="inventory_detail_count">%1$d 次</string>
+    <string name="inventory_detail_rssi">%1$d dBm</string>
+    <string name="common_close">关闭</string>
     <string name="inventory_empty">尚未发现标签</string>
     <string name="inventory_connect_first">请先连接读写器</string>
     <string name="inventory_start_failed">开始盘点失败</string>

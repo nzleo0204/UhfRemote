@@ -103,6 +103,7 @@ public class ReaderDomainTest {
 
     @Test
     public void exposesRm8011PowerLevelsAndPreservesHalfDbm() {
+        assertEquals(200, Rm8011PowerLevels.maxTenthsDbm());
         assertArrayEquals(new int[]{130, 145, 155, 170, 185, 200},
                 Rm8011PowerLevels.levels("RM-20dBm", "V1.0"));
         assertEquals("14.5 dBm", Rm8011PowerLevels.format(145));

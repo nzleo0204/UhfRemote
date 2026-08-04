@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/rfid_panel_bg"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_16">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_48"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/inventory_detail_title"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_18" />
+
+        <ImageButton
+            android:id="@+id/btn_inventory_detail_close"
+            android:layout_width="@dimen/dp_48"
+            android:layout_height="@dimen/dp_48"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="@dimen/dp_12"
+            android:src="@drawable/rfid_close_ic"
+            app:tint="@color/rfid_text_secondary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/dp_8">
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_id_label"
+            style="@style/InventoryDetailLabel" />
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_id"
+            style="@style/InventoryDetailValue"
+            android:fontFamily="monospace"
+            android:textColor="@color/rfid_primary_soft" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_inventory_detail_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/dp_8">
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_data_label"
+            style="@style/InventoryDetailLabel" />
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_data"
+            style="@style/InventoryDetailValue"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_inventory_detail_chip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/dp_8">
+
+        <TextView
+            style="@style/InventoryDetailLabel"
+            android:text="@string/inventory_item_chip" />
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_chip"
+            style="@style/InventoryDetailValue" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/dp_8">
+
+        <TextView
+            style="@style/InventoryDetailLabel"
+            android:text="@string/inventory_column_count" />
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_count"
+            style="@style/InventoryDetailValue" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_inventory_detail_rssi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/dp_8">
+
+        <TextView
+            style="@style/InventoryDetailLabel"
+            android:text="@string/inventory_column_rssi" />
+
+        <TextView
+            android:id="@+id/tv_inventory_detail_rssi"
+            style="@style/InventoryDetailValue" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_inventory_detail_fill_id"
+        style="@style/RfidPrimaryButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginTop="@dimen/dp_12"
+        android:text="@string/inventory_detail_fill_epc" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_inventory_detail_fill_data"
+        style="@style/RfidGhostButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginTop="@dimen/dp_8" />
+</LinearLayout>

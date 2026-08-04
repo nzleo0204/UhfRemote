@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.textfield.TextInputLayout;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
 import com.leo.remote.R;
@@ -32,7 +34,6 @@ import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.ConnectionPhase;
 import com.leo.remote.reader.DisconnectReason;
 import com.leo.remote.reader.InventoryArea;
-import com.leo.remote.reader.Rm8011PowerLevels;
 import com.leo.remote.reader.Rm610PowerLevels;
 import com.leo.remote.reader.ModuleSubtype;
 import com.leo.remote.reader.ReaderConfiguration;
@@ -57,7 +58,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /** RFID reader connection and parameter configuration page. */
-@SuppressLint("LogNotTimber")
+@SuppressLint({"LogNotTimber", "ClickableViewAccessibility"})
 public final class ReaderConfigFragment extends AppFragment<HomeActivity> implements ReaderObserver {
     private static final String TAG = "UhfReader/Config";
     private static final String CONNECTION_DIALOG_TAG = "reader_connection";
@@ -85,6 +86,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private View rateSection;
     private View bleActions;
     private View wifiActions;
+    private View disconnectRow;
+    private TextView connectedTargetView;
     private View workModeRow;
     private View blfRow;
     private View configRoot;
@@ -130,6 +133,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         rateSection = findViewById(R.id.ll_config_rate);
         bleActions = findViewById(R.id.ll_config_ble_actions);
         wifiActions = findViewById(R.id.ll_config_wifi_actions);
+        disconnectRow = findViewById(R.id.ll_config_disconnect);
+        connectedTargetView = findViewById(R.id.tv_config_connected_target);
         workModeRow = findViewById(R.id.row_config_work_mode);
         blfRow = findViewById(R.id.row_config_blf);
         configRoot = findViewById(R.id.fl_config_root);
@@ -157,10 +162,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             wifiSwitch.setChecked(false);
             bindingUi = false;
             dismissWifiKeyboard();
-            bindTransportRows(true, false);
-            if (session != null && session.getState().getTransport() != TransportType.NONE) {
-                session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
-            }
+            bindTransportRows(true, readerState.isConnected());
         });
         wifiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (bindingUi) { return; }
@@ -172,14 +174,12 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             bindingUi = true;
             bleSwitch.setChecked(false);
             bindingUi = false;
-            bindTransportRows(false, false);
-            if (session != null && session.getState().getTransport() != TransportType.NONE) {
-                session.disconnect(DisconnectReason.TRANSPORT_SWITCH);
-            }
+            bindTransportRows(false, readerState.isConnected());
         });
         deviceInfoButton.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
         findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view -> connectWifi());
+        findViewById(R.id.btn_config_disconnect).setOnClickListener(view -> disconnectDevice());
         wifiAddressView.setOnDoneAction(this::connectWifi);
         wifiAddressView.setOnEditingChangedListener(editing -> {
             if (editing) {
@@ -217,14 +217,21 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         findViewById(R.id.row_config_q).setOnClickListener(view -> showQDialog());
         findViewById(R.id.btn_config_refresh).setOnClickListener(view -> refreshParameters());
         powerValueView.setOnClickListener(view -> {
-            if (readerState.getModuleSubtype() == ModuleSubtype.RM8011) {
-                showRm8011PowerDialog();
-            } else if (readerState.getModuleSubtype() == ModuleSubtype.RM610
+            if (readerState.getModuleSubtype() == ModuleSubtype.RM610
                     && !Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial())) {
                 showRm610PowerDialog();
             }
         });
 
+        powerSeekBar.setOnTouchListener((view, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+                view.getParent().requestDisallowInterceptTouchEvent(true);
+            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getParent().requestDisallowInterceptTouchEvent(false);
+            }
+            return false;
+        });
         powerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(@NonNull SeekBar seekBar, int progress, boolean fromUser) {
@@ -323,11 +330,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         ModuleSubtype subtype = readerState.getModuleSubtype();
         boolean rm610Cmt = subtype == ModuleSubtype.RM610
                 && Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial());
-        if (subtype == ModuleSubtype.RM8011) {
-            powerSeekBar.setVisibility(View.GONE);
-            powerRangeView.setVisibility(View.GONE);
-            powerValueView.setText(Rm8011PowerLevels.format(value.powerTenthsDbm));
-        } else if (subtype == ModuleSubtype.RM610 && !rm610Cmt) {
+        if (subtype == ModuleSubtype.RM610 && !rm610Cmt) {
             powerSeekBar.setVisibility(View.GONE);
             powerRangeView.setVisibility(View.GONE);
             powerValueView.setText(Rm610PowerLevels.formatNonCmt(value.powerTenthsDbm));
@@ -352,6 +355,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void bindTransportRows(boolean ble, boolean connected) {
         bleActions.setVisibility(!connected && ble ? View.VISIBLE : View.GONE);
         wifiActions.setVisibility(!connected && !ble ? View.VISIBLE : View.GONE);
+        disconnectRow.setVisibility(connected ? View.VISIBLE : View.GONE);
+        bleSwitch.setEnabled(!connected);
+        wifiSwitch.setEnabled(!connected);
+        if (connected) {
+            String target = readerState.getTransport() == TransportType.BLE
+                    ? bleDisplayName(readerState.getDeviceName()) : readerState.getAddress();
+            connectedTargetView.setText(target);
+        }
+    }
+
+    private void disconnectDevice() {
+        if (session != null) {
+            session.disconnect(DisconnectReason.USER);
+        }
     }
 
     private void showBleDevices() {
@@ -540,15 +557,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 .inflate(R.layout.dialog_inventory_range, null, false);
         EditText addressInput = content.findViewById(R.id.et_inventory_addr);
         EditText lengthInput = content.findViewById(R.id.et_inventory_len);
-        addressInput.setText(String.valueOf(configuration == null
-                ? 0 : configuration.inventoryAddress));
-        lengthInput.setText(String.valueOf(configuration == null
-                || configuration.inventoryWordLen == 0
-                ? ReaderConfiguration.DEFAULT_INVENTORY_WORD_LEN
-                : configuration.inventoryWordLen));
+        TextInputLayout addressLayout = content.findViewById(R.id.til_inventory_addr);
+        TextInputLayout lengthLayout = content.findViewById(R.id.til_inventory_len);
+        TextView recommendationView = content.findViewById(R.id.tv_inventory_range_recommendation);
+        int defaultAddress = defaultAddress(target);
+        int defaultWordLen = defaultWordLen(target);
+        addressInput.setText(String.valueOf(defaultAddress));
+        lengthInput.setText(String.valueOf(defaultWordLen));
+        addressLayout.setHint(getString(R.string.config_inventory_addr_default, defaultAddress));
+        lengthLayout.setHint(getString(R.string.config_inventory_len_default, defaultWordLen));
+        recommendationView.setText(getString(R.string.config_inventory_range_recommendation,
+                defaultAddress, defaultWordLen));
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(target.getDisplayName())
-                .setMessage(R.string.config_inventory_range_hint)
+                .setTitle(getString(R.string.config_inventory_range_title,
+                        target.getDisplayName()))
                 .setView(content)
                 .setNegativeButton(R.string.common_cancel, null)
                 .setPositiveButton(R.string.common_confirm, null)
@@ -564,40 +586,63 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                         return;
                     }
                     dialog.dismiss();
-                    if (length == 0) {
-                        new MaterialAlertDialogBuilder(requireContext())
-                                .setTitle(R.string.config_inventory_len_zero_title)
-                                .setMessage(R.string.config_inventory_len_zero_warning)
-                                .setNegativeButton(R.string.common_cancel, null)
-                                .setPositiveButton(R.string.common_confirm,
-                                        (ignoredDialog, ignoredWhich) ->
-                                                applyInventoryArea(target, address, 0))
-                                .show();
-                    } else {
-                        applyInventoryArea(target, address, length);
-                    }
+                    applyInventoryArea(target, address, length);
                 }));
         dialog.show();
     }
 
     private void applyInventoryArea(InventoryArea target, int address, int length) {
-        String summary = target.isBaseOnly() ? target.getDisplayName()
-                : getString(R.string.config_inventory_area_summary, target.getDisplayName(),
-                address, length);
-        confirmAndApply(R.string.config_inventory_area, summary,
-                () -> session.setInventoryArea(target.getValue(), address, length)
-                        .thenApply(status -> {
-                            if (status == 0) { session.clearInventory(); }
-                            return status;
-                        }),
-                R.string.config_inventory_area_set_failed, () -> {});
+        settingWaitDialog = new WaitDialog.Builder(requireActivity())
+                .setMessage(R.string.config_setting_wait);
+        settingWaitDialog.show();
+        session.setInventoryArea(target.getValue(), address, length)
+                .thenApply(status -> {
+                    if (status == 0) { session.clearInventory(); }
+                    return status;
+                })
+                .whenComplete((status, error) -> {
+                    HomeActivity activity = getAttachActivity();
+                    if (activity == null) { return; }
+                    activity.runOnUiThread(() -> {
+                        dismissSettingWaitDialog();
+                        if (error != null || status == null || status != 0) {
+                            int errorCode = status == null ? -1 : status;
+                            Throwable cause = error;
+                            while (cause != null && cause.getCause() != null) {
+                                cause = cause.getCause();
+                            }
+                            if (cause instanceof ReaderException) {
+                                errorCode = ((ReaderException) cause).getErrorCode();
+                            }
+                            new MessageDialog.Builder(activity)
+                                    .setTitle(R.string.config_inventory_area_set_failed)
+                                    .setMessage(getString(R.string.config_error_code,
+                                            getString(R.string.config_inventory_area_set_failed),
+                                            errorCode))
+                                    .setCancel((CharSequence) null)
+                                    .setConfirm(R.string.common_confirm)
+                                    .show();
+                            return;
+                        }
+                        toast(getString(R.string.config_setting_success,
+                                getString(R.string.config_inventory_area),
+                                target.getDisplayName()));
+                    });
+                });
     }
 
     private void updateInventoryAreaView(ReaderConfiguration value) {
         InventoryArea area = InventoryArea.of(readerState.getProtocol(), value.inventoryArea);
-        inventoryAreaView.setText(area.isBaseOnly() ? area.getDisplayName()
-                : getString(R.string.config_inventory_area_summary, area.getDisplayName(),
-                value.inventoryAddress, value.inventoryWordLen));
+        inventoryAreaView.setText(area.getDisplayName());
+    }
+
+    private static int defaultAddress(InventoryArea area) {
+        return 0;
+    }
+
+    private static int defaultWordLen(InventoryArea area) {
+        return area == InventoryArea.C_EPC_RESERVED
+                ? 4 : ReaderConfiguration.DEFAULT_INVENTORY_WORD_LEN;
     }
 
     private static int parseInteger(String value, int fallback) {
@@ -746,29 +791,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         dialog.show();
     }
 
-    private void showRm8011PowerDialog() {
-        if (!requireReaderOnline()) { return; }
-        int[] levels = Rm8011PowerLevels.levels(
-                readerState.getModuleSerial(), readerState.getModuleVersion());
-        String[] values = new String[levels.length];
-        for (int i = 0; i < values.length; i++) { values[i] = formatPower(levels[i]); }
-        int selected = -1;
-        if (configuration != null) {
-            for (int i = 0; i < levels.length; i++) {
-                if (levels[i] == configuration.powerTenthsDbm) { selected = i; break; }
-            }
-        }
-        int initialSelection = selected;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_magic_power)
-                .setSingleChoiceItems(values, initialSelection, (dialog, which) -> {
-                    dialog.dismiss();
-                    if (which == initialSelection) { return; }
-                    confirmAndApply(R.string.config_transmit_power, values[which],
-                            () -> session.setPower(levels[which]),
-                            R.string.config_power_set_failed, () -> {});
-                }).setNegativeButton(R.string.common_cancel, null).show();
-    }
-
     private void showRm610PowerDialog() {
         if (!requireReaderOnline()) { return; }
         String[] values = Rm610PowerLevels.nonCmtLabels();
@@ -803,12 +825,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         boolean isRm610Discrete = subtype == ModuleSubtype.RM610
                 && !Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial());
         boolean connected = readerState.isConnected();
-        powerSeekBar.setMax(subtype == ModuleSubtype.RM610 ? 20 : 30);
-        powerSeekBar.setVisibility(isRm8011 || isRm610Discrete ? View.GONE : View.VISIBLE);
-        powerRangeView.setVisibility(isRm8011 || isRm610Discrete ? View.GONE : View.VISIBLE);
-        powerMaxView.setText(subtype == ModuleSubtype.RM610
+        int maxDbm = subtype == ModuleSubtype.RM8011 || subtype == ModuleSubtype.RM610 ? 20 : 30;
+        powerSeekBar.setMax(maxDbm);
+        powerSeekBar.setVisibility(isRm610Discrete ? View.GONE : View.VISIBLE);
+        powerRangeView.setVisibility(isRm610Discrete ? View.GONE : View.VISIBLE);
+        powerMaxView.setText(maxDbm == 20
                 ? R.string.config_power_max_rm610 : R.string.config_power_max);
-        powerValueView.setClickable((isRm8011 || isRm610Discrete) && connected);
+        powerValueView.setClickable(isRm610Discrete && connected);
         blfRow.setVisibility(isRm8011 ? View.GONE : View.VISIBLE);
         workModeRow.setEnabled(!isRm8011 && connected);
         if (isRm8011) {

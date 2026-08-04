@@ -19,7 +19,8 @@ public final class Rm8011PowerLevels {
 
     private Rm8011PowerLevels() {}
 
-    /** Returns supported power values in tenths of a dBm. */
+    /** @deprecated RM8011 products use a continuous 0-20 dBm power range. */
+    @Deprecated
     public static int[] levels(String moduleSerial, String moduleVersion) {
         String serial = moduleSerial == null ? "" : moduleSerial;
         if (serial.contains("RM-20dBm")) {
@@ -38,6 +39,9 @@ public final class Rm8011PowerLevels {
         warn("未识别的功率档位，回退 0-20dBm，serial=" + serial);
         return TIER_FALLBACK.clone();
     }
+
+    /** RM8011 uses a continuous 0-20 dBm range in tenths of a dBm. */
+    public static int maxTenthsDbm() { return 200; }
 
     /** Formats tenths of a dBm without truncating half-dBm values. */
     public static String format(int tenthsDbm) {

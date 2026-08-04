@@ -135,7 +135,7 @@
             <SeekBar
                 android:id="@+id/sb_config_power"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_36"
+                android:layout_height="@dimen/dp_48"
                 android:max="30"
                 android:progress="26"
                 android:progressTint="@color/rfid_primary_soft"
@@ -286,6 +286,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/config_connect" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_config_disconnect"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_48"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_config_connected_target"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_15" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_config_disconnect"
+                    style="@style/RfidTextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/config_disconnect"
+                    android:textColor="@color/rfid_danger" />
             </LinearLayout>
         </LinearLayout>
 

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
+import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.InventoryItem;
 import com.leo.remote.reader.ModuleSubtype;
 import java.util.List;
@@ -44,8 +45,17 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             };
     private boolean rssiVisible;
     private boolean chipVisible;
+    private InventoryArea currentArea = InventoryArea.C_EPC_ONLY;
+    private final OnItemClickListener itemClickListener;
 
-    public InventoryAdapter() { super(DIFF); }
+    public interface OnItemClickListener {
+        void onItemClick(InventoryItem item);
+    }
+
+    public InventoryAdapter(OnItemClickListener listener) {
+        super(DIFF);
+        itemClickListener = listener;
+    }
 
     public void submitList(List<InventoryItem> values) {
         super.submitList(List.copyOf(values));
@@ -67,6 +77,12 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
     }
 
+    public void setInventoryArea(InventoryArea area) {
+        if (currentArea == area) { return; }
+        currentArea = area;
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -80,9 +96,9 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.index.setText(String.format(java.util.Locale.US, "%03d", position + 1));
         holder.id.setText(item.getId());
         holder.data.setText(item.getData());
-        holder.data.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
+        holder.dataLabel.setText(dataLabel(currentArea));
         bindCounters(holder, item);
-        bindVisibility(holder);
+        bindVisibility(holder, item);
         int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
         holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
     }
@@ -94,7 +110,9 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             bindCounters(holder, getItem(position));
         }
         if (payloads.contains(PAYLOAD_LAYOUT)) {
-            bindVisibility(holder);
+            InventoryItem item = getItem(position);
+            holder.dataLabel.setText(dataLabel(currentArea));
+            bindVisibility(holder, item);
         }
         if (!payloads.isEmpty()) {
             return;
@@ -111,9 +129,21 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.chip.setText(item.getChipModel().isEmpty() ? "-" : item.getChipModel());
     }
 
-    private void bindVisibility(ViewHolder holder) {
+    private void bindVisibility(ViewHolder holder, InventoryItem item) {
+        holder.dataRow.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
         holder.rssi.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
-        holder.chip.setVisibility(chipVisible ? View.VISIBLE : View.GONE);
+        boolean showChip = chipVisible && !item.getData().isEmpty()
+                && !item.getChipModel().isEmpty();
+        holder.chipRow.setVisibility(showChip ? View.VISIBLE : View.GONE);
+    }
+
+    private static String dataLabel(InventoryArea area) {
+        return switch (area) {
+            case C_EPC_TID -> "TID";
+            case C_EPC_USER, B_UID_USER, GJB_CODE_USER, GB_CODE_USER -> "USER";
+            case C_EPC_RESERVED -> "RSRV";
+            default -> "DATA";
+        };
     }
 
     private static int rssiColor(int rssi) {
@@ -129,22 +159,34 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         return R.color.rfid_danger;
     }
 
-    static final class ViewHolder extends RecyclerView.ViewHolder {
+    final class ViewHolder extends RecyclerView.ViewHolder {
         final TextView index;
         final TextView id;
         final TextView data;
+        final TextView dataLabel;
         final TextView count;
         final TextView rssi;
         final TextView chip;
+        final View dataRow;
+        final View chipRow;
 
         ViewHolder(View view) {
             super(view);
             index = view.findViewById(R.id.tv_inventory_index);
             id = view.findViewById(R.id.tv_inventory_id);
             data = view.findViewById(R.id.tv_inventory_data);
+            dataLabel = view.findViewById(R.id.tv_inventory_data_label);
             count = view.findViewById(R.id.tv_inventory_count);
             rssi = view.findViewById(R.id.tv_inventory_rssi);
             chip = view.findViewById(R.id.tv_inventory_chip);
+            dataRow = view.findViewById(R.id.row_inventory_data);
+            chipRow = view.findViewById(R.id.row_inventory_chip);
+            view.setOnClickListener(ignored -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && itemClickListener != null) {
+                    itemClickListener.onItemClick(getItem(position));
+                }
+            });
         }
     }
 }
