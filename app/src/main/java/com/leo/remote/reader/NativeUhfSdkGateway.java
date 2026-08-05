@@ -3,6 +3,7 @@ package com.leo.remote.reader;
 import android.annotation.SuppressLint;
 import android.util.Log;
 import com.uhf.linkage.Linkage;
+import com.uhf.structures.AntennaPorts;
 import com.uhf.structures.DynamicQParams;
 import com.uhf.structures.FixedQParams;
 import com.uhf.structures.InventoryData;
@@ -122,9 +123,28 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     @Override
     public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,
             int inventoryOffTime) {
+        AntennaPorts antenna = new AntennaPorts();
+        int status = linkage.getAntennaPort(0, antenna);
+        if (status != STATUS_OK) {
+            return status;
+        }
         LowpowerParams params = new LowpowerParams();
-        params.setValue(highPerformanceTime, inventoryOnTime, inventoryOffTime);
+        prepareLowPowerValues(antenna, params, highPerformanceTime, inventoryOnTime,
+                inventoryOffTime);
+        status = linkage.setAntennaPort(0, antenna.antennaStatus, antenna.powerLevel,
+                antenna.dwellTime, antenna.numberInventoryCycles);
+        if (status != STATUS_OK) {
+            return status;
+        }
         return linkage.setLowpowerScheduler(params);
+    }
+
+    static void prepareLowPowerValues(AntennaPorts antenna, LowpowerParams params,
+            int highPerformanceTime, int inventoryOnTime, int inventoryOffTime) {
+        antenna.setDwellTime(inventoryOnTime);
+        params.setHighPerformanceTime(highPerformanceTime);
+        params.setInventoryOnTime(inventoryOnTime);
+        params.setInventoryOffTime(inventoryOffTime);
     }
 
     @Override

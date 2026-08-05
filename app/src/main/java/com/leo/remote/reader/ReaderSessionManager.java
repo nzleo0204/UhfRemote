@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class ReaderSessionManager {
     private static final String TAG = "UhfReader";
     public static final int WIFI_PORT = 1200;
+    private static final int STATUS_UNSUPPORTED = -1001;
     private static final String MMKV_ID = "reader_connection";
     private static final String KEY_WIFI_ADDRESS = "wifi_address";
     private static volatile ReaderSessionManager instance;
@@ -494,8 +495,16 @@ public final class ReaderSessionManager {
                 }
             }
             if (status == 0 && inventoryMode == 2) {
-                status = monitorSdkStatus(gateway.setLowPowerScheduler(0, 30, 100));
-                Log.i(TAG, "low-power inventory scheduler status=" + status);
+                int schedulerStatus = gateway.setLowPowerScheduler(0, 30, 100);
+                if (schedulerStatus == STATUS_UNSUPPORTED) {
+                    Log.w(TAG, "low-power inventory scheduler is unsupported; "
+                            + "continue with reader mode 2");
+                } else {
+                    Log.i(TAG, "low-power inventory scheduler status=" + schedulerStatus);
+                    if (schedulerStatus != 0) {
+                        return schedulerStatus;
+                    }
+                }
             }
             int maskFlag = inventoryMaskApplied ? 1 : 0;
             if (status == 0) { status = gateway.startInventory(inventoryMode, maskFlag); }
