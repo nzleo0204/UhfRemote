@@ -49,6 +49,7 @@ public final class ReaderSessionManager {
     private volatile ReaderTag currentTag;
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
+    private volatile boolean inventoryMaskApplied;
     private volatile InventoryMaskConfig singleTagMask;
     private volatile int inventoryMode = 1;
     private volatile boolean pendingDisconnectAlert;
@@ -137,6 +138,7 @@ public final class ReaderSessionManager {
             inventory.add(tag.id, tag.data, tag.rssi, tag.count, ChipModelFormatter.format(tag));
             scheduleInventoryUpdate();
         });
+        gateway.setInventoryStopListener(this::handleInventoryStopped);
         wifiMonitor.start();
     }
 
@@ -333,11 +335,13 @@ public final class ReaderSessionManager {
             int status = stopInventoryInternal();
             if (status != 0) { return status; }
             if (inventoryMask != null) {
-                status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol()));
+                status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
+                        state.getModuleSubtype()));
                 Log.i(TAG, "clear inventory mask before protocol switch status=" + status);
                 if (status != 0) { return status; }
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
+                inventoryMaskApplied = false;
                 notifyMask(null);
             }
             status = monitorSdkStatus(gateway.setProtocol(protocol));
@@ -376,6 +380,9 @@ public final class ReaderSessionManager {
     public void setInventoryMode(int mode) {
         if (mode < 0 || mode > 2) { return; }
         inventoryMode = state.getModuleSubtype() == ModuleSubtype.RM8011 ? 1 : mode;
+        if (configuration != null) {
+            configCache.saveConfiguration(state.getModuleSubtype(), buildConfigurationSnapshot());
+        }
         notifyConfiguration();
     }
 
@@ -476,14 +483,22 @@ public final class ReaderSessionManager {
                 if (inventoryMaskProtocol != state.getProtocol()) {
                     inventoryMask = null;
                     inventoryMaskProtocol = null;
+                    inventoryMaskApplied = false;
                     notifyMask(null);
                     Log.i(TAG, "discard inventory mask after protocol mismatch");
                 } else {
-                    status = gateway.applyInventoryMask(state.getProtocol(), activeMask);
+                    status = gateway.applyInventoryMask(state.getProtocol(), state.getModuleSubtype(),
+                            activeMask);
                     Log.i(TAG, "inventory mask re-applied on start status=" + status);
+                    inventoryMaskApplied = status == 0;
                 }
             }
-            if (status == 0) { status = gateway.startInventory(inventoryMode, 0); }
+            if (status == 0 && inventoryMode == 2) {
+                status = monitorSdkStatus(gateway.setLowPowerScheduler(0, 30, 100));
+                Log.i(TAG, "low-power inventory scheduler status=" + status);
+            }
+            int maskFlag = inventoryMaskApplied ? 1 : 0;
+            if (status == 0) { status = gateway.startInventory(inventoryMode, maskFlag); }
             status = monitorSdkStatus(status);
             if (status == 0) {
                 publish(state.buildUpon().inventoryRunning(true).build());
@@ -507,12 +522,14 @@ public final class ReaderSessionManager {
     public CompletableFuture<Integer> applyInventoryMask(@NonNull InventoryMaskConfig config) {
         return submitConnected(() -> {
             TagProtocol protocol = state.getProtocol();
-            int status = monitorSdkStatus(gateway.applyInventoryMask(protocol, config));
+            int status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
+                    state.getModuleSubtype(), config));
             Log.i(TAG, "applyInventoryMask status=" + status + " bank=" + config.bank
                     + " offsetBits=" + config.offsetBits + " lengthBits=" + config.lengthBits);
             if (status == 0) {
                 inventoryMask = config;
                 inventoryMaskProtocol = protocol;
+                inventoryMaskApplied = true;
                 notifyMask(config);
             }
             return status;
@@ -527,17 +544,20 @@ public final class ReaderSessionManager {
         if (!state.isConnected()) {
             inventoryMask = null;
             inventoryMaskProtocol = null;
+            inventoryMaskApplied = false;
             notifyMask(null);
             return CompletableFuture.completedFuture(0);
         }
         return submitConnected(() -> {
             TagProtocol protocol = inventoryMaskProtocol == null
                     ? state.getProtocol() : inventoryMaskProtocol;
-            int status = monitorSdkStatus(gateway.clearInventoryMask(protocol));
+            int status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
+                    state.getModuleSubtype()));
             Log.i(TAG, "clearInventoryMask status=" + status);
             if (status == 0) {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
+                inventoryMaskApplied = false;
                 notifyMask(null);
             }
             return status;
@@ -607,20 +627,37 @@ public final class ReaderSessionManager {
             int status = stopInventoryInternal();
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
             TagProtocol protocol = state.getProtocol();
-            if (inventoryMask != null) {
-                status = monitorSdkStatus(gateway.clearInventoryMask(protocol));
+            InventoryMaskConfig maskToRestore = inventoryMask;
+            if (maskToRestore != null) {
+                status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
+                        state.getModuleSubtype()));
                 if (status != 0) { throw new ReaderException("Unable to clear inventory mask", status); }
+                inventoryMaskApplied = false;
             }
             InventoryMaskConfig activeMask = singleTagMask;
-            if (activeMask == null) { return operation.call(); }
-            status = monitorSdkStatus(gateway.applyInventoryMask(protocol, activeMask));
-            if (status != 0) { throw new ReaderException("Unable to set single-tag mask", status); }
             try {
+                if (activeMask != null) {
+                    status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
+                            state.getModuleSubtype(), activeMask));
+                    if (status != 0) {
+                        throw new ReaderException("Unable to set single-tag mask", status);
+                    }
+                }
                 return operation.call();
             } finally {
-                int clearStatus = monitorSdkStatus(gateway.clearInventoryMask(protocol));
-                if (clearStatus != 0) {
-                    throw new ReaderException("Unable to clear single-tag mask", clearStatus);
+                if (maskToRestore != null) {
+                    int restoreStatus = monitorSdkStatus(gateway.applyInventoryMask(protocol,
+                            state.getModuleSubtype(), maskToRestore));
+                    inventoryMaskApplied = restoreStatus == 0;
+                    if (restoreStatus != 0) {
+                        throw new ReaderException("Unable to restore inventory mask", restoreStatus);
+                    }
+                } else if (activeMask != null) {
+                    int clearStatus = monitorSdkStatus(gateway.clearTargetMask(protocol,
+                            state.getModuleSubtype()));
+                    if (clearStatus != 0) {
+                        throw new ReaderException("Unable to clear single-tag mask", clearStatus);
+                    }
                 }
             }
         });
@@ -643,6 +680,7 @@ public final class ReaderSessionManager {
             if (inventoryMask != null && inventoryMaskProtocol != TagProtocol.ISO_18000_6C) {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
+                inventoryMaskApplied = false;
                 notifyMask(null);
                 Log.i(TAG, "discard inventory mask because handshake restored 6C protocol");
             }
@@ -732,6 +770,16 @@ public final class ReaderSessionManager {
         return status;
     }
 
+    /** 模块自行结束盘点时同步会话状态，避免单次模式按钮停在“停止”。 */
+    private void handleInventoryStopped(int status) {
+        mainHandler.post(() -> {
+            if (state.isInventoryRunning()) {
+                Log.i(TAG, "inventory stopped by reader status=" + status);
+                publish(state.buildUpon().inventoryRunning(false).build());
+            }
+        });
+    }
+
     private void disconnectTransportInternal() {
         disconnectTransportInternal(state.getTransport(), state.isInventoryRunning());
     }
@@ -797,6 +845,7 @@ public final class ReaderSessionManager {
         }
         inventoryMask = null;
         inventoryMaskProtocol = null;
+        inventoryMaskApplied = false;
         notifyMask(null);
         configuration = null;
         clearCurrentTag();
@@ -912,13 +961,18 @@ public final class ReaderSessionManager {
     private void notifyConfiguration() {
         ReaderConfiguration current = configuration;
         if (current == null) { return; }
-        ReaderConfiguration updated = new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
+        ReaderConfiguration updated = buildConfigurationSnapshot();
+        configuration = updated;
+        mainHandler.post(() -> observers.forEach(observer -> observer.onReaderConfigurationChanged(updated)));
+    }
+
+    private ReaderConfiguration buildConfigurationSnapshot() {
+        ReaderConfiguration current = configuration;
+        return new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
                 current.blfProfile, current.session, current.target, current.dynamicQ, current.qValue,
                 current.qMinValue, current.qMaxValue, current.qRetryCount,
                 current.qThresholdMultiplier, current.qToggleTarget, current.qRepeatUntilNoTags,
                 current.inventoryArea, current.inventoryAddress, current.inventoryWordLen);
-        configuration = updated;
-        mainHandler.post(() -> observers.forEach(observer -> observer.onReaderConfigurationChanged(updated)));
     }
 
     private void scheduleInventoryUpdate() {

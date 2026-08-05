@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.text.TextUtils;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -25,7 +24,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.android.material.textfield.TextInputLayout;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
 import com.leo.remote.R;
@@ -49,6 +47,7 @@ import com.leo.remote.ui.dialog.BleDeviceSheet;
 import com.leo.remote.ui.dialog.ReaderConnectionDialog;
 import com.leo.remote.ui.dialog.ReaderDeviceInfoDialog;
 import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.ui.dialog.common.InventoryRangeDialog;
 import com.leo.remote.ui.dialog.common.WaitDialog;
 import com.leo.remote.ui.view.IpAddressInputView;
 import com.hjq.base.BaseDialog;
@@ -66,7 +65,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private ReaderSessionManager session;
     private TextView statusView;
-    private TextView connectionTargetView;
     private TextView disconnectReasonView;
     private TextView powerValueView;
     private TextView protocolView;
@@ -113,7 +111,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     @Override
     protected void initView() {
         statusView = findViewById(R.id.tv_config_status);
-        connectionTargetView = findViewById(R.id.tv_config_connection_target);
         disconnectReasonView = findViewById(R.id.tv_config_disconnect_reason);
         powerValueView = findViewById(R.id.tv_config_power_value);
         protocolView = findViewById(R.id.tv_config_protocol);
@@ -292,7 +289,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         } else {
             disconnectReasonView.setVisibility(View.GONE);
         }
-        bindConnectionTarget(state);
         if (state.getTransport() == TransportType.BLE) {
             bindingUi = true;
             bleSwitch.setChecked(true);
@@ -385,18 +381,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         if (getParentFragmentManager().findFragmentByTag(DEVICE_INFO_DIALOG_TAG) == null) {
             new ReaderDeviceInfoDialog().show(getParentFragmentManager(), DEVICE_INFO_DIALOG_TAG);
         }
-    }
-
-    private void bindConnectionTarget(ReaderState state) {
-        if (state.getAddress().isEmpty()) {
-            connectionTargetView.setVisibility(View.GONE);
-            connectionTargetView.setText("");
-            return;
-        }
-        String target = state.getTransport() == TransportType.BLE
-                ? bleDisplayName(state.getDeviceName()) : state.getAddress();
-        connectionTargetView.setText(target);
-        connectionTargetView.setVisibility(View.VISIBLE);
     }
 
     private String bleDisplayName(String name) {
@@ -553,42 +537,28 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showInventoryRangeDialog(InventoryArea target) {
-        View content = LayoutInflater.from(requireContext())
-                .inflate(R.layout.dialog_inventory_range, null, false);
-        EditText addressInput = content.findViewById(R.id.et_inventory_addr);
-        EditText lengthInput = content.findViewById(R.id.et_inventory_len);
-        TextInputLayout addressLayout = content.findViewById(R.id.til_inventory_addr);
-        TextInputLayout lengthLayout = content.findViewById(R.id.til_inventory_len);
-        TextView recommendationView = content.findViewById(R.id.tv_inventory_range_recommendation);
         int defaultAddress = defaultAddress(target);
         int defaultWordLen = defaultWordLen(target);
-        addressInput.setText(String.valueOf(defaultAddress));
-        lengthInput.setText(String.valueOf(defaultWordLen));
-        addressLayout.setHint(getString(R.string.config_inventory_addr_default, defaultAddress));
-        lengthLayout.setHint(getString(R.string.config_inventory_len_default, defaultWordLen));
-        recommendationView.setText(getString(R.string.config_inventory_range_recommendation,
-                defaultAddress, defaultWordLen));
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+        new InventoryRangeDialog.Builder(requireContext())
                 .setTitle(getString(R.string.config_inventory_range_title,
                         target.getDisplayName()))
-                .setView(content)
-                .setNegativeButton(R.string.common_cancel, null)
-                .setPositiveButton(R.string.common_confirm, null)
-                .create();
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
-                    int address = parseInteger(addressInput.getText().toString(), -1);
-                    int length = parseInteger(lengthInput.getText().toString(), -1);
-                    if (address < 0 || length < 0
-                            || length > ReaderConfiguration.MAX_INVENTORY_WORD_LEN) {
+                .setAddress(defaultAddress)
+                .setLength(defaultWordLen)
+                .setHint(getString(R.string.config_inventory_range_recommendation,
+                        defaultAddress, defaultWordLen))
+                .setListener(new InventoryRangeDialog.Builder.OnListener() {
+                    @Override
+                    public void onConfirm(@NonNull BaseDialog dialog, int address, int length) {
+                        applyInventoryArea(target, address, length);
+                    }
+
+                    @Override
+                    public void onInvalid(@NonNull BaseDialog dialog) {
                         toast(getString(R.string.config_inventory_range_invalid,
                                 ReaderConfiguration.MAX_INVENTORY_WORD_LEN));
-                        return;
                     }
-                    dialog.dismiss();
-                    applyInventoryArea(target, address, length);
-                }));
-        dialog.show();
+                })
+                .show();
     }
 
     private void applyInventoryArea(InventoryArea target, int address, int length) {
@@ -643,14 +613,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private static int defaultWordLen(InventoryArea area) {
         return area == InventoryArea.C_EPC_RESERVED
                 ? 4 : ReaderConfiguration.DEFAULT_INVENTORY_WORD_LEN;
-    }
-
-    private static int parseInteger(String value, int fallback) {
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (RuntimeException error) {
-            return fallback;
-        }
     }
 
     private void showWorkModeDialog() {
@@ -890,11 +852,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 .setListener(new MessageDialog.OnListener() {
                     @Override
                     public void onConfirm(@NonNull BaseDialog dialog) {
-                        if (settingName == R.string.config_work_mode) {
-                            action.get();
-                            toast(R.string.config_work_mode_deferred_hint);
-                            return;
-                        }
                         settingWaitDialog = new WaitDialog.Builder(requireActivity())
                                 .setMessage(power ? R.string.config_power_set_wait
                                         : R.string.config_setting_wait);

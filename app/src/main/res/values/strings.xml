@@ -79,8 +79,6 @@
     <string name="config_inventory_area_summary">%1$s · 地址 %2$d · %3$d 字</string>
     <string name="config_inventory_addr">起始地址（字）</string>
     <string name="config_inventory_len">盘点长度（字，0 = 全区）</string>
-    <string name="config_inventory_addr_default">起始地址（字，默认 %1$d）</string>
-    <string name="config_inventory_len_default">盘点长度（字，默认 %1$d）</string>
     <string name="config_inventory_range_title">%1$s设置</string>
     <string name="config_inventory_range_recommendation">推荐值：起始地址 %1$d，读取长度 %2$d 字</string>
     <string name="config_inventory_range_hint">起始地址非 0 时无法识别芯片型号。长度必须与标签实际长度匹配，超出会读取失败</string>
@@ -120,7 +118,6 @@
     <string name="config_setting_confirm_message">是否将「%1$s」修改为「%2$s」？</string>
     <string name="config_setting_wait">正在设置&#8230;</string>
     <string name="config_setting_success">「%1$s」已设为「%2$s」</string>
-    <string name="config_work_mode_deferred_hint">工作模式将在下次开始盘点时生效</string>
     <string name="config_magic_power">RM8011 功率</string>
     <string name="config_rm610_power">RM610 功率</string>
     <string name="config_power_set_failed">功率设置失败</string>

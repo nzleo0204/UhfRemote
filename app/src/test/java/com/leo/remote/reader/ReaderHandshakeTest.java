@@ -58,6 +58,9 @@ public class ReaderHandshakeTest {
         @Override public int startInventory(int mode, int maskFlag) { return 0; }
         @Override public int stopInventory() { return 0; }
         @Override public void setInventoryListener(InventoryListener listener) {}
+        @Override public void setInventoryStopListener(InventoryStopListener listener) {}
+        @Override public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,
+                int inventoryOffTime) { return 0; }
         @Override public ReaderTag inventoryOnce(int timeoutMs) { return null; }
         @Override public int setPowerTenthsDbm(int powerTenthsDbm) { return 0; }
         @Override public int setBlfProfile(int profile) { return 0; }
@@ -75,10 +78,12 @@ public class ReaderHandshakeTest {
         }
         @Override public int setInventoryArea(int area, int address, int wordLen) { return 0; }
         @Override public int[] getInventoryArea() { return new int[]{0, 0, 0}; }
-        @Override public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) { return 0; }
-        @Override public int clearInventoryMask(TagProtocol protocol) { return 0; }
-        @Override public int setTargetMask(TagProtocol protocol, ReaderTag tag) { return 0; }
-        @Override public int clearTargetMask(TagProtocol protocol) { return 0; }
+        @Override public int applyInventoryMask(TagProtocol protocol, ModuleSubtype subtype,
+                InventoryMaskConfig config) { return 0; }
+        @Override public int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype) { return 0; }
+        @Override public int setTargetMask(TagProtocol protocol, ModuleSubtype subtype,
+                ReaderTag tag) { return 0; }
+        @Override public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype) { return 0; }
         @Override public byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password, int timeoutMs) { return new byte[0]; }
         @Override public int writeTag(TagProtocol protocol, int length, int address, int bank, byte[] password, byte[] data, int timeoutMs) { return 0; }
         @Override public int lockTag(byte[] password, int bank, int policy, int timeoutMs) { return 0; }

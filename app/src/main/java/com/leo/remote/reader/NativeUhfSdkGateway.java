@@ -7,6 +7,7 @@ import com.uhf.structures.DynamicQParams;
 import com.uhf.structures.FixedQParams;
 import com.uhf.structures.InventoryData;
 import com.uhf.structures.InventoryParams;
+import com.uhf.structures.LowpowerParams;
 import com.uhf.structures.Parameters;
 import com.uhf.structures.RW_Params;
 import com.uhf.structures.Rfid_Value;
@@ -21,6 +22,8 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     private static final String TAG = "UhfReader";
     private static final int STATUS_OK = 0;
     private final Linkage linkage = new Linkage();
+    /** 掩码下发前的 Query Sel 快照，取消掩码时还原。 */
+    private Integer savedSelected;
 
     @Override
     public int initialize() { return linkage.initRFID(); }
@@ -108,6 +111,23 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
+    public void setInventoryStopListener(InventoryStopListener listener) {
+        linkage.setOnInventoryStopListener(status -> {
+            if (listener != null) {
+                listener.onInventoryStopped(status);
+            }
+        });
+    }
+
+    @Override
+    public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,
+            int inventoryOffTime) {
+        LowpowerParams params = new LowpowerParams();
+        params.setValue(highPerformanceTime, inventoryOnTime, inventoryOffTime);
+        return linkage.setLowpowerScheduler(params);
+    }
+
+    @Override
     public ReaderTag inventoryOnce(int timeoutMs) throws ReaderException {
         InventoryData data = new InventoryData();
         check(linkage.inventoryOnceSync(0, timeoutMs, data), "inventoryOnceSync");
@@ -123,7 +143,10 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
         if (power == null || blf == null || group == null || q == null) {
             throw new ReaderException("Unable to read reader configuration", -8);
         }
-        return new ReaderConfiguration(power, 1, blf, group[0], group[1], q.dynamic,
+        ReaderConfiguration cached = new ReaderConfigCache().loadConfiguration(subtype);
+        int mode = cached == null ? ReaderConfigCache.getDefaultConfiguration(subtype).inventoryMode
+                : cached.inventoryMode;
+        return new ReaderConfiguration(power, mode, blf, group[0], group[1], q.dynamic,
                 q.qValue, q.minQ, q.maxQ, q.retryCount, q.thresholdMultiplier,
                 q.toggleTarget, q.repeatUntilNoTags);
     }
@@ -223,7 +246,8 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config) {
+    public int applyInventoryMask(TagProtocol protocol, ModuleSubtype subtype,
+            InventoryMaskConfig config) {
         byte[] mask = config.getMask();
         if (protocol == TagProtocol.ISO_18000_6B) {
             Select6BCriteria criteria = new Select6BCriteria();
@@ -234,25 +258,35 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
                     Math.min(byteLength, criteria.maskData.length));
             return linkage.set18K6BSelectCriteria(criteria);
         }
+        saveSelectedIfAbsent(subtype);
+        int status = setSelectValue(subtype, 2);
+        if (status != STATUS_OK) {
+            return status;
+        }
         SelectCriteria criteria = new SelectCriteria();
+        status = linkage.get18K6CSelectCriteria(criteria);
+        if (status != STATUS_OK) {
+            return status;
+        }
         criteria.selectorIdx = 0;
         criteria.status = 1;
         criteria.bank = config.bank;
         criteria.offset = ProtocolEncoding.encodeMaskOffset(protocol, config.offsetBits);
         criteria.length = config.lengthBits;
         criteria.session = 4;
+        criteria.jq = 0;
         criteria.action = 0;
-        criteria.maskData = Arrays.copyOf(mask, Math.max(64, mask.length));
+        criteria.maskData = toFixedMaskData(mask);
         return linkage.set18K6CSelectCriteria(criteria);
     }
 
     @Override
-    public int clearInventoryMask(TagProtocol protocol) {
-        return clearTargetMask(protocol);
+    public int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype) {
+        return clearTargetMask(protocol, subtype);
     }
 
     @Override
-    public int setTargetMask(TagProtocol protocol, ReaderTag tag) {
+    public int setTargetMask(TagProtocol protocol, ModuleSubtype subtype, ReaderTag tag) {
         byte[] id = HexCodec.decode(tag.id);
         if (protocol == TagProtocol.ISO_18000_6B) {
             Select6BCriteria criteria = new Select6BCriteria();
@@ -261,24 +295,96 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
             System.arraycopy(id, 0, criteria.maskData, 0, Math.min(id.length, criteria.maskData.length));
             return linkage.set18K6BSelectCriteria(criteria);
         }
+        saveSelectedIfAbsent(subtype);
+        int status = setSelectValue(subtype, 2);
+        if (status != STATUS_OK) {
+            return status;
+        }
         SelectCriteria criteria = new SelectCriteria();
+        status = linkage.get18K6CSelectCriteria(criteria);
+        if (status != STATUS_OK) {
+            return status;
+        }
         criteria.selectorIdx = 0;
         criteria.status = 1;
         criteria.bank = ProtocolEncoding.targetMaskBank(protocol);
         criteria.offset = ProtocolEncoding.targetMaskOffset(protocol);
         criteria.length = id.length * 8;
         criteria.session = 4;
+        criteria.jq = 0;
         criteria.action = 0;
-        criteria.maskData = Arrays.copyOf(id, Math.max(64, id.length));
+        criteria.maskData = toFixedMaskData(id);
         return linkage.set18K6CSelectCriteria(criteria);
     }
 
     @Override
-    public int clearTargetMask(TagProtocol protocol) {
+    public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype) {
         if (protocol == TagProtocol.ISO_18000_6B) {
             return linkage.set18K6BSelectCriteria(new Select6BCriteria(0));
         }
-        return linkage.set18K6CSelectCriteria(new SelectCriteria(0));
+        int selected = savedSelected == null ? 0 : savedSelected;
+        int status = setSelectValue(subtype, selected);
+        savedSelected = null;
+        if (status != STATUS_OK) {
+            return status;
+        }
+        SelectCriteria criteria = new SelectCriteria();
+        status = linkage.get18K6CSelectCriteria(criteria);
+        if (status != STATUS_OK) {
+            return status;
+        }
+        criteria.selectorIdx = 0;
+        criteria.status = 0;
+        criteria.session = 0;
+        criteria.jq = 0;
+        criteria.action = 0;
+        return linkage.set18K6CSelectCriteria(criteria);
+    }
+
+    /** 保存当前 Sel 值，仅首次应用掩码时保存。 */
+    private void saveSelectedIfAbsent(ModuleSubtype subtype) {
+        if (savedSelected != null) {
+            return;
+        }
+        if (subtype == ModuleSubtype.RM8011) {
+            Parameters current = new Parameters();
+            if (linkage.get_Query(current) == STATUS_OK) {
+                savedSelected = current.getSel();
+            }
+            return;
+        }
+        TagGroup tagGroup = new TagGroup();
+        if (linkage.Radio_GetQueryTagGroup(tagGroup) == STATUS_OK) {
+            savedSelected = tagGroup.selected;
+        }
+    }
+
+    /** 以指定 Sel 值更新 Query，保留其他 Query 参数。 */
+    private int setSelectValue(ModuleSubtype subtype, int selected) {
+        if (subtype == ModuleSubtype.RM8011) {
+            Parameters current = new Parameters();
+            int status = linkage.get_Query(current);
+            if (status != STATUS_OK) {
+                return status;
+            }
+            return linkage.set_Query(current.getDR(), current.getM(), current.getTRext(),
+                    selected, current.getSession(), current.getTarget(), current.getQ());
+        }
+        TagGroup tagGroup = new TagGroup();
+        int status = linkage.Radio_GetQueryTagGroup(tagGroup);
+        if (status != STATUS_OK) {
+            return status;
+        }
+        tagGroup.selected = selected;
+        return linkage.Radio_SetQueryTagGroup(tagGroup);
+    }
+
+    private static byte[] toFixedMaskData(byte[] mask) {
+        byte[] data = new byte[64];
+        if (mask != null) {
+            System.arraycopy(mask, 0, data, 0, Math.min(mask.length, data.length));
+        }
+        return data;
     }
 
     @Override

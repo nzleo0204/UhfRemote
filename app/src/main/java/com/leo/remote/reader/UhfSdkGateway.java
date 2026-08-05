@@ -3,6 +3,7 @@ package com.leo.remote.reader;
 public interface UhfSdkGateway {
     interface OutboundDataListener { void onOutboundData(byte[] data); }
     interface InventoryListener { void onTag(ReaderTag tag); }
+    interface InventoryStopListener { void onInventoryStopped(int status); }
 
     int initialize();
     void deinitialize();
@@ -18,6 +19,8 @@ public interface UhfSdkGateway {
     int startInventory(int mode, int maskFlag);
     int stopInventory();
     void setInventoryListener(InventoryListener listener);
+    void setInventoryStopListener(InventoryStopListener listener);
+    int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime, int inventoryOffTime);
     ReaderTag inventoryOnce(int timeoutMs) throws ReaderException;
     ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException;
     int setPowerTenthsDbm(int powerTenthsDbm);
@@ -32,10 +35,10 @@ public interface UhfSdkGateway {
     Integer getBlfProfile();
     int[] getQueryGroup(ModuleSubtype subtype);
     ReaderQParams getQParams(ModuleSubtype subtype);
-    int applyInventoryMask(TagProtocol protocol, InventoryMaskConfig config);
-    int clearInventoryMask(TagProtocol protocol);
-    int setTargetMask(TagProtocol protocol, ReaderTag tag);
-    int clearTargetMask(TagProtocol protocol);
+    int applyInventoryMask(TagProtocol protocol, ModuleSubtype subtype, InventoryMaskConfig config);
+    int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype);
+    int setTargetMask(TagProtocol protocol, ModuleSubtype subtype, ReaderTag tag);
+    int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype);
     byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password,
             int timeoutMs) throws ReaderException;
     int writeTag(TagProtocol protocol, int length, int address, int bank, byte[] password,

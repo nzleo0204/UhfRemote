@@ -264,6 +264,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     private void fillMaskFromItem(int bank, String hexValue) {
         if (bank < 0 || bank >= maskBankSpinner.getCount() || hexValue.isEmpty()) { return; }
+        if (session.getState().isInventoryRunning()) {
+            session.stopInventory();
+        }
         dismissMaskKeyboard();
         maskBankSpinner.setSelection(bank);
         maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(

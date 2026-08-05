@@ -63,18 +63,6 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tv_config_connection_target"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_16"
-                android:ellipsize="end"
-                android:gravity="end|center_vertical"
-                android:maxLines="1"
-                android:textColor="@color/rfid_text_muted"
-                android:textSize="@dimen/sp_12"
-                android:visibility="gone"
-                tools:text="UHF Reader · 00:11:22:33:44:55" />
-
-            <TextView
                 android:id="@+id/tv_config_disconnect_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
