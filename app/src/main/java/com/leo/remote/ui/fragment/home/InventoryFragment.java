@@ -306,6 +306,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onInventoryMaskChanged(@Nullable InventoryMaskConfig config) {
         activeMask = config;
+        if (adapter != null) { adapter.setMaskActive(config != null); }
         setMaskSwitchChecked(config != null);
         if (config != null) {
             bindMaskForm(config);

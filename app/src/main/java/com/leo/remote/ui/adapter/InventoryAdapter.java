@@ -3,6 +3,7 @@ package com.leo.remote.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -45,6 +46,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             };
     private boolean rssiVisible;
     private boolean chipVisible;
+    private boolean maskActive;
     private InventoryArea currentArea = InventoryArea.C_EPC_ONLY;
     private final OnItemClickListener itemClickListener;
 
@@ -80,6 +82,12 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
     public void setInventoryArea(InventoryArea area) {
         if (currentArea == area) { return; }
         currentArea = area;
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
+    }
+
+    public void setMaskActive(boolean active) {
+        if (maskActive == active) { return; }
+        maskActive = active;
         notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
     }
 
@@ -137,6 +145,10 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         boolean showChip = chipVisible && !item.getData().isEmpty()
                 && !item.getChipModel().isEmpty();
         holder.chipRow.setVisibility(showChip ? View.VISIBLE : View.GONE);
+        holder.maskLock.setImageResource(maskActive
+                ? R.drawable.rfid_lock_closed_ic : R.drawable.rfid_lock_open_ic);
+        holder.maskLock.setContentDescription(holder.itemView.getContext().getString(maskActive
+                ? R.string.inventory_mask_lock_closed : R.string.inventory_mask_lock_open));
     }
 
     private static String dataLabel(InventoryArea area) {
@@ -196,6 +208,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         final TextView rssi;
         final TextView chip;
         final TextView chipLabel;
+        final ImageView maskLock;
         final View dataRow;
         final View chipRow;
 
@@ -210,6 +223,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             rssi = view.findViewById(R.id.tv_inventory_rssi);
             chip = view.findViewById(R.id.tv_inventory_chip);
             chipLabel = view.findViewById(R.id.tv_inventory_chip_label);
+            maskLock = view.findViewById(R.id.iv_inventory_mask_lock);
             dataRow = view.findViewById(R.id.row_inventory_data);
             chipRow = view.findViewById(R.id.row_inventory_chip);
             view.setOnClickListener(ignored -> {

@@ -194,6 +194,8 @@
     <string name="inventory_mask_cleared">掩码已清除</string>
     <string name="inventory_mask_apply_failed">应用掩码失败</string>
     <string name="inventory_mask_clear_failed">清除掩码失败</string>
+    <string name="inventory_mask_lock_open">未设置掩码</string>
+    <string name="inventory_mask_lock_closed">掩码已生效</string>
     <string name="inventory_mask_number_invalid">%1$s必须是非负整数</string>
     <string name="inventory_mask_length_positive">掩码长度必须大于 0</string>
     <string name="inventory_mask_hex_required">请输入掩码 HEX</string>
