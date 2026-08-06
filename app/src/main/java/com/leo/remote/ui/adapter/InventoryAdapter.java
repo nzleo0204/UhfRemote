@@ -99,6 +99,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         holder.dataLabel.setText(dataLabel(currentArea));
         bindCounters(holder, item);
         bindVisibility(holder, item);
+        bindColors(holder);
         int background = position % 2 == 0 ? R.color.rfid_panel_bg : R.color.rfid_page_bg;
         holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), background));
     }
@@ -113,6 +114,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             InventoryItem item = getItem(position);
             holder.dataLabel.setText(dataLabel(currentArea));
             bindVisibility(holder, item);
+            bindColors(holder);
         }
         if (!payloads.isEmpty()) {
             return;
@@ -146,6 +148,31 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         };
     }
 
+    private static int dataColor(InventoryArea area) {
+        return switch (area) {
+            case C_EPC_TID -> R.color.rfid_col_tid;
+            case C_EPC_USER, B_UID_USER, GJB_CODE_USER, GB_CODE_USER -> R.color.rfid_col_user;
+            case C_EPC_RESERVED -> R.color.rfid_col_reserved;
+            default -> R.color.rfid_col_data;
+        };
+    }
+
+    private void bindColors(ViewHolder holder) {
+        android.content.Context context = holder.itemView.getContext();
+        int epcColor = ContextCompat.getColor(context, R.color.rfid_col_epc);
+        int dataColor = ContextCompat.getColor(context, dataColor(currentArea));
+        holder.index.setTextColor(ContextCompat.getColor(context, R.color.rfid_col_index));
+        holder.epcLabel.setTextColor(epcColor);
+        holder.epcLabel.setAlpha(0.65f);
+        holder.id.setTextColor(epcColor);
+        holder.dataLabel.setTextColor(dataColor);
+        holder.dataLabel.setAlpha(0.65f);
+        holder.data.setTextColor(dataColor);
+        holder.chipLabel.setTextColor(ContextCompat.getColor(context, R.color.rfid_col_index));
+        holder.chip.setTextColor(ContextCompat.getColor(context, R.color.rfid_col_chip));
+        holder.count.setTextColor(ContextCompat.getColor(context, R.color.rfid_col_count));
+    }
+
     private static int rssiColor(int rssi) {
         if (rssi == 0) {
             return R.color.rfid_text_muted;
@@ -162,11 +189,13 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
     final class ViewHolder extends RecyclerView.ViewHolder {
         final TextView index;
         final TextView id;
+        final TextView epcLabel;
         final TextView data;
         final TextView dataLabel;
         final TextView count;
         final TextView rssi;
         final TextView chip;
+        final TextView chipLabel;
         final View dataRow;
         final View chipRow;
 
@@ -174,11 +203,13 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             super(view);
             index = view.findViewById(R.id.tv_inventory_index);
             id = view.findViewById(R.id.tv_inventory_id);
+            epcLabel = view.findViewById(R.id.tv_inventory_epc_label);
             data = view.findViewById(R.id.tv_inventory_data);
             dataLabel = view.findViewById(R.id.tv_inventory_data_label);
             count = view.findViewById(R.id.tv_inventory_count);
             rssi = view.findViewById(R.id.tv_inventory_rssi);
             chip = view.findViewById(R.id.tv_inventory_chip);
+            chipLabel = view.findViewById(R.id.tv_inventory_chip_label);
             dataRow = view.findViewById(R.id.row_inventory_data);
             chipRow = view.findViewById(R.id.row_inventory_chip);
             view.setOnClickListener(ignored -> {

@@ -13,7 +13,7 @@
         android:layout_width="@dimen/dp_40"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/rfid_text_muted"
+        android:textColor="@color/rfid_col_index"
         android:textSize="@dimen/sp_12" />
 
     <LinearLayout
@@ -32,7 +32,7 @@
                 android:layout_width="@dimen/dp_36"
                 android:layout_height="wrap_content"
                 android:text="@string/inventory_item_epc"
-                android:textColor="@color/rfid_text_muted"
+                android:textColor="@color/rfid_col_epc"
                 android:textSize="@dimen/sp_11" />
 
             <TextView
@@ -43,7 +43,7 @@
                 android:ellipsize="end"
                 android:fontFamily="monospace"
                 android:maxLines="1"
-                android:textColor="@color/rfid_primary_soft"
+                android:textColor="@color/rfid_col_epc"
                 android:textSize="@dimen/sp_13" />
         </LinearLayout>
 
@@ -57,7 +57,7 @@
                 android:id="@+id/tv_inventory_data_label"
                 android:layout_width="@dimen/dp_36"
                 android:layout_height="wrap_content"
-                android:textColor="@color/rfid_text_muted"
+                android:textColor="@color/rfid_col_data"
                 android:textSize="@dimen/sp_11" />
 
             <TextView
@@ -68,7 +68,7 @@
                 android:ellipsize="end"
                 android:fontFamily="monospace"
                 android:maxLines="1"
-                android:textColor="@color/rfid_text_secondary"
+                android:textColor="@color/rfid_col_data"
                 android:textSize="@dimen/sp_13" />
         </LinearLayout>
 
@@ -83,7 +83,7 @@
                 android:layout_width="@dimen/dp_36"
                 android:layout_height="wrap_content"
                 android:text="@string/inventory_item_chip"
-                android:textColor="@color/rfid_text_muted"
+                android:textColor="@color/rfid_col_index"
                 android:textSize="@dimen/sp_11" />
 
             <TextView
@@ -93,7 +93,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/rfid_text"
+                android:textColor="@color/rfid_col_chip"
                 android:textSize="@dimen/sp_13" />
         </LinearLayout>
     </LinearLayout>
@@ -103,7 +103,7 @@
         android:layout_width="@dimen/dp_52"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/rfid_text"
+        android:textColor="@color/rfid_col_count"
         android:textSize="@dimen/sp_13" />
 
     <TextView

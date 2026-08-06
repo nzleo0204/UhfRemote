@@ -17,5 +17,13 @@
     <color name="rfid_text_muted">#64748B</color>
     <color name="rfid_line">#CBD5E1</color>
     <color name="rfid_input_guard">#330F172A</color>
+    <color name="rfid_col_index">#94A3B8</color>
+    <color name="rfid_col_epc">#2563EB</color>
+    <color name="rfid_col_tid">#7C3AED</color>
+    <color name="rfid_col_user">#0F766E</color>
+    <color name="rfid_col_reserved">#C2410C</color>
+    <color name="rfid_col_data">#475569</color>
+    <color name="rfid_col_count">#B45309</color>
+    <color name="rfid_col_chip">#0F172A</color>
     <color name="launcher_ic_background">#FFFFFF</color>
 </resources>
