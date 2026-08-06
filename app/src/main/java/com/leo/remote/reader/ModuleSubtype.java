@@ -48,6 +48,11 @@ public enum ModuleSubtype {
         return this == R2000 || this == R2000_PLUS || this == RM610;
     }
 
+    /** Single and low-power inventory are available only on R2000 modules. */
+    public boolean supportsInventoryModeSwitch() {
+        return this == R2000 || this == R2000_PLUS;
+    }
+
     public String getDisplayName() {
         return switch (this) {
             case R2000 -> "R2000";

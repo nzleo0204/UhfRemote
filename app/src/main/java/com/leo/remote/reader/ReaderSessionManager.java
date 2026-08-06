@@ -380,7 +380,12 @@ public final class ReaderSessionManager {
 
     public void setInventoryMode(int mode) {
         if (mode < 0 || mode > 2) { return; }
-        inventoryMode = state.getModuleSubtype() == ModuleSubtype.RM8011 ? 1 : mode;
+        ModuleSubtype subtype = state.getModuleSubtype();
+        inventoryMode = subtype.supportsInventoryModeSwitch() ? mode : 1;
+        if (inventoryMode != mode) {
+            Log.w(TAG, "inventory mode " + mode + " unsupported on " + subtype
+                    + "; fall back to high performance");
+        }
         if (configuration != null) {
             configCache.saveConfiguration(state.getModuleSubtype(), buildConfigurationSnapshot());
         }

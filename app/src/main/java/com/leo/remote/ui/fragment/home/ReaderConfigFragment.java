@@ -343,8 +343,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
                 : getString(R.string.config_q_value, value.qValue));
         updateInventoryAreaView(value);
-        workModeView.setText(readerState.getModuleSubtype() == ModuleSubtype.RM8011
-                ? workModeLabel(1) : workModeLabel(value.inventoryMode));
+        workModeView.setText(readerState.getModuleSubtype().supportsInventoryModeSwitch()
+                ? workModeLabel(value.inventoryMode) : workModeLabel(1));
         bindingUi = false;
     }
 
@@ -617,6 +617,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private void showWorkModeDialog() {
         if (!requireReaderOnline()) { return; }
+        if (!readerState.getModuleSubtype().supportsInventoryModeSwitch()) {
+            toast(R.string.config_work_mode_unsupported);
+            return;
+        }
         String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
         int selected = configuration == null ? 1 : configuration.inventoryMode;
         new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_work_mode)
@@ -795,8 +799,9 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 ? R.string.config_power_max_rm610 : R.string.config_power_max);
         powerValueView.setClickable(isRm610Discrete && connected);
         blfRow.setVisibility(isRm8011 ? View.GONE : View.VISIBLE);
-        workModeRow.setEnabled(!isRm8011 && connected);
-        if (isRm8011) {
+        boolean supportsModeSwitch = subtype.supportsInventoryModeSwitch();
+        workModeRow.setEnabled(supportsModeSwitch && connected);
+        if (!supportsModeSwitch) {
             workModeView.setText(workModeLabel(1));
         }
         protocolView.setText(readerState.getProtocol().getDisplayName());
