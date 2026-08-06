@@ -25,7 +25,8 @@ public interface UhfSdkGateway {
     ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException;
     int setPowerTenthsDbm(int powerTenthsDbm);
     int setBlfProfile(int profile);
-    int setQueryGroup(int session, int target);
+    /** Changes session while preserving the supplied target and selected values. */
+    int setSession(ModuleSubtype subtype, int session, int target, int selected);
     int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue, int retryCount,
             int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags);
     int setMagicQuery(int session, int target, int qValue);
@@ -33,7 +34,8 @@ public interface UhfSdkGateway {
     int[] getInventoryArea();
     Integer getPowerTenthsDbm();
     Integer getBlfProfile();
-    int[] getQueryGroup(ModuleSubtype subtype);
+    /** Returns {session, target, selected}, or null when the read fails. */
+    int[] getQueryValues(ModuleSubtype subtype);
     ReaderQParams getQParams(ModuleSubtype subtype);
     int applyInventoryMask(TagProtocol protocol, ModuleSubtype subtype, InventoryMaskConfig config);
     int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype);

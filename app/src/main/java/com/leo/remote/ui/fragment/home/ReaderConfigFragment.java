@@ -338,8 +338,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             powerValueView.setText(formatPower(value.powerTenthsDbm));
         }
         blfView.setText(blfLabel(value.blfProfile));
-        sessionView.setText(getString(R.string.config_session_format, value.session,
-                value.target == 0 ? "A" : "B"));
+        sessionView.setText(getString(R.string.config_session_value, value.session));
         qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
                 : getString(R.string.config_q_value, value.qValue));
         updateInventoryAreaView(value);
@@ -636,16 +635,24 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private void showSessionDialog() {
         if (!requireReaderOnline()) { return; }
+        if (!supportsSession(readerState.getProtocol())) {
+            toast(R.string.config_session_unsupported);
+            return;
+        }
         String[] labels = getResources().getStringArray(R.array.config_session_labels);
-        int selected = configuration == null ? 0 : configuration.session * 2 + configuration.target;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_session_target)
+        int selected = configuration == null ? 0 : configuration.session;
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_session)
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_session_target, labels[which],
-                            () -> session.setSessionTarget(which / 2, which % 2),
+                    confirmAndApply(R.string.config_session, labels[which],
+                            () -> session.setSession(which),
                             R.string.config_query_set_failed, () -> {});
                 }).setNegativeButton(R.string.common_cancel, null).show();
+    }
+
+    private static boolean supportsSession(TagProtocol protocol) {
+        return protocol == TagProtocol.ISO_18000_6C || protocol == TagProtocol.GB_T_29768;
     }
 
     private void showBlfDialog() {
@@ -805,6 +812,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             workModeView.setText(workModeLabel(1));
         }
         protocolView.setText(readerState.getProtocol().getDisplayName());
+        boolean sessionEnabled = supportsSession(readerState.getProtocol()) && connected;
+        View sessionRow = findViewById(R.id.row_config_session);
+        sessionRow.setEnabled(sessionEnabled);
+        sessionRow.setAlpha(sessionEnabled ? 1f : 0.45f);
         Log.d(TAG, "applyModuleUi subtype=" + subtype + " isRm8011=" + isRm8011
                 + " connected=" + connected);
     }

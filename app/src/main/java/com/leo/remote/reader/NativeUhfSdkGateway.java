@@ -156,7 +156,7 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     public ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException {
         Integer power = getPowerTenthsDbm();
         Integer blf = subtype == ModuleSubtype.RM8011 ? 0 : getBlfProfile();
-        int[] group = getQueryGroup(subtype);
+        int[] group = getQueryValues(subtype);
         ReaderQParams q = getQParams(subtype);
         if (power == null || blf == null || group == null || q == null) {
             throw new ReaderException("Unable to read reader configuration", -8);
@@ -182,15 +182,15 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public int[] getQueryGroup(ModuleSubtype subtype) {
+    public int[] getQueryValues(ModuleSubtype subtype) {
         if (subtype == ModuleSubtype.RM8011) {
             Parameters params = new Parameters();
             if (linkage.get_Query(params) != STATUS_OK) { return null; }
-            return new int[]{params.getSession(), params.getTarget()};
+            return new int[]{params.getSession(), params.getTarget(), params.getSel()};
         }
         TagGroup group = new TagGroup();
         if (linkage.Radio_GetQueryTagGroup(group) != STATUS_OK) { return null; }
-        return new int[]{group.session, group.target};
+        return new int[]{group.session, group.target, group.selected};
     }
 
     @Override
@@ -229,12 +229,20 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     public int setBlfProfile(int profile) { return linkage.Radio_SetCurrentLinkProfile(profile); }
 
     @Override
-    public int setQueryGroup(int session, int target) {
+    public int setSession(ModuleSubtype subtype, int session, int target, int selected) {
+        if (subtype == ModuleSubtype.RM8011) {
+            Parameters current = new Parameters();
+            int status = linkage.get_Query(current);
+            if (status != STATUS_OK) { return status; }
+            return linkage.set_Query(current.getDR(), current.getM(), current.getTRext(),
+                    selected, session, target, current.getQ());
+        }
         TagGroup current = new TagGroup();
         int status = linkage.Radio_GetQueryTagGroup(current);
         if (status != STATUS_OK) { return status; }
         current.session = session;
         current.target = target;
+        current.selected = selected;
         return linkage.Radio_SetQueryTagGroup(current);
     }
 

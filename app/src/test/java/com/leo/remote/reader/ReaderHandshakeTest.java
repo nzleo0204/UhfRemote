@@ -64,7 +64,8 @@ public class ReaderHandshakeTest {
         @Override public ReaderTag inventoryOnce(int timeoutMs) { return null; }
         @Override public int setPowerTenthsDbm(int powerTenthsDbm) { return 0; }
         @Override public int setBlfProfile(int profile) { return 0; }
-        @Override public int setQueryGroup(int session, int target) { return 0; }
+        @Override public int setSession(ModuleSubtype subtype, int session, int target,
+                int selected) { return 0; }
         @Override public int setQ(boolean dynamic, int qValue, int minQValue, int maxQValue,
                 int retryCount, int thresholdMultiplier, int toggleTarget, int repeatUntilNoTags) {
             return 0;
@@ -72,7 +73,7 @@ public class ReaderHandshakeTest {
         @Override public int setMagicQuery(int session, int target, int qValue) { return 0; }
         @Override public Integer getPowerTenthsDbm() { return 270; }
         @Override public Integer getBlfProfile() { return 1; }
-        @Override public int[] getQueryGroup(ModuleSubtype subtype) { return new int[]{1, 0}; }
+        @Override public int[] getQueryValues(ModuleSubtype subtype) { return new int[]{1, 0, 0}; }
         @Override public ReaderQParams getQParams(ModuleSubtype subtype) {
             return ReaderQParams.dynamic(4, 0, 15, 0, 1, 1);
         }

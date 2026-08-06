@@ -443,15 +443,25 @@ public final class ReaderSessionManager {
                         configuration.inventoryAddress, configuration.inventoryWordLen)));
     }
 
-    public CompletableFuture<Integer> setSessionTarget(int session, int target) {
+    /** Changes only Session; Target and the handshake Sel value are preserved. */
+    public CompletableFuture<Integer> setSession(int session) {
+        if (session < 0 || session > 3) {
+            return CompletableFuture.completedFuture(-31);
+        }
         return submitConnected(() -> {
-            int status = state.getModuleSubtype() == ModuleSubtype.RM8011
-                    ? gateway.setMagicQuery(session, target, configuration.qValue)
-                    : gateway.setQueryGroup(session, target);
-            return updateConfiguration(monitorSdkStatus(status), new ReaderConfiguration(configuration.powerTenthsDbm,
-                    inventoryMode, configuration.blfProfile, session, target,
-                    configuration.dynamicQ, configuration.qValue, configuration.qMinValue,
-                    configuration.qMaxValue, configuration.qRetryCount,
+            ModuleSubtype subtype = state.getModuleSubtype();
+            int target = configuration.target;
+            int selected = configCache.loadSelected(subtype);
+            int status = monitorSdkStatus(gateway.setSession(subtype, session, target, selected));
+            Log.i(TAG, "setSession S" + session + " target=" + target
+                    + " selected=" + selected + " status=" + status);
+            if (status == 0 && inventoryMaskApplied) {
+                gateway.applyInventoryMask(state.getProtocol(), subtype, inventoryMask);
+            }
+            return updateConfiguration(status, new ReaderConfiguration(
+                    configuration.powerTenthsDbm, inventoryMode, configuration.blfProfile,
+                    session, target, configuration.dynamicQ, configuration.qValue,
+                    configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
                     configuration.qThresholdMultiplier, configuration.qToggleTarget,
                     configuration.qRepeatUntilNoTags, configuration.inventoryArea,
                     configuration.inventoryAddress, configuration.inventoryWordLen));

@@ -90,8 +90,7 @@
     <string name="config_session">Session</string>
     <string name="config_session_s0">S0</string>
     <string name="config_session_value">S%1$d</string>
-    <string name="config_session_target">Session / Target</string>
-    <string name="config_session_format">S%1$d · %2$s</string>
+    <string name="config_session_unsupported">当前协议下 Session 无意义</string>
     <string name="config_blf_rate">Blf 速率</string>
     <string name="config_blf_fm0_40">DSB_ASK/FM0 · 40 kHz</string>
     <string name="config_blf_m2_250">PR_ASK/M2 · 250 kHz</string>
@@ -138,14 +137,10 @@
         <item>@string/config_work_mode_user</item>
     </string-array>
     <string-array name="config_session_labels">
-        <item>S0 / A</item>
-        <item>S0 / B</item>
-        <item>S1 / A</item>
-        <item>S1 / B</item>
-        <item>S2 / A</item>
-        <item>S2 / B</item>
-        <item>S3 / A</item>
-        <item>S3 / B</item>
+        <item>S0</item>
+        <item>S1</item>
+        <item>S2</item>
+        <item>S3</item>
     </string-array>
     <string-array name="config_blf_labels">
         <item>@string/config_blf_fm0_40</item>

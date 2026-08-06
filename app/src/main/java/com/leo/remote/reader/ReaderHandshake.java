@@ -91,15 +91,18 @@ final class ReaderHandshake {
         progress.accept(R.string.handshake_reading_session);
         int session = fallback.session;
         int target = fallback.target;
+        int selected = cache.loadSelected(subtype);
         try {
-            int[] group = gateway.getQueryGroup(subtype);
-            if (group != null && group.length >= 2) {
-                session = group[0];
-                target = group[1];
+            int[] values = gateway.getQueryValues(subtype);
+            if (values != null && values.length >= 3) {
+                session = values[0];
+                target = values[1];
+                selected = values[2];
             }
         } catch (RuntimeException error) {
             Log.w(TAG, "读取 Session 失败，使用缓存值 S" + session, error);
         }
+        cache.saveSelected(subtype, selected);
 
         progress.accept(R.string.handshake_reading_blf);
         int blf = fallback.blfProfile;

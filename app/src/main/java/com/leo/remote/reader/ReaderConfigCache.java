@@ -54,6 +54,15 @@ public final class ReaderConfigCache {
                         ReaderConfiguration.DEFAULT_INVENTORY_WORD_LEN));
     }
 
+    /** Keeps the handshake Sel value separate from the user-visible configuration. */
+    public void saveSelected(ModuleSubtype subtype, int selected) {
+        mmkv.encode(prefix(subtype) + "selected", selected);
+    }
+
+    public int loadSelected(ModuleSubtype subtype) {
+        return mmkv.decodeInt(prefix(subtype) + "selected", 0);
+    }
+
     public static ReaderConfiguration getDefaultConfiguration(ModuleSubtype subtype) {
         if (subtype == ModuleSubtype.RM8011) {
             return new ReaderConfiguration(100, 1, 0, 0, 0, false, 7);
