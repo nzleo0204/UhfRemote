@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RfidCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/rfid_panel_bg"
+    android:layout_marginHorizontal="@dimen/dp_16"
+    android:layout_marginBottom="@dimen/dp_8"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/dp_2">
+    android:padding="0dp">
 
     <LinearLayout
         android:id="@+id/row_inventory_mask_toggle"
@@ -15,7 +17,7 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/dp_16">
+        android:paddingHorizontal="@dimen/dp_12">
 
         <ImageView
             android:id="@+id/iv_inventory_mask_expand"
@@ -53,6 +55,28 @@
             android:textColor="@color/white"
             android:textSize="@dimen/sp_11"
             android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/fl_inventory_mask_switch_target"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp_8"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_inventory_mask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:clickable="false"
+                android:contentDescription="@string/inventory_mask_title"
+                android:focusable="false"
+                android:minWidth="0dp"
+                android:padding="0dp"
+                android:text="" />
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -60,7 +84,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingHorizontal="@dimen/dp_12"
         android:paddingBottom="@dimen/dp_12"
         android:visibility="gone">
 
@@ -182,15 +206,30 @@
             android:textColor="@color/rfid_text_muted"
             android:textSize="@dimen/sp_11" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_inventory_mask_toggle"
-            style="@style/RfidPrimaryButton"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_40"
             android:layout_marginTop="@dimen/dp_12"
-            android:fontFamily="sans-serif-medium"
-            android:stateListAnimator="@null"
-            android:text="@string/inventory_mask_apply"
-            android:textSize="@dimen/sp_14" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_inventory_mask_apply"
+                style="@style/RfidPrimaryButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/inventory_mask_apply"
+                android:textSize="@dimen/sp_14" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_inventory_mask_clear"
+                style="@style/RfidGhostButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp_12"
+                android:layout_weight="1"
+                android:text="@string/inventory_mask_cancel"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
