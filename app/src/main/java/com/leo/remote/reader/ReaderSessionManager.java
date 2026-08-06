@@ -499,6 +499,14 @@ public final class ReaderSessionManager {
         int status = gateway.applyInventoryParams(state.getProtocol(), area,
                 area == 0 ? 0 : address, area == 0 ? 0 : wordLen);
         InventoryMaskConfig activeMask = inventoryMask;
+        if (status == 0 && activeMask == null) {
+            status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
+                    state.getModuleSubtype()));
+            Log.i(TAG, "inventory selection reset before unmasked start status=" + status);
+            if (status == 0) {
+                configCache.saveSelected(state.getModuleSubtype(), 0);
+            }
+        }
         if (status == 0 && activeMask != null) {
             if (inventoryMaskProtocol != state.getProtocol()) {
                 inventoryMask = null;
@@ -575,7 +583,18 @@ public final class ReaderSessionManager {
     /** Clears only the active inventory Select criteria. */
     public CompletableFuture<Integer> clearInventoryMask() {
         if (inventoryMask == null) {
-            return CompletableFuture.completedFuture(0);
+            if (!state.isConnected()) {
+                return CompletableFuture.completedFuture(0);
+            }
+            return submitConnected(() -> {
+                int status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
+                        state.getModuleSubtype()));
+                Log.i(TAG, "clearInventoryMask without local mask status=" + status);
+                if (status == 0) {
+                    configCache.saveSelected(state.getModuleSubtype(), 0);
+                }
+                return status;
+            });
         }
         if (!state.isConnected()) {
             inventoryMask = null;
@@ -599,6 +618,7 @@ public final class ReaderSessionManager {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
+                configCache.saveSelected(state.getModuleSubtype(), 0);
                 notifyMask(null);
             }
             if (wasRunning) {
