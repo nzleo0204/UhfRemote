@@ -87,6 +87,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     protected void initView() {
+        session = ReaderSessionManager.getInstance(requireActivity().getApplication());
         startButton = findViewById(R.id.btn_inventory_start);
         totalView = findViewById(R.id.tv_inventory_total);
         emptyView = findViewById(R.id.tv_inventory_empty);
@@ -159,7 +160,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
                 return false;
             }
         });
-        updateMaskControls();
+        syncMaskFromSession();
     }
 
     @Override
@@ -173,7 +174,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     public void onResume() {
         super.onResume();
         maskExpanded = false;
-        updateMaskControls();
+        syncMaskFromSession();
     }
 
     @Override
@@ -189,6 +190,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     public void onReaderStateChanged(ReaderState state) {
         TagProtocol previousProtocol = readerState.getProtocol();
         readerState = state;
+        if (!isViewAlive()) { return; }
         if (previousProtocol != state.getProtocol()) {
             updateMaskBanks(state.getProtocol());
         }
@@ -203,6 +205,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onInventoryChanged(List<InventoryItem> items, long totalReads) {
+        if (!isViewAlive()) { return; }
         adapter.submitList(items);
         totalView.setText(getString(R.string.inventory_total, items.size()));
         emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
@@ -211,6 +214,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onReaderConfigurationChanged(ReaderConfiguration value) {
         configuration = value;
+        if (!isViewAlive()) { return; }
         applyColumnVisibility();
     }
 
@@ -531,6 +535,13 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     private boolean isViewAlive() {
         return getView() != null && isAdded();
+    }
+
+    private void syncMaskFromSession() {
+        activeMask = session.getInventoryMask();
+        if (activeMask != null) { bindMaskForm(activeMask); }
+        if (adapter != null) { adapter.setMaskActive(activeMask != null); }
+        updateMaskControls();
     }
 
     private void dismissMaskKeyboard() {

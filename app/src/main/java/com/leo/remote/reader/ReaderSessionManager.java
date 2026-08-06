@@ -598,6 +598,11 @@ public final class ReaderSessionManager {
         return inventoryMask != null;
     }
 
+    @Nullable
+    public InventoryMaskConfig getInventoryMask() {
+        return inventoryMask;
+    }
+
     public void setSingleTagMask(@Nullable InventoryMaskConfig config) {
         singleTagMask = config;
         notifySingleTagMask(config);
