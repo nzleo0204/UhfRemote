@@ -31,7 +31,7 @@
             android:orientation="vertical"
             android:paddingBottom="@dimen/dp_16">
 
-            <include layout="@layout/single_tag_mask_panel" />
+            <include layout="@layout/inventory_mask_panel" />
 
             <LinearLayout
                 style="@style/RfidCard"

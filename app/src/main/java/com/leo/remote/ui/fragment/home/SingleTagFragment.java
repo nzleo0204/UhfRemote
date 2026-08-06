@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputLayout;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
@@ -60,17 +59,14 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private EditText maskOffsetView;
     private EditText maskLengthView;
     private EditText maskHexView;
-    private MaterialButton maskApplyButton;
-    private MaterialButton maskClearButton;
+    private MaterialButton maskToggleButton;
     private TextView maskLengthHintView;
     private TextView maskStatusView;
     private ImageView maskExpandView;
-    private SwitchMaterial maskSwitch;
     private ReaderTag currentTag;
     private ReaderState readerState = ReaderState.disconnected();
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
-    private boolean bindingMaskSwitch;
 
     public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
@@ -94,12 +90,10 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         maskOffsetView = findViewById(R.id.et_inventory_mask_offset);
         maskLengthView = findViewById(R.id.et_inventory_mask_length);
         maskHexView = findViewById(R.id.et_inventory_mask_hex);
-        maskApplyButton = findViewById(R.id.btn_inventory_mask_apply);
-        maskClearButton = findViewById(R.id.btn_inventory_mask_clear);
+        maskToggleButton = findViewById(R.id.btn_inventory_mask_toggle);
         maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
         maskStatusView = findViewById(R.id.tv_inventory_mask_status);
         maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
-        maskSwitch = findViewById(R.id.sw_inventory_mask);
 
         maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -137,26 +131,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             maskExpanded = !maskExpanded;
             updateMaskControls();
         });
-        maskSwitch.setOnCheckedChangeListener((button, checked) -> {
-            if (bindingMaskSwitch) { return; }
-            if (checked) {
-                maskExpanded = true;
-                applyMask(true);
-            } else if (activeMask != null) {
-                clearMask();
-            } else {
-                updateMaskControls();
-            }
-        });
-        findViewById(R.id.fl_inventory_mask_switch_target).setOnClickListener(view -> {
-            if (!readerState.isConnected()) {
-                requireReaderOnline();
-                return;
-            }
-            maskSwitch.performClick();
-        });
-        maskApplyButton.setOnClickListener(view -> applyMask());
-        maskClearButton.setOnClickListener(view -> clearMask());
+        maskToggleButton.setOnClickListener(view -> toggleMask());
         findViewById(R.id.single_tag_root).setOnClickListener(view -> dismissMaskKeyboard());
         bindTag(null);
         refreshOperations();
@@ -200,7 +175,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onSingleTagMaskChanged(@Nullable InventoryMaskConfig config) {
         activeMask = config;
-        setMaskSwitchChecked(config != null);
         if (config != null) { bindMaskForm(config); }
         updateMaskControls();
     }
@@ -382,25 +356,26 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     // ========== Mask management ==========
 
     @SingleClick
-    private void applyMask() {
-        applyMask(false);
+    private void toggleMask() {
+        if (activeMask != null) {
+            clearMask();
+        } else {
+            applyMask();
+        }
     }
 
-    private void applyMask(boolean switchedOn) {
+    private void applyMask() {
         if (!readerState.isConnected()) {
-            if (switchedOn) { setMaskSwitchChecked(false); }
             requireReaderOnline();
             return;
         }
         try {
             InventoryMaskConfig config = parseMaskForm();
             session.setSingleTagMask(config);
-            setMaskSwitchChecked(true);
             Log.i(TAG, "single-tag mask set bank=" + config.bank + " offsetBits="
                     + config.offsetBits + " lengthBits=" + config.lengthBits);
             toast(R.string.inventory_mask_applied);
         } catch (IllegalArgumentException error) {
-            setMaskSwitchChecked(false);
             maskExpanded = true;
             focusInvalidMaskField();
             toast(error.getMessage());
@@ -408,10 +383,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateMaskControls();
     }
 
-    @SingleClick
     private void clearMask() {
         session.setSingleTagMask(null);
-        setMaskSwitchChecked(false);
         Log.i(TAG, "single-tag mask cleared");
         toast(R.string.inventory_mask_cleared);
         updateMaskControls();
@@ -528,13 +501,20 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         setEnabledRecursively(maskPanelContent, connected);
         maskOffsetView.setEnabled(connected
                 && readerState.getProtocol() != TagProtocol.ISO_18000_6B);
-        maskSwitch.setEnabled(connected);
-        maskApplyButton.setEnabled(connected && formValid);
-        maskClearButton.setEnabled(connected && activeMask != null);
-        maskStatusView.setVisibility(activeMask == null ? View.GONE : View.VISIBLE);
-        if (activeMask != null) {
+        boolean masked = activeMask != null;
+        maskToggleButton.setText(masked
+                ? R.string.inventory_mask_cancel : R.string.inventory_mask_apply);
+        maskToggleButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(),
+                masked ? R.color.rfid_danger_button_background
+                        : R.color.rfid_primary_button_background));
+        maskToggleButton.setTextColor(ContextCompat.getColorStateList(requireContext(),
+                R.color.rfid_primary_button_text));
+        maskToggleButton.setEnabled(connected && (masked || formValid));
+        maskStatusView.setVisibility(masked ? View.VISIBLE : View.GONE);
+        if (masked) {
             Object bank = maskBankSpinner.getSelectedItem();
             String bankLabel = bank == null ? "" : bank.toString();
+            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_red_bg);
             maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
                     activeMask.offsetBits, activeMask.lengthBits));
         }
@@ -588,12 +568,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         for (int i = 0; i < group.getChildCount(); i++) {
             setEnabledRecursively(group.getChildAt(i), enabled);
         }
-    }
-
-    private void setMaskSwitchChecked(boolean checked) {
-        bindingMaskSwitch = true;
-        maskSwitch.setChecked(checked);
-        bindingMaskSwitch = false;
     }
 
     private void dismissMaskKeyboard() {
