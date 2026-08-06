@@ -38,7 +38,7 @@ public enum ModuleSubtype {
             return EnumSet.of(TagProtocol.ISO_18000_6C);
         }
         if (this == RM610) {
-            // RM610 支持 6C + GJB 7377.1
+            // RM610 支持 ISO 18000-6C + GJB_7377
             return EnumSet.of(TagProtocol.ISO_18000_6C, TagProtocol.GJB_7377_1);
         }
         return EnumSet.noneOf(TagProtocol.class);
