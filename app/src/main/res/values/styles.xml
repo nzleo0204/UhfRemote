@@ -163,11 +163,39 @@
     </style>
 
     <style name="ReaderDeviceInfoValue" parent="TextAppearance.MaterialComponents.Body2">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">monospace</item>
         <item name="android:gravity">end</item>
         <item name="android:textColor">@color/rfid_text</item>
         <item name="android:textSize">@dimen/sp_13</item>
+    </style>
+
+    <style name="ReaderDeviceInfoGroup" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/dp_12</item>
+        <item name="android:layout_marginBottom">@dimen/dp_2</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">@color/rfid_text_muted</item>
+        <item name="android:textSize">@dimen/sp_11</item>
+    </style>
+
+    <style name="ReaderDeviceInfoRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingTop">@dimen/dp_6</item>
+        <item name="android:paddingBottom">@dimen/dp_6</item>
+    </style>
+
+    <style name="ReaderDeviceInfoDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/dp_1</item>
+        <item name="android:layout_marginTop">@dimen/dp_8</item>
+        <item name="android:background">@color/rfid_line</item>
     </style>
 
     <style name="InventoryDetailLabel" parent="TextAppearance.MaterialComponents.Body2">

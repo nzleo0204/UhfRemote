@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -25,9 +26,8 @@ public final class ReaderDeviceInfoDialog extends DialogFragment implements Read
         session = ReaderSessionManager.getInstance(requireActivity().getApplication());
         bind(view, session.getState());
         return new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("设备信息")
                 .setView(view)
-                .setPositiveButton("关闭", null)
+                .setPositiveButton(R.string.device_info_close, null)
                 .create();
     }
 
@@ -48,20 +48,21 @@ public final class ReaderDeviceInfoDialog extends DialogFragment implements Read
         if (!state.isConnected()) { dismissAllowingStateLoss(); }
     }
 
-    private static void bind(View view, ReaderState state) {
-        set(view, R.id.tv_device_info_transport,
-                state.getTransport() == TransportType.BLE ? "蓝牙" : "Wi-Fi");
+    private void bind(View view, ReaderState state) {
+        boolean ble = state.getTransport() == TransportType.BLE;
+        ((ImageView) view.findViewById(R.id.iv_device_info_icon)).setImageResource(
+                ble ? R.drawable.rfid_bluetooth_ic : R.drawable.rfid_wifi_ic);
         set(view, R.id.tv_device_info_name,
-                state.getTransport() == TransportType.BLE ? state.getDeviceName() : "Wi-Fi 读写器");
+                ble ? state.getDeviceName() : getString(R.string.device_info_name_wifi));
+        set(view, R.id.tv_device_info_protocol, state.getProtocol().getDisplayName());
+        set(view, R.id.tv_device_info_transport, getString(ble
+                ? R.string.device_info_transport_ble : R.string.device_info_transport_wifi));
         set(view, R.id.tv_device_info_address, state.getAddress());
         set(view, R.id.tv_device_info_board_serial, state.getBoardSerial());
         set(view, R.id.tv_device_info_board_version, state.getBoardVersion());
-        set(view, R.id.tv_device_info_subtype_raw,
-                state.getRawModuleSubtype() == Integer.MIN_VALUE ? "" : String.valueOf(state.getRawModuleSubtype()));
         set(view, R.id.tv_device_info_subtype, state.getModuleSubtype().getDisplayName());
         set(view, R.id.tv_device_info_module_serial, state.getModuleSerial());
         set(view, R.id.tv_device_info_module_version, state.getModuleVersion());
-        set(view, R.id.tv_device_info_protocol, state.getProtocol().getDisplayName());
     }
 
     private static void set(View view, int id, String value) {

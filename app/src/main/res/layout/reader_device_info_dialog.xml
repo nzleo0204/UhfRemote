@@ -4,52 +4,147 @@
     android:layout_height="wrap_content"
     android:fillViewport="true">
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dp_8"
-        android:shrinkColumns="1"
-        android:stretchColumns="1">
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/dp_20"
+        android:paddingTop="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_4">
 
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="传输方式" />
-            <TextView android:id="@+id/tv_device_info_transport" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="设备名称" />
-            <TextView android:id="@+id/tv_device_info_name" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="地址 / IP" />
-            <TextView android:id="@+id/tv_device_info_address" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="板卡序列号" />
-            <TextView android:id="@+id/tv_device_info_board_serial" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="板卡版本" />
-            <TextView android:id="@+id/tv_device_info_board_version" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="子类型原始值" />
-            <TextView android:id="@+id/tv_device_info_subtype_raw" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="当前子模块" />
-            <TextView android:id="@+id/tv_device_info_subtype" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="RF 模块序列号" />
-            <TextView android:id="@+id/tv_device_info_module_serial" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="RF 模块版本" />
-            <TextView android:id="@+id/tv_device_info_module_version" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-        <TableRow android:paddingTop="@dimen/dp_6" android:paddingBottom="@dimen/dp_6">
-            <TextView style="@style/ReaderDeviceInfoLabel" android:text="当前协议" />
-            <TextView android:id="@+id/tv_device_info_protocol" style="@style/ReaderDeviceInfoValue" />
-        </TableRow>
-    </TableLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_device_info_icon"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:background="@drawable/rfid_chip_blue_bg"
+                android:contentDescription="@null"
+                android:padding="@dimen/dp_8"
+                android:src="@drawable/rfid_bluetooth_ic" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_12"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_device_info_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_16" />
+
+                <TextView
+                    android:id="@+id/tv_device_info_protocol"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_2"
+                    android:singleLine="true"
+                    android:textColor="@color/rfid_text_muted"
+                    android:textSize="@dimen/sp_12" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_device_info_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rfid_chip_green_bg"
+                android:paddingHorizontal="@dimen/dp_8"
+                android:paddingVertical="@dimen/dp_2"
+                android:text="@string/device_info_connected"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_11" />
+        </LinearLayout>
+
+        <View style="@style/ReaderDeviceInfoDivider" />
+
+        <TextView
+            style="@style/ReaderDeviceInfoGroup"
+            android:text="@string/device_info_group_connection" />
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_transport" />
+            <TextView
+                android:id="@+id/tv_device_info_transport"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_address" />
+            <TextView
+                android:id="@+id/tv_device_info_address"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <View style="@style/ReaderDeviceInfoDivider" />
+
+        <TextView
+            style="@style/ReaderDeviceInfoGroup"
+            android:text="@string/device_info_group_board" />
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_serial" />
+            <TextView
+                android:id="@+id/tv_device_info_board_serial"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_version" />
+            <TextView
+                android:id="@+id/tv_device_info_board_version"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <View style="@style/ReaderDeviceInfoDivider" />
+
+        <TextView
+            style="@style/ReaderDeviceInfoGroup"
+            android:text="@string/device_info_group_module" />
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_model" />
+            <TextView
+                android:id="@+id/tv_device_info_subtype"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_serial" />
+            <TextView
+                android:id="@+id/tv_device_info_module_serial"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ReaderDeviceInfoRow">
+            <TextView
+                style="@style/ReaderDeviceInfoLabel"
+                android:text="@string/device_info_version" />
+            <TextView
+                android:id="@+id/tv_device_info_module_version"
+                style="@style/ReaderDeviceInfoValue" />
+        </LinearLayout>
+    </LinearLayout>
 </ScrollView>
