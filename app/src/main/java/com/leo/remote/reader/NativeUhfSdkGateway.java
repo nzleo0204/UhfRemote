@@ -23,8 +23,6 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     private static final String TAG = "UhfReader";
     private static final int STATUS_OK = 0;
     private final Linkage linkage = new Linkage();
-    /** 掩码下发前的 Query Sel 快照，取消掩码时还原。 */
-    private Integer savedSelected;
 
     @Override
     public int initialize() { return linkage.initRFID(); }
@@ -278,7 +276,6 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
                     Math.min(byteLength, criteria.maskData.length));
             return linkage.set18K6BSelectCriteria(criteria);
         }
-        saveSelectedIfAbsent(subtype);
         int status = setSelectValue(subtype, 2);
         if (status != STATUS_OK) {
             return status;
@@ -315,7 +312,6 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
             System.arraycopy(id, 0, criteria.maskData, 0, Math.min(id.length, criteria.maskData.length));
             return linkage.set18K6BSelectCriteria(criteria);
         }
-        saveSelectedIfAbsent(subtype);
         int status = setSelectValue(subtype, 2);
         if (status != STATUS_OK) {
             return status;
@@ -342,9 +338,7 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
         if (protocol == TagProtocol.ISO_18000_6B) {
             return linkage.set18K6BSelectCriteria(new Select6BCriteria(0));
         }
-        int selected = savedSelected == null ? 0 : savedSelected;
-        int status = setSelectValue(subtype, selected);
-        savedSelected = null;
+        int status = setSelectValue(subtype, 0);
         if (status != STATUS_OK) {
             return status;
         }
@@ -355,28 +349,14 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
         }
         criteria.selectorIdx = 0;
         criteria.status = 0;
+        criteria.bank = 0;
+        criteria.offset = 0;
+        criteria.length = 0;
         criteria.session = 0;
         criteria.jq = 0;
         criteria.action = 0;
+        criteria.maskData = new byte[64];
         return linkage.set18K6CSelectCriteria(criteria);
-    }
-
-    /** 保存当前 Sel 值，仅首次应用掩码时保存。 */
-    private void saveSelectedIfAbsent(ModuleSubtype subtype) {
-        if (savedSelected != null) {
-            return;
-        }
-        if (subtype == ModuleSubtype.RM8011) {
-            Parameters current = new Parameters();
-            if (linkage.get_Query(current) == STATUS_OK) {
-                savedSelected = current.getSel();
-            }
-            return;
-        }
-        TagGroup tagGroup = new TagGroup();
-        if (linkage.Radio_GetQueryTagGroup(tagGroup) == STATUS_OK) {
-            savedSelected = tagGroup.selected;
-        }
     }
 
     /** 以指定 Sel 值更新 Query，保留其他 Query 参数。 */

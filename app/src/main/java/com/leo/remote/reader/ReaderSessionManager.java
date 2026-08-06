@@ -472,48 +472,51 @@ public final class ReaderSessionManager {
     }
 
     public CompletableFuture<Integer> startInventory() {
-        return submitConnected(() -> {
-            ReaderConfiguration current = configuration;
-            int area = current == null ? 0 : current.inventoryArea;
-            int address = current == null ? 0 : current.inventoryAddress;
-            int wordLen = current == null ? 0 : current.inventoryWordLen;
-            int status = gateway.applyInventoryParams(state.getProtocol(), area,
-                    area == 0 ? 0 : address, area == 0 ? 0 : wordLen);
-            InventoryMaskConfig activeMask = inventoryMask;
-            if (status == 0 && activeMask != null) {
-                if (inventoryMaskProtocol != state.getProtocol()) {
-                    inventoryMask = null;
-                    inventoryMaskProtocol = null;
-                    inventoryMaskApplied = false;
-                    notifyMask(null);
-                    Log.i(TAG, "discard inventory mask after protocol mismatch");
-                } else {
-                    status = gateway.applyInventoryMask(state.getProtocol(), state.getModuleSubtype(),
-                            activeMask);
-                    Log.i(TAG, "inventory mask re-applied on start status=" + status);
-                    inventoryMaskApplied = status == 0;
+        return submitConnected(this::startInventoryInternal);
+    }
+
+    /** Starts inventory on the SDK executor with the current mask flag. */
+    private int startInventoryInternal() {
+        ReaderConfiguration current = configuration;
+        int area = current == null ? 0 : current.inventoryArea;
+        int address = current == null ? 0 : current.inventoryAddress;
+        int wordLen = current == null ? 0 : current.inventoryWordLen;
+        int status = gateway.applyInventoryParams(state.getProtocol(), area,
+                area == 0 ? 0 : address, area == 0 ? 0 : wordLen);
+        InventoryMaskConfig activeMask = inventoryMask;
+        if (status == 0 && activeMask != null) {
+            if (inventoryMaskProtocol != state.getProtocol()) {
+                inventoryMask = null;
+                inventoryMaskProtocol = null;
+                inventoryMaskApplied = false;
+                notifyMask(null);
+                Log.i(TAG, "discard inventory mask after protocol mismatch");
+            } else {
+                status = gateway.applyInventoryMask(state.getProtocol(), state.getModuleSubtype(),
+                        activeMask);
+                Log.i(TAG, "inventory mask re-applied on start status=" + status);
+                inventoryMaskApplied = status == 0;
+            }
+        }
+        if (status == 0 && inventoryMode == 2) {
+            int schedulerStatus = gateway.setLowPowerScheduler(0, 30, 100);
+            if (schedulerStatus == STATUS_UNSUPPORTED) {
+                Log.w(TAG, "low-power inventory scheduler is unsupported; "
+                        + "continue with reader mode 2");
+            } else {
+                Log.i(TAG, "low-power inventory scheduler status=" + schedulerStatus);
+                if (schedulerStatus != 0) {
+                    return schedulerStatus;
                 }
             }
-            if (status == 0 && inventoryMode == 2) {
-                int schedulerStatus = gateway.setLowPowerScheduler(0, 30, 100);
-                if (schedulerStatus == STATUS_UNSUPPORTED) {
-                    Log.w(TAG, "low-power inventory scheduler is unsupported; "
-                            + "continue with reader mode 2");
-                } else {
-                    Log.i(TAG, "low-power inventory scheduler status=" + schedulerStatus);
-                    if (schedulerStatus != 0) {
-                        return schedulerStatus;
-                    }
-                }
-            }
-            int maskFlag = inventoryMaskApplied ? 1 : 0;
-            if (status == 0) { status = gateway.startInventory(inventoryMode, maskFlag); }
-            status = monitorSdkStatus(status);
-            if (status == 0) {
-                publish(state.buildUpon().inventoryRunning(true).build());
-            }
-            return status;
-        });
+        }
+        int maskFlag = inventoryMaskApplied ? 1 : 0;
+        if (status == 0) { status = gateway.startInventory(inventoryMode, maskFlag); }
+        status = monitorSdkStatus(status);
+        if (status == 0) {
+            publish(state.buildUpon().inventoryRunning(true).build());
+        }
+        return status;
     }
 
     public CompletableFuture<Integer> stopInventory() {
@@ -531,6 +534,11 @@ public final class ReaderSessionManager {
     public CompletableFuture<Integer> applyInventoryMask(@NonNull InventoryMaskConfig config) {
         return submitConnected(() -> {
             TagProtocol protocol = state.getProtocol();
+            boolean wasRunning = state.isInventoryRunning();
+            if (wasRunning) {
+                int stopStatus = stopInventoryInternal();
+                if (stopStatus != 0) { return stopStatus; }
+            }
             int status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
                     state.getModuleSubtype(), config));
             Log.i(TAG, "applyInventoryMask status=" + status + " bank=" + config.bank
@@ -540,6 +548,10 @@ public final class ReaderSessionManager {
                 inventoryMaskProtocol = protocol;
                 inventoryMaskApplied = true;
                 notifyMask(config);
+            }
+            if (wasRunning) {
+                int restartStatus = startInventoryInternal();
+                if (status == 0 && restartStatus != 0) { status = restartStatus; }
             }
             return status;
         });
@@ -560,6 +572,11 @@ public final class ReaderSessionManager {
         return submitConnected(() -> {
             TagProtocol protocol = inventoryMaskProtocol == null
                     ? state.getProtocol() : inventoryMaskProtocol;
+            boolean wasRunning = state.isInventoryRunning();
+            if (wasRunning) {
+                int stopStatus = stopInventoryInternal();
+                if (stopStatus != 0) { return stopStatus; }
+            }
             int status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
                     state.getModuleSubtype()));
             Log.i(TAG, "clearInventoryMask status=" + status);
@@ -568,6 +585,10 @@ public final class ReaderSessionManager {
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
                 notifyMask(null);
+            }
+            if (wasRunning) {
+                int restartStatus = startInventoryInternal();
+                if (status == 0 && restartStatus != 0) { status = restartStatus; }
             }
             return status;
         });
