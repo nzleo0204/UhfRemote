@@ -16,30 +16,35 @@ public final class InventoryRangeDialog {
     public static final class Builder extends StyleDialog.Builder<Builder> {
         private final RegexEditText addressView;
         private final RegexEditText lengthView;
-        private final android.widget.TextView hintView;
         @Nullable
         private OnListener listener;
+        private int defaultAddress = 0;
+        private int defaultLength = 0;
 
         public Builder(@NonNull Context context) {
             super(context);
             setCustomView(R.layout.dialog_inventory_range_input);
+            // 增大弹窗宽度，避免误触
+            setWidth((int) (context.getResources().getDisplayMetrics().widthPixels * 0.8));
             addressView = findViewById(R.id.et_inventory_range_addr);
             lengthView = findViewById(R.id.et_inventory_range_len);
-            hintView = findViewById(R.id.tv_inventory_range_recommendation);
         }
 
         public Builder setAddress(int address) {
-            addressView.setText(String.valueOf(address));
+            this.defaultAddress = address;
+            // 使用 post 延迟设置，确保视图已创建
+            if (addressView != null) {
+                addressView.post(() -> addressView.setText(String.valueOf(address)));
+            }
             return this;
         }
 
         public Builder setLength(int length) {
-            lengthView.setText(String.valueOf(length));
-            return this;
-        }
-
-        public Builder setHint(@Nullable CharSequence hint) {
-            hintView.setText(hint);
+            this.defaultLength = length;
+            // 使用 post 延迟设置，确保视图已创建
+            if (lengthView != null) {
+                lengthView.post(() -> lengthView.setText(String.valueOf(length)));
+            }
             return this;
         }
 
@@ -58,9 +63,15 @@ public final class InventoryRangeDialog {
             }
             if (view.getId() != R.id.tv_ui_confirm) { return; }
 
+            // 解析用户输入，如果输入框为空则使用默认值
             Integer address = parse(addressView);
             Integer length = parse(lengthView);
-            if (address == null || address < 0 || length == null || length < 0
+
+            // 如果用户没有输入，使用默认值
+            if (address == null) { address = defaultAddress; }
+            if (length == null) { length = defaultLength; }
+
+            if (address < 0 || length < 0
                     || length > ReaderConfiguration.MAX_INVENTORY_WORD_LEN) {
                 if (listener != null) { listener.onInvalid(getDialog()); }
                 return;

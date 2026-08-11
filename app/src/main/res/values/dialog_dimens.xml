@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- 弹窗设计规范 - 参照原框架风格 -->
+    <!-- ============================================ -->
+
+    <!-- 字体大小 -->
+    <dimen name="dialog_title_text_size">18sp</dimen>
+    <dimen name="dialog_subtitle_text_size">14sp</dimen>
+    <dimen name="dialog_body_text_size">15sp</dimen>
+    <dimen name="dialog_label_text_size">14sp</dimen>
+    <dimen name="dialog_value_text_size">14sp</dimen>
+    <dimen name="dialog_hint_text_size">13sp</dimen>
+
+    <!-- 间距 -->
+    <dimen name="dialog_padding">20dp</dimen>
+    <dimen name="dialog_title_margin_bottom">12dp</dimen>
+    <dimen name="dialog_section_margin_top">16dp</dimen>
+    <dimen name="dialog_row_spacing">10dp</dimen>
+    <dimen name="dialog_button_margin_top">20dp</dimen>
+
+    <!-- 圆角（参照原框架 5dp） -->
+    <dimen name="dialog_corner_radius">8dp</dimen>
+    <dimen name="dialog_button_corner_radius">8dp</dimen>
+    <dimen name="dialog_chip_corner_radius">6dp</dimen>
+
+    <!-- 高度 -->
+    <dimen name="dialog_title_height">52dp</dimen>
+    <dimen name="dialog_button_height">46dp</dimen>
+    <dimen name="dialog_row_min_height">44dp</dimen>
+</resources>

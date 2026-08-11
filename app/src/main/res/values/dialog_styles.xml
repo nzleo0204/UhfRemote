@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- 弹窗样式 - 参照原框架风格 -->
+    <!-- ============================================ -->
+
+    <!-- 弹窗标题样式（不加粗） -->
+    <style name="DialogTitle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/rfid_text</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- 弹窗副标题样式 -->
+    <style name="DialogSubtitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/rfid_text_muted</item>
+        <item name="android:gravity">center</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <!-- 弹窗正文样式 -->
+    <style name="DialogBody">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/rfid_text</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <!-- 弹窗标签样式（左侧，不加粗） -->
+    <style name="DialogLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/rfid_text_secondary</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+    <!-- 弹窗值样式（右侧，不加粗） -->
+    <style name="DialogValue">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1.5</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/rfid_text</item>
+        <item name="android:gravity">end|center_vertical</item>
+    </style>
+
+    <!-- 弹窗行样式 -->
+    <style name="DialogRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingVertical">10dp</item>
+    </style>
+
+    <!-- 弹窗分组标题样式（小字号，大写） -->
+    <style name="DialogGroupTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/rfid_text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:paddingVertical">6dp</item>
+    </style>
+
+    <!-- 弹窗分割线样式 -->
+    <style name="DialogDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/rfid_line</item>
+        <item name="android:layout_marginVertical">12dp</item>
+    </style>
+</resources>

@@ -30,8 +30,8 @@ import java.util.Locale;
 @SuppressLint("CustomSplashScreen")
 public final class SplashActivity extends AppActivity {
 
-    private LottieAnimationView mLottieView;
-    private SlantedTextView mBuildTypeView;
+    private LottieAnimationView lottieView;
+    private SlantedTextView buildTypeView;
 
     @Override
     protected int getLayoutId() {
@@ -40,8 +40,8 @@ public final class SplashActivity extends AppActivity {
 
     @Override
     protected void initView() {
-        mLottieView = findViewById(R.id.lav_splash_lottie);
-        mBuildTypeView = findViewById(R.id.iv_splash_build_type);
+        lottieView = findViewById(R.id.lav_splash_lottie);
+        buildTypeView = findViewById(R.id.iv_splash_build_type);
 
         // 禁用返回键
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -53,11 +53,11 @@ public final class SplashActivity extends AppActivity {
         });
 
         // 设置动画监听
-        mLottieView.addAnimatorListener(new AnimatorListenerAdapter() {
+        lottieView.addAnimatorListener(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mLottieView.removeAnimatorListener(this);
+                lottieView.removeAnimatorListener(this);
 
                 if (InitManager.isAgreePrivacy(SplashActivity.this)) {
                     agreePrivacyAfter();
@@ -87,10 +87,10 @@ public final class SplashActivity extends AppActivity {
     @Override
     protected void initData() {
         if (AppConfig.isDebug()) {
-            mBuildTypeView.setVisibility(View.VISIBLE);
-            mBuildTypeView.setText(AppConfig.getBuildType().toUpperCase(Locale.ROOT));
+            buildTypeView.setVisibility(View.VISIBLE);
+            buildTypeView.setText(AppConfig.getBuildType().toUpperCase(Locale.ROOT));
         } else {
-            mBuildTypeView.setVisibility(View.INVISIBLE);
+            buildTypeView.setVisibility(View.INVISIBLE);
         }
 
     }

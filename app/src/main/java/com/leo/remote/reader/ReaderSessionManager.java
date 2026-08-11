@@ -51,6 +51,7 @@ public final class ReaderSessionManager {
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
     private volatile boolean inventoryMaskApplied;
+    private final InventoryMaskSelection inventoryMaskSelection = new InventoryMaskSelection();
     private volatile InventoryMaskConfig singleTagMask;
     private volatile int inventoryMode = 1;
     private volatile boolean pendingDisconnectAlert;
@@ -337,12 +338,13 @@ public final class ReaderSessionManager {
             if (status != 0) { return status; }
             if (inventoryMask != null) {
                 status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
-                        state.getModuleSubtype()));
+                        state.getModuleSubtype(), inventoryMaskRestoreValue()));
                 Log.i(TAG, "clear inventory mask before protocol switch status=" + status);
                 if (status != 0) { return status; }
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
+                inventoryMaskSelection.clear();
                 notifyMask(null);
             }
             status = monitorSdkStatus(gateway.setProtocol(protocol));
@@ -499,19 +501,12 @@ public final class ReaderSessionManager {
         int status = gateway.applyInventoryParams(state.getProtocol(), area,
                 area == 0 ? 0 : address, area == 0 ? 0 : wordLen);
         InventoryMaskConfig activeMask = inventoryMask;
-        if (status == 0 && activeMask == null) {
-            status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
-                    state.getModuleSubtype()));
-            Log.i(TAG, "inventory selection reset before unmasked start status=" + status);
-            if (status == 0) {
-                configCache.saveSelected(state.getModuleSubtype(), 0);
-            }
-        }
         if (status == 0 && activeMask != null) {
             if (inventoryMaskProtocol != state.getProtocol()) {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
+                inventoryMaskSelection.clear();
                 notifyMask(null);
                 Log.i(TAG, "discard inventory mask after protocol mismatch");
             } else {
@@ -562,8 +557,18 @@ public final class ReaderSessionManager {
                 int stopStatus = stopInventoryInternal();
                 if (stopStatus != 0) { return stopStatus; }
             }
-            int status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
-                    state.getModuleSubtype(), config));
+            ModuleSubtype subtype = state.getModuleSubtype();
+            boolean capturedNow = !inventoryMaskSelection.isCaptured();
+            if (capturedNow && !captureInventoryMaskSelection(subtype)) {
+                if (wasRunning) { startInventoryInternal(); }
+                return -45;
+            }
+            int status = gateway.applyInventoryMask(protocol, subtype, config);
+            if (status != 0 && capturedNow) {
+                gateway.clearInventoryMask(protocol, subtype, inventoryMaskRestoreValue());
+                inventoryMaskSelection.clear();
+            }
+            status = monitorSdkStatus(status);
             Log.i(TAG, "applyInventoryMask status=" + status + " bank=" + config.bank
                     + " offsetBits=" + config.offsetBits + " lengthBits=" + config.lengthBits);
             if (status == 0) {
@@ -583,23 +588,13 @@ public final class ReaderSessionManager {
     /** Clears only the active inventory Select criteria. */
     public CompletableFuture<Integer> clearInventoryMask() {
         if (inventoryMask == null) {
-            if (!state.isConnected()) {
-                return CompletableFuture.completedFuture(0);
-            }
-            return submitConnected(() -> {
-                int status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
-                        state.getModuleSubtype()));
-                Log.i(TAG, "clearInventoryMask without local mask status=" + status);
-                if (status == 0) {
-                    configCache.saveSelected(state.getModuleSubtype(), 0);
-                }
-                return status;
-            });
+            return CompletableFuture.completedFuture(0);
         }
         if (!state.isConnected()) {
             inventoryMask = null;
             inventoryMaskProtocol = null;
             inventoryMaskApplied = false;
+            inventoryMaskSelection.clear();
             notifyMask(null);
             return CompletableFuture.completedFuture(0);
         }
@@ -612,13 +607,14 @@ public final class ReaderSessionManager {
                 if (stopStatus != 0) { return stopStatus; }
             }
             int status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
-                    state.getModuleSubtype()));
+                    state.getModuleSubtype(), inventoryMaskRestoreValue()));
             Log.i(TAG, "clearInventoryMask status=" + status);
             if (status == 0) {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
-                configCache.saveSelected(state.getModuleSubtype(), 0);
+                configCache.saveSelected(state.getModuleSubtype(), inventoryMaskRestoreValue());
+                inventoryMaskSelection.clear();
                 notifyMask(null);
             }
             if (wasRunning) {
@@ -636,6 +632,41 @@ public final class ReaderSessionManager {
     @Nullable
     public InventoryMaskConfig getInventoryMask() {
         return inventoryMask;
+    }
+
+    private boolean captureInventoryMaskSelection(ModuleSubtype subtype) {
+        try {
+            int[] queryValues = gateway.getQueryValues(subtype);
+            if (!inventoryMaskSelection.capture(queryValues)) {
+                Log.e(TAG, "Unable to capture Query Sel before applying inventory mask");
+                return false;
+            }
+            int selected = inventoryMaskSelection.restoreValue();
+            configCache.saveSelected(subtype, selected);
+            Log.i(TAG, "Captured Query Sel before applying inventory mask selected=" + selected);
+            return true;
+        } catch (RuntimeException error) {
+            Log.e(TAG, "Unable to capture Query Sel before applying inventory mask", error);
+            return false;
+        }
+    }
+
+    private int inventoryMaskRestoreValue() {
+        return inventoryMaskSelection.isCaptured()
+                ? inventoryMaskSelection.restoreValue()
+                : configCache.loadSelected(state.getModuleSubtype());
+    }
+
+    private int readSelectedForTemporaryMask(ModuleSubtype subtype) throws ReaderException {
+        try {
+            int[] queryValues = gateway.getQueryValues(subtype);
+            if (queryValues == null || queryValues.length < 3) {
+                throw new ReaderException("Unable to read Query Sel", -45);
+            }
+            return queryValues[2];
+        } catch (RuntimeException error) {
+            throw new ReaderException("Unable to read Query Sel", -45);
+        }
     }
 
     public void setSingleTagMask(@Nullable InventoryMaskConfig config) {
@@ -700,11 +731,17 @@ public final class ReaderSessionManager {
             InventoryMaskConfig maskToRestore = inventoryMask;
             if (maskToRestore != null) {
                 status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
-                        state.getModuleSubtype()));
+                        state.getModuleSubtype(), inventoryMaskRestoreValue()));
                 if (status != 0) { throw new ReaderException("Unable to clear inventory mask", status); }
                 inventoryMaskApplied = false;
             }
             InventoryMaskConfig activeMask = singleTagMask;
+            int selectedBeforeTargetMask = 0;
+            if (activeMask != null) {
+                selectedBeforeTargetMask = maskToRestore == null
+                        ? readSelectedForTemporaryMask(state.getModuleSubtype())
+                        : inventoryMaskRestoreValue();
+            }
             try {
                 if (activeMask != null) {
                     status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
@@ -724,7 +761,7 @@ public final class ReaderSessionManager {
                     }
                 } else if (activeMask != null) {
                     int clearStatus = monitorSdkStatus(gateway.clearTargetMask(protocol,
-                            state.getModuleSubtype()));
+                            state.getModuleSubtype(), selectedBeforeTargetMask));
                     if (clearStatus != 0) {
                         throw new ReaderException("Unable to clear single-tag mask", clearStatus);
                     }
@@ -751,6 +788,7 @@ public final class ReaderSessionManager {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
                 inventoryMaskApplied = false;
+                inventoryMaskSelection.clear();
                 notifyMask(null);
                 Log.i(TAG, "discard inventory mask because handshake restored 6C protocol");
             }
@@ -916,6 +954,7 @@ public final class ReaderSessionManager {
         inventoryMask = null;
         inventoryMaskProtocol = null;
         inventoryMaskApplied = false;
+        inventoryMaskSelection.clear();
         notifyMask(null);
         configuration = null;
         clearCurrentTag();

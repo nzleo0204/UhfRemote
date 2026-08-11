@@ -1,11 +1,13 @@
 package com.leo.remote.ui.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
@@ -13,10 +15,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.InventoryMaskConfig;
+import com.leo.remote.reader.InventoryMaskMatcher;
 import com.leo.remote.reader.ModuleSubtype;
+import com.leo.remote.reader.TagProtocol;
 import java.util.List;
 
+/**
+ * 盘点列表适配器
+ *
+ * 负责展示 RFID 标签盘点数据，支持：
+ * - DiffUtil 增量更新
+ * - Payload 局部刷新（只更新计数器）
+ * - 动态显示/隐藏列（RSSI、芯片型号）
+ * - Mask 过滤状态展示
+ */
 public final class InventoryAdapter extends ListAdapter<InventoryItem, InventoryAdapter.ViewHolder> {
+    private static final String TAG = "UhfRemote/InventoryAdapter";
     private static final Object PAYLOAD_COUNTERS = new Object();
     private static final Object PAYLOAD_LAYOUT = new Object();
 
@@ -46,7 +61,9 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
             };
     private boolean rssiVisible;
     private boolean chipVisible;
-    private boolean maskActive;
+    @Nullable private InventoryMaskConfig maskConfig;
+    private TagProtocol currentProtocol = TagProtocol.ISO_18000_6C;
+    private int inventoryAddress;
     private InventoryArea currentArea = InventoryArea.C_EPC_ONLY;
     private final OnItemClickListener itemClickListener;
 
@@ -60,10 +77,12 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
     }
 
     public void submitList(List<InventoryItem> values) {
+        Log.d(TAG, "更新盘点列表，数量: " + values.size());
         super.submitList(List.copyOf(values));
     }
 
     public void setModuleSubtype(ModuleSubtype subtype) {
+        Log.d(TAG, "设置模块类型: " + subtype);
         setRssiVisible(subtype == ModuleSubtype.R2000 || subtype == ModuleSubtype.R2000_PLUS);
     }
 
@@ -85,9 +104,17 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
     }
 
-    public void setMaskActive(boolean active) {
-        if (maskActive == active) { return; }
-        maskActive = active;
+    public void setMaskConfig(@Nullable InventoryMaskConfig config) {
+        if (maskConfig == config) { return; }
+        Log.d(TAG, "更新 Mask 配置: " + (config != null ? "已启用" : "未启用"));
+        maskConfig = config;
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
+    }
+
+    public void setMaskContext(TagProtocol protocol, int address) {
+        if (currentProtocol == protocol && inventoryAddress == address) { return; }
+        currentProtocol = protocol;
+        inventoryAddress = address;
         notifyItemRangeChanged(0, getItemCount(), PAYLOAD_LAYOUT);
     }
 
@@ -145,10 +172,14 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
         boolean showChip = chipVisible && !item.getData().isEmpty()
                 && !item.getChipModel().isEmpty();
         holder.chipRow.setVisibility(showChip ? View.VISIBLE : View.GONE);
-        holder.maskLock.setImageResource(maskActive
+        boolean maskMatches = InventoryMaskMatcher.matches(maskConfig, currentProtocol,
+                currentArea, inventoryAddress, item);
+        holder.maskLock.setImageResource(maskMatches
                 ? R.drawable.rfid_lock_closed_ic : R.drawable.rfid_lock_open_ic);
-        holder.maskLock.setContentDescription(holder.itemView.getContext().getString(maskActive
-                ? R.string.inventory_mask_lock_closed : R.string.inventory_mask_lock_open));
+        int description = maskMatches ? R.string.inventory_mask_lock_closed
+                : maskConfig == null ? R.string.inventory_mask_lock_open
+                : R.string.inventory_mask_lock_not_matched;
+        holder.maskLock.setContentDescription(holder.itemView.getContext().getString(description));
     }
 
     private static String dataLabel(InventoryArea area) {

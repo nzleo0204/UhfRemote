@@ -306,8 +306,8 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype) {
-        return clearTargetMask(protocol, subtype);
+    public int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype, int selected) {
+        return clearTargetMask(protocol, subtype, selected);
     }
 
     @Override
@@ -342,16 +342,12 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype) {
+    public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype, int selected) {
         if (protocol == TagProtocol.ISO_18000_6B) {
             return linkage.set18K6BSelectCriteria(new Select6BCriteria(0));
         }
-        int status = setSelectValue(subtype, 0);
-        if (status != STATUS_OK) {
-            return status;
-        }
         SelectCriteria criteria = new SelectCriteria();
-        status = linkage.get18K6CSelectCriteria(criteria);
+        int status = linkage.get18K6CSelectCriteria(criteria);
         if (status != STATUS_OK) {
             return status;
         }
@@ -364,7 +360,8 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
         criteria.jq = 0;
         criteria.action = 0;
         criteria.maskData = new byte[64];
-        return linkage.set18K6CSelectCriteria(criteria);
+        status = linkage.set18K6CSelectCriteria(criteria);
+        return status == STATUS_OK ? setSelectValue(subtype, selected) : status;
     }
 
     /** 以指定 Sel 值更新 Query，保留其他 Query 参数。 */

@@ -55,7 +55,9 @@
     <string name="device_info_group_board">板卡</string>
     <string name="device_info_group_module">射频模块</string>
     <string name="device_info_transport">传输方式</string>
-    <string name="device_info_address">地址 / IP</string>
+    <string name="device_info_address">地址</string>
+    <string name="device_info_ble_address">蓝牙地址</string>
+    <string name="device_info_wifi_address">IP 地址</string>
     <string name="device_info_serial">序列号</string>
     <string name="device_info_version">版本</string>
     <string name="device_info_model">型号</string>
@@ -92,8 +94,9 @@
     <string name="config_inventory_area">盘点区域</string>
     <string name="config_inventory_area_epc_only">仅盘点 EPC</string>
     <string name="config_inventory_area_summary">%1$s · 地址 %2$d · %3$d 字</string>
-    <string name="config_inventory_addr">起始地址（字）</string>
-    <string name="config_inventory_len">盘点长度（字，0 = 全区）</string>
+    <string name="config_inventory_addr">起始地址</string>
+    <string name="config_inventory_len">读取长度</string>
+    <string name="config_inventory_unit">word</string>
     <string name="config_inventory_range_title">%1$s设置</string>
     <string name="config_inventory_range_recommendation">推荐值：起始地址 %1$d，读取长度 %2$d 字</string>
     <string name="config_inventory_range_hint">起始地址非 0 时无法识别芯片型号。长度必须与标签实际长度匹配，超出会读取失败</string>
@@ -192,6 +195,7 @@
     <string name="inventory_export_failed">导出失败：%1$s</string>
     <string name="inventory_mask_title">掩码过滤</string>
     <string name="inventory_mask_expand">展开或收起掩码设置</string>
+    <string name="inventory_mask_collapse">收起掩码设置</string>
     <string name="inventory_mask_bank">存储区</string>
     <string name="inventory_mask_offset">偏移（bit）</string>
     <string name="inventory_mask_length">长度（bit）</string>
@@ -199,13 +203,15 @@
     <string name="inventory_mask_hex_hint">例如 E28011C0</string>
     <string name="inventory_mask_apply">应用掩码</string>
     <string name="inventory_mask_cancel">取消掩码</string>
-    <string name="inventory_mask_active" tools:ignore="PluralsCandidate">%1$s · 偏%2$d · %3$d bit</string>
+    <string name="inventory_mask_active" tools:ignore="PluralsCandidate">已启用 · %1$s · 偏%2$d · %3$d bit</string>
+    <string name="inventory_mask_inactive">未启用</string>
     <string name="inventory_mask_applied">掩码已应用</string>
     <string name="inventory_mask_cleared">掩码已清除</string>
     <string name="inventory_mask_apply_failed">应用掩码失败</string>
     <string name="inventory_mask_clear_failed">清除掩码失败</string>
     <string name="inventory_mask_lock_open">未设置掩码</string>
     <string name="inventory_mask_lock_closed">掩码已生效</string>
+    <string name="inventory_mask_lock_not_matched">未命中当前掩码</string>
     <string name="inventory_mask_number_invalid">%1$s必须是非负整数</string>
     <string name="inventory_mask_length_positive">掩码长度必须大于 0</string>
     <string name="inventory_mask_hex_required">请输入掩码 HEX</string>

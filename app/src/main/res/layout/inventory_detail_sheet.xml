@@ -5,121 +5,152 @@
     android:layout_height="wrap_content"
     android:background="@color/rfid_panel_bg"
     android:orientation="vertical"
-    android:padding="@dimen/dp_16">
+    android:paddingHorizontal="20dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="20dp">
 
+    <!-- 标题栏 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_48"
+        android:layout_height="52dp"
         android:gravity="center_vertical">
 
+        <!-- 标题文字（不加粗） -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
             android:text="@string/inventory_detail_title"
             android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_18" />
+            android:textSize="18sp" />
 
+        <!-- 关闭按钮 -->
         <ImageButton
             android:id="@+id/btn_inventory_detail_close"
-            android:layout_width="@dimen/dp_48"
-            android:layout_height="@dimen/dp_48"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_close"
-            android:padding="@dimen/dp_12"
+            android:contentDescription="关闭"
+            android:padding="10dp"
             android:src="@drawable/rfid_close_ic"
             app:tint="@color/rfid_text_secondary" />
     </LinearLayout>
 
-    <LinearLayout
+    <!-- 分割线 -->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/dp_8">
+        android:layout_height="1dp"
+        android:background="@color/rfid_line"
+        android:layout_marginVertical="8dp" />
+
+    <!-- EPC 标签 ID -->
+    <LinearLayout
+        style="@style/DialogRow">
 
         <TextView
             android:id="@+id/tv_inventory_detail_id_label"
-            style="@style/InventoryDetailLabel" />
+            style="@style/DialogLabel" />
 
         <TextView
             android:id="@+id/tv_inventory_detail_id"
-            style="@style/InventoryDetailValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
             android:fontFamily="monospace"
-            android:textColor="@color/rfid_primary_soft" />
+            android:textColor="@color/rfid_primary_soft"
+            android:textSize="14sp"
+            android:gravity="end|center_vertical"
+            android:ellipsize="middle"
+            android:singleLine="true" />
     </LinearLayout>
 
+    <!-- 附加数据 -->
     <LinearLayout
         android:id="@+id/row_inventory_detail_data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/dp_8">
+        style="@style/DialogRow">
 
         <TextView
             android:id="@+id/tv_inventory_detail_data_label"
-            style="@style/InventoryDetailLabel" />
+            style="@style/DialogLabel" />
 
         <TextView
             android:id="@+id/tv_inventory_detail_data"
-            style="@style/InventoryDetailValue"
-            android:fontFamily="monospace" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:fontFamily="monospace"
+            android:textColor="@color/rfid_text"
+            android:textSize="14sp"
+            android:gravity="end|center_vertical"
+            android:ellipsize="middle"
+            android:singleLine="true" />
     </LinearLayout>
 
+    <!-- 芯片型号 -->
     <LinearLayout
         android:id="@+id/row_inventory_detail_chip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/dp_8">
+        style="@style/DialogRow">
 
         <TextView
-            style="@style/InventoryDetailLabel"
+            style="@style/DialogLabel"
             android:text="@string/inventory_item_chip" />
 
         <TextView
             android:id="@+id/tv_inventory_detail_chip"
-            style="@style/InventoryDetailValue" />
+            style="@style/DialogValue" />
     </LinearLayout>
 
+    <!-- 读取次数 -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/dp_8">
+        style="@style/DialogRow">
 
         <TextView
-            style="@style/InventoryDetailLabel"
+            style="@style/DialogLabel"
             android:text="@string/inventory_column_count" />
 
         <TextView
             android:id="@+id/tv_inventory_detail_count"
-            style="@style/InventoryDetailValue" />
+            style="@style/DialogValue"
+            android:textColor="@color/rfid_warning" />
     </LinearLayout>
 
+    <!-- RSSI 信号强度 -->
     <LinearLayout
         android:id="@+id/row_inventory_detail_rssi"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/dp_8">
+        style="@style/DialogRow">
 
         <TextView
-            style="@style/InventoryDetailLabel"
+            style="@style/DialogLabel"
             android:text="@string/inventory_column_rssi" />
 
         <TextView
             android:id="@+id/tv_inventory_detail_rssi"
-            style="@style/InventoryDetailValue" />
+            style="@style/DialogValue" />
     </LinearLayout>
 
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/rfid_line"
+        android:layout_marginTop="12dp" />
+
+    <!-- 填充 EPC 按钮 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_inventory_detail_fill_id"
         style="@style/RfidPrimaryButton"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_44"
-        android:layout_marginTop="@dimen/dp_12"
-        android:text="@string/inventory_detail_fill_epc" />
+        android:layout_height="46dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/inventory_detail_fill_epc"
+        android:textSize="15sp" />
 
+    <!-- 填充附加数据按钮 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_inventory_detail_fill_data"
         style="@style/RfidGhostButton"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_44"
-        android:layout_marginTop="@dimen/dp_8" />
+        android:layout_height="46dp"
+        android:layout_marginTop="10dp"
+        android:textSize="15sp" />
 </LinearLayout>

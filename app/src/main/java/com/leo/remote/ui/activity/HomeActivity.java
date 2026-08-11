@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -26,33 +27,46 @@ import com.leo.remote.ui.fragment.home.SingleTagFragment;
 import com.leo.remote.reader.ReaderSessionManager;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 首页界面
+ * 应用主界面
+ *
+ * 采用底部导航 + ViewPager 的架构：
+ * - 配置页：Reader 连接和参数配置
+ * - 盘点页：批量标签盘点
+ * - 单标签页：单个标签读写操作
+ * - 我的页：业务功能入口
+ *
+ * 平板设备使用侧边导航栏（layout-sw600dp-land）
+ *
+ * 原作者: Android 轮子哥
+ * 原项目: https://github.com/getActivity/AndroidProject
+ * 修改时间: 2024
+ * 修改说明: 基于原框架改造为 RFID 应用
  */
 public final class HomeActivity extends AppActivity
         implements NavigationAdapter.OnNavigationListener {
 
+    private static final String TAG = "UhfRemote/Home";
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
 
-    private ViewPager mViewPager;
-    private RecyclerView mNavigationView;
+    private ViewPager viewPager;
+    private RecyclerView navigationView;
 
-    private NavigationAdapter mNavigationAdapter;
-    private BasePagerAdapter<AppFragment<?>> mPagerAdapter;
-    private ReaderSessionManager mReaderSession;
-    private int mSelectedPage;
-    private final ViewPager.SimpleOnPageChangeListener mPageChangeListener =
+    private NavigationAdapter navigationAdapter;
+    private BasePagerAdapter<AppFragment<?>> pagerAdapter;
+    private ReaderSessionManager readerSession;
+    private int selectedPage;
+    private final ViewPager.SimpleOnPageChangeListener pageChangeListener =
             new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
-                    if (mSelectedPage == 1 && position != 1 && mReaderSession != null
-                            && mReaderSession.getState().isInventoryRunning()) {
-                        mReaderSession.stopInventory();
+                    Log.d(TAG, "切换页面: " + position);
+                    if (selectedPage == 1 && position != 1 && readerSession != null
+                            && readerSession.getState().isInventoryRunning()) {
+                        Log.i(TAG, "离开盘点页面，自动停止盘点");
+                        readerSession.stopInventory();
                     }
-                    mSelectedPage = position;
+                    selectedPage = position;
                 }
             };
 
@@ -76,20 +90,21 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void initView() {
-        mViewPager = findViewById(R.id.vp_home_pager);
-        mNavigationView = findViewById(R.id.rv_home_navigation);
+        Log.d(TAG, "初始化主界面视图");
+        viewPager = findViewById(R.id.vp_home_pager);
+        navigationView = findViewById(R.id.rv_home_navigation);
 
-        mNavigationAdapter = new NavigationAdapter(this);
-        mNavigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_config),
+        navigationAdapter = new NavigationAdapter(this);
+        navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_config),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_config_ic)));
-        mNavigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_inventory),
+        navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_inventory),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_inventory_ic)));
-        mNavigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_tag),
+        navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_tag),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_tag_ic)));
-        mNavigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_mine),
+        navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_mine),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_mine_ic)));
-        mNavigationAdapter.setOnNavigationListener(this);
-        mNavigationView.setAdapter(mNavigationAdapter);
+        navigationAdapter.setOnNavigationListener(this);
+        navigationView.setAdapter(navigationAdapter);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
 
@@ -102,14 +117,15 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void initData() {
-        mReaderSession = ReaderSessionManager.getInstance(getApplication());
-        mPagerAdapter = new BasePagerAdapter<>(this);
-        mPagerAdapter.addFragment(ReaderConfigFragment.newInstance());
-        mPagerAdapter.addFragment(InventoryFragment.newInstance());
-        mPagerAdapter.addFragment(SingleTagFragment.newInstance());
-        mPagerAdapter.addFragment(MineFragment.newInstance());
-        mViewPager.setAdapter(mPagerAdapter);
-        mViewPager.addOnPageChangeListener(mPageChangeListener);
+        Log.d(TAG, "初始化主界面数据，加载 Fragment");
+        readerSession = ReaderSessionManager.getInstance(getApplication());
+        pagerAdapter = new BasePagerAdapter<>(this);
+        pagerAdapter.addFragment(ReaderConfigFragment.newInstance());
+        pagerAdapter.addFragment(InventoryFragment.newInstance());
+        pagerAdapter.addFragment(SingleTagFragment.newInstance());
+        pagerAdapter.addFragment(MineFragment.newInstance());
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.addOnPageChangeListener(pageChangeListener);
 
         onNewIntent(getIntent());
     }
@@ -123,7 +139,7 @@ public final class HomeActivity extends AppActivity
     @Nullable
     @Override
     public View getImmersionBottomView() {
-        return getResources().getBoolean(R.bool.home_navigation_rail) ? null : mNavigationView;
+        return getResources().getBoolean(R.bool.home_navigation_rail) ? null : navigationView;
     }
 
     @Override
@@ -134,14 +150,14 @@ public final class HomeActivity extends AppActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        switchFragment(mPagerAdapter.getFragmentIndex(getSerializable(INTENT_KEY_IN_FRAGMENT_CLASS)));
+        switchFragment(pagerAdapter.getFragmentIndex(getSerializable(INTENT_KEY_IN_FRAGMENT_CLASS)));
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         // 保存当前 Fragment 索引位置
-        outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
+        outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, viewPager.getCurrentItem());
     }
 
     @Override
@@ -161,8 +177,8 @@ public final class HomeActivity extends AppActivity
             case 1:
             case 2:
             case 3:
-                mViewPager.setCurrentItem(fragmentIndex);
-                mNavigationAdapter.setSelectedPosition(fragmentIndex);
+                viewPager.setCurrentItem(fragmentIndex);
+                navigationAdapter.setSelectedPosition(fragmentIndex);
                 break;
             default:
                 break;
@@ -179,12 +195,13 @@ public final class HomeActivity extends AppActivity
 
     @Override
     public boolean onNavigationItemSelected(int position) {
+        Log.d(TAG, "导航栏点击: " + position);
         switch (position) {
             case 0:
             case 1:
             case 2:
             case 3:
-                mViewPager.setCurrentItem(position);
+                viewPager.setCurrentItem(position);
                 return true;
             default:
                 return false;
@@ -212,11 +229,12 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "销毁主界面，清理资源");
         super.onDestroy();
-        mViewPager.removeOnPageChangeListener(mPageChangeListener);
-        mViewPager.setAdapter(null);
-        mNavigationView.setAdapter(null);
-        mNavigationAdapter.setOnNavigationListener(null);
+        viewPager.removeOnPageChangeListener(pageChangeListener);
+        viewPager.setAdapter(null);
+        navigationView.setAdapter(null);
+        navigationAdapter.setOnNavigationListener(null);
     }
 
 }

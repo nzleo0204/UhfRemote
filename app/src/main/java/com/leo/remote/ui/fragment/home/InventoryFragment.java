@@ -40,14 +40,25 @@ import com.leo.remote.reader.TagProtocol;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.adapter.InventoryAdapter;
 import com.leo.remote.ui.dialog.InventoryDetailSheet;
+import com.leo.remote.util.ViewUtils;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/** Live RFID inventory page. */
+/**
+ * 盘点页面 Fragment
+ *
+ * 实时 RFID 标签盘点功能，支持：
+ * - 批量标签盘点
+ * - 标签过滤（Mask 功能）
+ * - 数据导出为 CSV
+ * - 实时显示标签信息（EPC、TID、USER 等）
+ */
 @SuppressLint("LogNotTimber")
 public final class InventoryFragment extends AppFragment<HomeActivity> implements ReaderObserver {
     private static final String TAG = "UhfReader/Inventory";
@@ -87,6 +98,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     protected void initView() {
+        Log.d(TAG, "初始化盘点页面视图");
         session = ReaderSessionManager.getInstance(requireActivity().getApplication());
         startButton = findViewById(R.id.btn_inventory_start);
         totalView = findViewById(R.id.tv_inventory_total);
@@ -165,6 +177,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     protected void initData() {
+        Log.d(TAG, "初始化盘点页面数据，注册 Reader 观察者");
         session = ReaderSessionManager.getInstance(requireActivity().getApplication());
         session.addObserver(this);
     }
@@ -179,8 +192,12 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "销毁盘点页面，清理资源");
         if (session != null) {
-            if (session.getState().isInventoryRunning()) { session.stopInventory(); }
+            if (session.getState().isInventoryRunning()) {
+                Log.i(TAG, "页面销毁时停止盘点");
+                session.stopInventory();
+            }
             session.removeObserver(this);
         }
         super.onDestroy();
@@ -206,6 +223,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onInventoryChanged(List<InventoryItem> items, long totalReads) {
         if (!isViewAlive()) { return; }
+        Log.d(TAG, "盘点数据更新: " + items.size() + " 个标签, 总读取次数: " + totalReads);
         adapter.submitList(items);
         totalView.setText(getString(R.string.inventory_total, items.size()));
         emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
@@ -230,6 +248,8 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         adapter.setModuleSubtype(subtype);
         adapter.setChipVisible(chipVisible);
         adapter.setInventoryArea(area);
+        adapter.setMaskContext(readerState.getProtocol(),
+                configuration == null ? 0 : configuration.inventoryAddress);
         rssiHeader.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
         chipHeader.setVisibility(View.GONE);
         dataHeader.setText(area.getColumnHeader());
@@ -258,14 +278,30 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     // ========== Inventory controls ==========
 
+    /**
+     * 切换盘点状态（开始/停止）
+     *
+     * 如果当前正在盘点，则停止盘点；
+     * 如果当前未盘点，则启动盘点。
+     *
+     * 前置条件：
+     * - Reader 必须已连接
+     * - 单击防抖保护（@SingleClick 注解）
+     */
     @SingleClick
     private void toggleInventory() {
         ReaderState state = session.getState();
-        if (!state.isConnected() && !requireReaderOnline()) { return; }
+        if (!state.isConnected() && !requireReaderOnline()) {
+            Log.w(TAG, "Reader 未连接，无法切换盘点状态");
+            return;
+        }
+
         if (state.isInventoryRunning()) {
+            Log.i(TAG, "停止盘点");
             session.stopInventory().whenComplete((status, error) ->
                     showResult(status, error, R.string.inventory_stop_failed));
         } else {
+            Log.i(TAG, "开始盘点");
             session.startInventory().whenComplete((status, error) ->
                     showResult(status, error, R.string.inventory_start_failed));
         }
@@ -287,7 +323,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         if (!isViewAlive()) { return; }
         activeMask = config;
         if (config != null) { bindMaskForm(config); }
-        if (adapter != null) { adapter.setMaskActive(config != null); }
+        if (adapter != null) { adapter.setMaskConfig(config); }
         updateMaskControls();
     }
 
@@ -459,9 +495,11 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         boolean formValid = updateMaskLengthHint();
         maskPanelContent.setVisibility(maskExpanded ? View.VISIBLE : View.GONE);
         maskPanelContent.setAlpha(formEnabled ? 1f : 0.48f);
-        maskExpandView.setImageResource(maskExpanded
-                ? R.drawable.arrows_top_ic : R.drawable.arrows_bottom_ic);
-        setEnabledRecursively(maskPanelContent, formEnabled);
+        maskExpandView.setImageResource(R.drawable.arrows_bottom_ic);
+        maskExpandView.setRotation(maskExpanded ? 180f : 0f);
+        maskExpandView.setContentDescription(getString(maskExpanded
+                ? R.string.inventory_mask_collapse : R.string.inventory_mask_expand));
+        ViewUtils.setEnabledRecursively(maskPanelContent, formEnabled);
         maskOffsetView.setEnabled(formEnabled
                 && readerState.getProtocol() != TagProtocol.ISO_18000_6B);
         boolean masked = activeMask != null;
@@ -473,13 +511,16 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
         maskToggleButton.setTextColor(ContextCompat.getColorStateList(requireContext(),
                 R.color.rfid_primary_button_text));
         maskToggleButton.setEnabled(formEnabled && (masked || formValid));
-        maskStatusView.setVisibility(masked ? View.VISIBLE : View.GONE);
+        maskStatusView.setVisibility(View.VISIBLE);
         if (masked) {
             Object bank = maskBankSpinner.getSelectedItem();
             String bankLabel = bank == null ? "" : bank.toString();
             maskStatusView.setBackgroundResource(R.drawable.rfid_chip_red_bg);
             maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
                     activeMask.offsetBits, activeMask.lengthBits));
+        } else {
+            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_blue_bg);
+            maskStatusView.setText(R.string.inventory_mask_inactive);
         }
     }
 
@@ -525,14 +566,6 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
                 warning ? R.color.rfid_warning : R.color.rfid_text_muted));
     }
 
-    private void setEnabledRecursively(View view, boolean enabled) {
-        view.setEnabled(enabled);
-        if (!(view instanceof ViewGroup group)) { return; }
-        for (int i = 0; i < group.getChildCount(); i++) {
-            setEnabledRecursively(group.getChildAt(i), enabled);
-        }
-    }
-
     private boolean isViewAlive() {
         return getView() != null && isAdded();
     }
@@ -540,7 +573,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private void syncMaskFromSession() {
         activeMask = session.getInventoryMask();
         if (activeMask != null) { bindMaskForm(activeMask); }
-        if (adapter != null) { adapter.setMaskActive(activeMask != null); }
+        if (adapter != null) { adapter.setMaskConfig(activeMask); }
         updateMaskControls();
     }
 
@@ -554,20 +587,60 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     // ========== Data export ==========
 
+    /**
+     * 导出盘点数据为 CSV 文件
+     *
+     * CSV 格式：
+     * index,id,additional_data,count,rssi,chip_model
+     * 1,"E280...","-",5,-65,"Impinj M730"
+     *
+     * 使用流式写入避免大数据集（几千条）内存溢出
+     *
+     * @param uri 用户选择的保存位置
+     */
     private void writeCsv(Uri uri) {
-        if (uri == null) { return; }
-        StringBuilder csv = new StringBuilder("index,id,additional_data,count,rssi,chip_model\r\n");
-        for (int i = 0; i < exportItems.size(); i++) {
-            InventoryItem item = exportItems.get(i);
-            csv.append(i + 1).append(',').append(escape(item.getId())).append(',')
-                    .append(escape(item.getData())).append(',').append(item.getCount()).append(',')
-                    .append(item.getRssi()).append(',').append(escape(item.getChipModel())).append("\r\n");
+        if (uri == null) {
+            return;
         }
-        try (OutputStream output = requireContext().getContentResolver().openOutputStream(uri)) {
-            if (output == null) { throw new IOException("Unable to open document"); }
-            output.write(csv.toString().getBytes(StandardCharsets.UTF_8));
+
+        Log.i(TAG, "开始导出 CSV，数据量: " + exportItems.size());
+
+        try (OutputStream output = requireContext().getContentResolver().openOutputStream(uri);
+             OutputStreamWriter writer = new OutputStreamWriter(output, StandardCharsets.UTF_8);
+             BufferedWriter buffered = new BufferedWriter(writer)) {
+
+            if (output == null) {
+                throw new IOException("Unable to open document");
+            }
+
+            // 写入表头
+            buffered.write("index,id,additional_data,count,rssi,chip_model\r\n");
+
+            // 流式写入数据，避免内存溢出
+            for (int i = 0; i < exportItems.size(); i++) {
+                InventoryItem item = exportItems.get(i);
+                String line = String.format("%d,%s,%s,%d,%d,%s\r\n",
+                        i + 1,
+                        escape(item.getId()),
+                        escape(item.getData()),
+                        item.getCount(),
+                        item.getRssi(),
+                        escape(item.getChipModel()));
+                buffered.write(line);
+
+                // 每 100 条刷新一次
+                if ((i + 1) % 100 == 0) {
+                    buffered.flush();
+                    Log.d(TAG, "已写入 " + (i + 1) + " 条数据");
+                }
+            }
+
+            buffered.flush();
+            Log.i(TAG, "CSV 导出成功，共 " + exportItems.size() + " 条");
             toast(R.string.inventory_exported);
+
         } catch (IOException error) {
+            Log.e(TAG, "CSV 导出失败", error);
             toast(getString(R.string.inventory_export_failed, error.getMessage()));
         }
     }

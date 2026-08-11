@@ -1,14 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="@dimen/dp_8">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="锁定区域" android:textColor="@color/rfid_text_muted" />
-    <Spinner android:id="@+id/sp_tag_lock_bank" android:layout_width="match_parent" android:layout_height="@dimen/dp_48" />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="锁定策略" android:textColor="@color/rfid_text_muted" />
-    <Spinner android:id="@+id/sp_tag_lock_policy" android:layout_width="match_parent" android:layout_height="@dimen/dp_48" />
-    <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="访问密码（8 位 HEX）">
-        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_tag_lock_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapCharacters" />
+    android:paddingHorizontal="@dimen/dialog_padding"
+    android:paddingVertical="20dp">
+
+    <!-- 锁定区域 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="锁定区域"
+        android:textColor="@color/rfid_text_secondary"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/sp_tag_lock_bank"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackground"
+        android:paddingHorizontal="16dp" />
+
+    <!-- 锁定策略 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="锁定策略"
+        android:textColor="@color/rfid_text_secondary"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/sp_tag_lock_policy"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackground"
+        android:paddingHorizontal="16dp" />
+
+    <!-- 访问密码 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:hint="访问密码（8 位 HEX）"
+        app:hintTextColor="@color/rfid_text_muted"
+        app:boxStrokeColor="@color/rfid_primary"
+        app:helperText="空密码请输入 00000000"
+        app:helperTextTextColor="@color/rfid_text_muted"
+        app:endIconMode="password_toggle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_tag_lock_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"
+            android:textSize="16sp"
+            android:textColor="@color/rfid_text"
+            android:fontFamily="monospace"
+            android:maxLength="8" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 警告提示 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:background="@drawable/rfid_chip_red_bg"
+        android:text="⚠️ 警告：锁定操作不可逆，请谨慎操作"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp" />
 </LinearLayout>

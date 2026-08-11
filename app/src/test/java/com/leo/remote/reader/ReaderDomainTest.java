@@ -147,6 +147,66 @@ public class ReaderDomainTest {
     }
 
     @Test
+    public void inventoryMaskMatchesOnlyTargetEpcAfterProtocolOffset() {
+        InventoryMaskConfig mask = new InventoryMaskConfig(1, 32, 16,
+                new byte[]{(byte) 0xE2, 0x00});
+        InventoryItem target = new InventoryItem("E2003412", "", -50, 1, "");
+        InventoryItem other = new InventoryItem("30003412", "", -50, 1, "");
+
+        assertTrue(InventoryMaskMatcher.matches(mask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_ONLY, 0, target));
+        assertFalse(InventoryMaskMatcher.matches(mask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_ONLY, 0, other));
+    }
+
+    @Test
+    public void inventoryMaskMatchesNonByteAlignedBits() {
+        InventoryMaskConfig mask = new InventoryMaskConfig(1, 36, 5,
+                new byte[]{0x50});
+
+        assertTrue(InventoryMaskMatcher.matches(mask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_ONLY, 0,
+                new InventoryItem("E500", "", -50, 1, "")));
+        assertFalse(InventoryMaskMatcher.matches(mask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_ONLY, 0,
+                new InventoryItem("E400", "", -50, 1, "")));
+    }
+
+    @Test
+    public void inventoryMaskUsesOnlyVisibleMatchingMemoryBank() {
+        InventoryMaskConfig userMask = new InventoryMaskConfig(3, 24, 8,
+                new byte[]{0x34});
+        InventoryItem item = new InventoryItem("E200", "1234", -50, 1, "");
+
+        assertTrue(InventoryMaskMatcher.matches(userMask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_USER, 1, item));
+        assertFalse(InventoryMaskMatcher.matches(userMask, TagProtocol.ISO_18000_6C,
+                InventoryArea.C_EPC_TID, 1, item));
+    }
+
+    @Test
+    public void inventoryMaskSelectionRestoresValueCapturedBeforeFirstApply() {
+        InventoryMaskSelection selection = new InventoryMaskSelection();
+
+        assertTrue(selection.capture(new int[]{1, 0, 3}));
+        assertTrue(selection.capture(new int[]{1, 0, 2}));
+        assertEquals(3, selection.restoreValue());
+
+        selection.clear();
+        assertTrue(selection.capture(new int[]{1, 0, 1}));
+        assertEquals(1, selection.restoreValue());
+    }
+
+    @Test
+    public void inventoryMaskSelectionRejectsMissingQueryValue() {
+        InventoryMaskSelection selection = new InventoryMaskSelection();
+
+        assertFalse(selection.capture(null));
+        assertFalse(selection.capture(new int[]{1, 0}));
+        assertFalse(selection.isCaptured());
+    }
+
+    @Test
     public void aggregatesByIdAndAdditionalData() {
         InventoryAccumulator accumulator = new InventoryAccumulator();
         accumulator.add("EPC1", "TID1", -60, 1, "chip");

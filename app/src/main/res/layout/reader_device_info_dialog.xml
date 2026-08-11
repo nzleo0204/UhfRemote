@@ -1,150 +1,321 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
 
+    <!-- 标题区域（图标+名称+状态） -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/dp_20"
-        android:paddingTop="@dimen/dp_20"
-        android:paddingBottom="@dimen/dp_4">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <!-- 设备图标（32dp） -->
+        <ImageView
+            android:id="@+id/iv_device_info_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/rfid_chip_blue_bg"
+            android:contentDescription="@null"
+            android:padding="6dp"
+            android:src="@drawable/rfid_bluetooth_ic"
+            app:tint="@color/white" />
+
+        <!-- 设备名称（居中对齐） -->
+        <TextView
+            android:id="@+id/tv_device_info_name"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:singleLine="true"
+            android:textColor="@color/rfid_text"
+            android:textSize="16sp" />
 
-            <ImageView
-                android:id="@+id/iv_device_info_icon"
-                android:layout_width="@dimen/dp_40"
-                android:layout_height="@dimen/dp_40"
-                android:background="@drawable/rfid_chip_blue_bg"
-                android:contentDescription="@null"
-                android:padding="@dimen/dp_8"
-                android:src="@drawable/rfid_bluetooth_ic" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dp_12"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tv_device_info_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:fontFamily="sans-serif-medium"
-                    android:singleLine="true"
-                    android:textColor="@color/rfid_text"
-                    android:textSize="@dimen/sp_16" />
-
-                <TextView
-                    android:id="@+id/tv_device_info_protocol"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp_2"
-                    android:singleLine="true"
-                    android:textColor="@color/rfid_text_muted"
-                    android:textSize="@dimen/sp_12" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_device_info_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/rfid_chip_green_bg"
-                android:paddingHorizontal="@dimen/dp_8"
-                android:paddingVertical="@dimen/dp_2"
-                android:text="@string/device_info_connected"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp_11" />
-        </LinearLayout>
-
-        <View style="@style/ReaderDeviceInfoDivider" />
-
+        <!-- 连接状态标签（与图标同高） -->
         <TextView
-            style="@style/ReaderDeviceInfoGroup"
-            android:text="@string/device_info_group_connection" />
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_transport" />
-            <TextView
-                android:id="@+id/tv_device_info_transport"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_address" />
-            <TextView
-                android:id="@+id/tv_device_info_address"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <View style="@style/ReaderDeviceInfoDivider" />
-
-        <TextView
-            style="@style/ReaderDeviceInfoGroup"
-            android:text="@string/device_info_group_board" />
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_serial" />
-            <TextView
-                android:id="@+id/tv_device_info_board_serial"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_version" />
-            <TextView
-                android:id="@+id/tv_device_info_board_version"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <View style="@style/ReaderDeviceInfoDivider" />
-
-        <TextView
-            style="@style/ReaderDeviceInfoGroup"
-            android:text="@string/device_info_group_module" />
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_model" />
-            <TextView
-                android:id="@+id/tv_device_info_subtype"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_serial" />
-            <TextView
-                android:id="@+id/tv_device_info_module_serial"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/ReaderDeviceInfoRow">
-            <TextView
-                style="@style/ReaderDeviceInfoLabel"
-                android:text="@string/device_info_version" />
-            <TextView
-                android:id="@+id/tv_device_info_module_version"
-                style="@style/ReaderDeviceInfoValue" />
-        </LinearLayout>
+            android:id="@+id/tv_device_info_status"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/rfid_chip_green_bg"
+            android:gravity="center"
+            android:minWidth="60dp"
+            android:paddingHorizontal="10dp"
+            android:text="已连接"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
     </LinearLayout>
-</ScrollView>
+
+    <!-- 协议类型（隐藏） -->
+    <TextView
+        android:id="@+id/tv_device_info_protocol"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/rfid_line"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 主板信息组 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="主板信息"
+        android:textSize="12sp"
+        android:textColor="@color/rfid_primary"
+        android:paddingVertical="6dp" />
+
+    <!-- 版本 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="版本"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_board_version"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 序列号 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="序列号"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_board_serial"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/rfid_line"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 模块信息组 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="模块信息"
+        android:textSize="12sp"
+        android:textColor="@color/rfid_primary"
+        android:paddingVertical="6dp" />
+
+    <!-- 型号 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/device_info_model"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_subtype"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 版本 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="版本"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_module_version"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 序列号 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="序列号"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_module_serial"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 射频协议 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="射频协议"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_rf_protocol"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 发射功率 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="发射功率"
+            android:textSize="12sp"
+            android:textColor="@color/rfid_text_secondary"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_device_info_rf_power"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="11sp"
+            android:textColor="@color/rfid_text" />
+    </LinearLayout>
+
+    <!-- 底部按钮（居中、带背景） -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_device_info_close"
+        style="@style/RfidPrimaryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:minWidth="100dp"
+        android:text="知道了"
+        android:textSize="14sp" />
+
+    <!-- 隐藏的字段 -->
+    <TextView
+        android:id="@+id/tv_device_info_transport"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_device_info_address"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_device_info_address_label"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+</LinearLayout>

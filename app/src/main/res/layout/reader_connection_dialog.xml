@@ -2,16 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_320"
+    android:layout_height="wrap_content"
     android:background="@drawable/rfid_card_bg"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="@dimen/dp_20">
+    android:padding="@dimen/dialog_padding">
 
+    <!-- 动画/图标区域 -->
     <FrameLayout
-        android:layout_width="@dimen/dp_120"
-        android:layout_height="@dimen/dp_104">
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp">
 
+        <!-- Loading 动画 -->
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lav_reader_connect"
             android:layout_width="match_parent"
@@ -20,52 +23,67 @@
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/loading" />
 
+        <!-- 结果图标（成功/失败） -->
         <ImageView
             android:id="@+id/iv_reader_connect_result"
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="@dimen/dp_80"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
-            android:contentDescription="连接结果"
+            android:contentDescription="@null"
             android:visibility="gone" />
     </FrameLayout>
 
+    <!-- 标题（居中、普通字重） -->
     <TextView
         android:id="@+id/tv_reader_connect_phase"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_32"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="正在连接"
         android:textColor="@color/rfid_text"
-        android:textSize="@dimen/sp_16" />
+        android:textSize="18sp" />
 
+    <!-- 详情描述（居中、灰色、普通字重） -->
     <TextView
         android:id="@+id/tv_reader_connect_detail"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_80"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="70dp"
         android:gravity="center"
         android:maxLines="4"
+        android:lineSpacingExtra="2dp"
         android:textColor="@color/rfid_text_muted"
-        android:textSize="@dimen/sp_12" />
+        android:textSize="14sp" />
 
+    <!-- 按钮区域 -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_48">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_button_margin_top">
 
+        <!-- 取消按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reader_connect_cancel"
             style="@style/RfidTextButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/dialog_button_height"
             android:layout_gravity="center"
-            android:text="取消" />
+            android:minWidth="110dp"
+            android:text="取消"
+            android:textSize="15sp" />
 
+        <!-- 关闭按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reader_connect_close"
-            style="@style/RfidTextButton"
+            style="@style/RfidPrimaryButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/dialog_button_height"
             android:layout_gravity="center"
+            android:minWidth="110dp"
             android:text="关闭"
+            android:textSize="15sp"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

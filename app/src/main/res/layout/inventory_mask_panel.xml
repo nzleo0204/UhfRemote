@@ -50,9 +50,9 @@
             android:maxWidth="140dp"
             android:maxLines="1"
             android:paddingHorizontal="@dimen/dp_8"
+            android:text="@string/inventory_mask_inactive"
             android:textColor="@color/white"
-            android:textSize="@dimen/sp_11"
-            android:visibility="gone" />
+            android:textSize="@dimen/sp_11" />
     </LinearLayout>
 
     <LinearLayout

@@ -28,11 +28,11 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
         implements BaseAdapter.OnItemClickListener {
 
     /** 当前选中条目位置 */
-    private int mSelectedPosition = 0;
+    private int selectedPosition = 0;
 
     /** 导航栏点击监听 */
     @Nullable
-    private OnNavigationListener mListener;
+    private OnNavigationListener listener;
 
     public NavigationAdapter(@NonNull Context context) {
         super(context);
@@ -53,15 +53,15 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
     }
 
     public int getSelectedPosition() {
-        return mSelectedPosition;
+        return selectedPosition;
     }
 
     public void setSelectedPosition(int position) {
-        if (mSelectedPosition == position) {
+        if (selectedPosition == position) {
             return;
         }
-        int oldPosition = mSelectedPosition;
-        mSelectedPosition = position;
+        int oldPosition = selectedPosition;
+        selectedPosition = position;
         notifyItemChanged(oldPosition);
         notifyItemChanged(position);
     }
@@ -70,7 +70,7 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
      * 设置导航栏监听
      */
     public void setOnNavigationListener(@Nullable OnNavigationListener listener) {
-        mListener = listener;
+        this.listener = listener;
     }
 
     /**
@@ -79,13 +79,13 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
 
     @Override
     public void onItemClick(@NonNull RecyclerView recyclerView, @NonNull View itemView, int position) {
-        if (mSelectedPosition == position) {
+        if (selectedPosition == position) {
             return;
         }
 
-        if (mListener == null || mListener.onNavigationItemSelected(position)) {
-            int oldPosition = mSelectedPosition;
-            mSelectedPosition = position;
+        if (listener == null || listener.onNavigationItemSelected(position)) {
+            int oldPosition = selectedPosition;
+            selectedPosition = position;
             notifyItemChanged(oldPosition);
             notifyItemChanged(position);
         }
@@ -93,28 +93,28 @@ public final class NavigationAdapter extends AppAdapter<NavigationItem>
 
     private final class ViewHolder extends AppViewHolder {
 
-        private final ImageView mIconView;
-        private final TextView mTitleView;
+        private final ImageView iconView;
+        private final TextView titleView;
 
         private ViewHolder() {
             super(R.layout.home_navigation_item);
-            mIconView = findViewById(R.id.iv_home_navigation_icon);
-            mTitleView = findViewById(R.id.tv_home_navigation_title);
+            iconView = findViewById(R.id.iv_home_navigation_icon);
+            titleView = findViewById(R.id.tv_home_navigation_title);
         }
 
         @Override
         public void onBindView(int position) {
             NavigationItem item = getItem(position);
-            boolean selected = mSelectedPosition == position;
+            boolean selected = selectedPosition == position;
             Drawable icon = item.drawable == null ? null : item.drawable.mutate();
-            mIconView.setImageDrawable(icon);
-            mTitleView.setText(item.text);
+            iconView.setImageDrawable(icon);
+            titleView.setText(item.text);
             itemView.setSelected(selected);
-            mIconView.setSelected(selected);
-            mTitleView.setSelected(selected);
+            iconView.setSelected(selected);
+            titleView.setSelected(selected);
             int tintColor = ContextCompat.getColor(getContext(),
                     selected ? R.color.white : R.color.rfid_text_muted);
-            ImageViewCompat.setImageTintList(mIconView, ColorStateList.valueOf(tintColor));
+            ImageViewCompat.setImageTintList(iconView, ColorStateList.valueOf(tintColor));
         }
     }
 

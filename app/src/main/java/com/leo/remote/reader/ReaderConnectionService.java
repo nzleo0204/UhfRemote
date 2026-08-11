@@ -9,14 +9,27 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.leo.remote.R;
 
-/** Keeps the reader session alive and exposes its current state in a foreground notification. */
+/**
+ * Reader 连接服务
+ *
+ * 保持 Reader 会话活跃，并通过前台通知展示当前连接状态。
+ * 使用前台服务可以防止系统在后台时杀死连接，确保长时间稳定运行。
+ *
+ * 主要功能：
+ * - 维持与 RFID Reader 的连接
+ * - 显示前台通知展示连接状态
+ * - 管理 Wi-Fi 锁，防止 Wi-Fi 休眠
+ * - 提供断开连接的操作入口
+ */
 public final class ReaderConnectionService extends Service {
+    private static final String TAG = "UhfRemote/ConnectionService";
     static final String ACTION_START = "com.leo.remote.reader.action.START";
     static final String ACTION_DISCONNECT = "com.leo.remote.reader.action.DISCONNECT";
     private static final String CHANNEL_ID = "reader_connection";
@@ -29,6 +42,7 @@ public final class ReaderConnectionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "创建 Reader 连接服务");
         session = ReaderSessionManager.getInstance(getApplication());
         WifiManager wifiManager = getSystemService(WifiManager.class);
         if (wifiManager != null) {
@@ -52,6 +66,8 @@ public final class ReaderConnectionService extends Service {
     }
 
     void updateReaderState(ReaderState updated) {
+        Log.d(TAG, "更新 Reader 状态: phase=" + updated.getPhase()
+                + ", connected=" + updated.isConnected());
         state = updated;
         updateWifiLock(updated);
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -60,8 +76,12 @@ public final class ReaderConnectionService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "销毁 Reader 连接服务");
         if (session != null) { session.onConnectionServiceDestroyed(this); }
-        if (wifiLock != null && wifiLock.isHeld()) { wifiLock.release(); }
+        if (wifiLock != null && wifiLock.isHeld()) {
+            Log.d(TAG, "释放 Wi-Fi 锁");
+            wifiLock.release();
+        }
         stopForeground(STOP_FOREGROUND_REMOVE);
         super.onDestroy();
     }

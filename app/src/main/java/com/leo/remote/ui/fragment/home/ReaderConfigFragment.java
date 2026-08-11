@@ -71,7 +71,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private TextView workModeView;
     private TextView sessionView;
     private TextView blfView;
-    private TextView qView;
+    // Q值相关已移除
     private TextView inventoryAreaView;
     private TextView bleDeviceView;
     private View deviceInfoButton;
@@ -117,7 +117,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         workModeView = findViewById(R.id.tv_config_work_mode);
         sessionView = findViewById(R.id.tv_config_session);
         blfView = findViewById(R.id.tv_config_blf);
-        qView = findViewById(R.id.tv_config_q);
+        // Q值相关已移除
         inventoryAreaView = findViewById(R.id.tv_config_inventory_area);
         bleDeviceView = findViewById(R.id.tv_config_ble_device);
         deviceInfoButton = findViewById(R.id.ibtn_config_device_info);
@@ -211,7 +211,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         workModeRow.setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
         blfRow.setOnClickListener(view -> showBlfDialog());
-        findViewById(R.id.row_config_q).setOnClickListener(view -> showQDialog());
+        // Q值相关已移除
         findViewById(R.id.btn_config_refresh).setOnClickListener(view -> refreshParameters());
         powerValueView.setOnClickListener(view -> {
             if (readerState.getModuleSubtype() == ModuleSubtype.RM610
@@ -219,6 +219,16 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 showRm610PowerDialog();
             }
         });
+        // 功率行整行可点击
+        View powerRow = findViewById(R.id.row_config_power);
+        if (powerRow != null) {
+            powerRow.setOnClickListener(view -> {
+                if (readerState.getModuleSubtype() == ModuleSubtype.RM610
+                        && !Rm610PowerLevels.isCmtVersion(readerState.getModuleSerial())) {
+                    showRm610PowerDialog();
+                }
+            });
+        }
 
         powerSeekBar.setOnTouchListener((view, event) -> {
             int action = event.getActionMasked();
@@ -339,8 +349,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         blfView.setText(blfLabel(value.blfProfile));
         sessionView.setText(getString(R.string.config_session_value, value.session));
-        qView.setText(value.dynamicQ ? getString(R.string.config_adaptive)
-                : getString(R.string.config_q_value, value.qValue));
+        // Q值相关已移除
         updateInventoryAreaView(value);
         workModeView.setText(readerState.getModuleSubtype().supportsInventoryModeSwitch()
                 ? workModeLabel(value.inventoryMode) : workModeLabel(1));
@@ -480,7 +489,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         String[] labels = protocols.stream().map(TagProtocol::getDisplayName).toArray(String[]::new);
         int selected = Math.max(0, protocols.indexOf(readerState.getProtocol()));
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.config_protocol)
+                .setCustomTitle(createDialogTitle(R.string.config_protocol))
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
@@ -516,20 +525,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void showInventoryAreaDialog() {
         if (!requireReaderOnline()) { return; }
         List<InventoryArea> areas = InventoryArea.forProtocol(readerState.getProtocol());
-        String[] labels = areas.stream().map(InventoryArea::getDisplayName).toArray(String[]::new);
+        // 去掉"盘点"两个字，只保留区域名称
+        String[] labels = areas.stream()
+                .map(area -> area.getDisplayName().replace("盘点", ""))
+                .toArray(String[]::new);
         int currentValue = configuration == null ? 0 : configuration.inventoryArea;
         int selected = Math.max(0, areas.indexOf(InventoryArea.of(readerState.getProtocol(),
                 currentValue)));
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.config_inventory_area)
+                .setCustomTitle(createDialogTitle(R.string.config_inventory_area))
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     InventoryArea target = areas.get(which);
-                    if (target.isBaseOnly()) {
-                        applyInventoryArea(target, 0, 0);
-                    } else {
-                        showInventoryRangeDialog(target);
-                    }
+                    // 所有选项都弹出输入弹窗
+                    showInventoryRangeDialog(target);
                 })
                 .setNegativeButton(R.string.common_cancel, null)
                 .show();
@@ -538,13 +547,35 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private void showInventoryRangeDialog(InventoryArea target) {
         int defaultAddress = defaultAddress(target);
         int defaultWordLen = defaultWordLen(target);
+        // 去掉 "EPC/" 前缀，只保留后面的部分
+        String columnHeader = target.getColumnHeader();
+        if (columnHeader.startsWith("EPC/")) {
+            columnHeader = columnHeader.substring(4); // 去掉 "EPC/"
+        }
+        String title = columnHeader + " 设置";
+
+        // 如果是仅EPC，显示简单的确认弹窗
+        if (target.isBaseOnly()) {
+            new MessageDialog.Builder(requireActivity())
+                    .setTitle(title)
+                    .setMessage("确认设置盘点区域为 " + columnHeader + "？")
+                    .setCancel(R.string.common_cancel)
+                    .setConfirm(R.string.common_confirm)
+                    .setListener(new MessageDialog.OnListener() {
+                        @Override
+                        public void onConfirm(@NonNull BaseDialog dialog) {
+                            applyInventoryArea(target, 0, 0);
+                        }
+                    })
+                    .show();
+            return;
+        }
+
+        // 非仅EPC，显示地址和长度输入弹窗
         new InventoryRangeDialog.Builder(requireContext())
-                .setTitle(getString(R.string.config_inventory_range_title,
-                        target.getDisplayName()))
+                .setTitle(title)
                 .setAddress(defaultAddress)
                 .setLength(defaultWordLen)
-                .setHint(getString(R.string.config_inventory_range_recommendation,
-                        defaultAddress, defaultWordLen))
                 .setListener(new InventoryRangeDialog.Builder.OnListener() {
                     @Override
                     public void onConfirm(@NonNull BaseDialog dialog, int address, int length) {
@@ -616,13 +647,16 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private void showWorkModeDialog() {
         if (!requireReaderOnline()) { return; }
-        if (!readerState.getModuleSubtype().supportsInventoryModeSwitch()) {
+        // RM610 同属于 R2000 系列，支持切换
+        ModuleSubtype subtype = readerState.getModuleSubtype();
+        if (!subtype.supportsInventoryModeSwitch()) {
             toast(R.string.config_work_mode_unsupported);
             return;
         }
         String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
         int selected = configuration == null ? 1 : configuration.inventoryMode;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_work_mode)
+        new MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(createDialogTitle(R.string.config_work_mode))
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
@@ -641,7 +675,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         String[] labels = getResources().getStringArray(R.array.config_session_labels);
         int selected = configuration == null ? 0 : configuration.session;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_session)
+        new MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(createDialogTitle(R.string.config_session))
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
@@ -659,7 +694,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_blf_labels);
         int selected = configuration == null ? 1 : configuration.blfProfile;
-        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.config_blf_rate)
+        new MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(createDialogTitle(R.string.config_blf_rate))
                 .setSingleChoiceItems(labels, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
@@ -668,108 +704,15 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
-    private void showQDialog() {
-        if (!requireReaderOnline()) { return; }
-        boolean magic = readerState.getModuleSubtype() == ModuleSubtype.RM8011;
-        String[] labels = new String[32];
-        for (int i = 0; i < 16; i++) {
-            labels[i] = getString(R.string.config_fixed_q, i);
-            labels[16 + i] = getString(R.string.config_dynamic_q, i);
-        }
-        if (magic) {
-            labels = new String[16];
-            for (int i = 0; i < 16; i++) { labels[i] = getString(R.string.config_q_value, i); }
-        }
-        String[] choices = labels;
-        int currentQ = configuration == null ? 4 : configuration.qValue;
-        int initialSelection = magic || configuration == null || !configuration.dynamicQ
-                ? currentQ : 16 + currentQ;
-        int[] selected = {Math.max(0, Math.min(choices.length - 1, initialSelection))};
-
-        LinearLayout parameters = new LinearLayout(requireContext());
-        parameters.setOrientation(LinearLayout.VERTICAL);
-        int padding = getResources().getDimensionPixelSize(R.dimen.dp_24);
-        parameters.setPadding(padding, 0, padding, 0);
-        EditText minQ = qParameterInput(R.string.config_q_min_value,
-                configuration == null ? 0 : configuration.qMinValue);
-        EditText maxQ = qParameterInput(R.string.config_q_max_value,
-                configuration == null ? 15 : configuration.qMaxValue);
-        EditText retry = qParameterInput(R.string.config_q_retry_count,
-                configuration == null ? 0 : configuration.qRetryCount);
-        EditText threshold = qParameterInput(R.string.config_q_threshold,
-                configuration == null ? 1 : configuration.qThresholdMultiplier);
-        parameters.addView(minQ);
-        parameters.addView(maxQ);
-        parameters.addView(retry);
-        parameters.addView(threshold);
-        boolean initiallyDynamic = !magic && selected[0] >= 16;
-        minQ.setVisibility(initiallyDynamic ? View.VISIBLE : View.GONE);
-        maxQ.setVisibility(initiallyDynamic ? View.VISIBLE : View.GONE);
-        threshold.setVisibility(initiallyDynamic ? View.VISIBLE : View.GONE);
-        parameters.setVisibility(magic ? View.GONE : View.VISIBLE);
-
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.config_q_parameter)
-                .setSingleChoiceItems(choices, selected[0], (choiceDialog, which) -> {
-                    selected[0] = which;
-                    boolean dynamic = !magic && which >= 16;
-                    minQ.setVisibility(dynamic ? View.VISIBLE : View.GONE);
-                    maxQ.setVisibility(dynamic ? View.VISIBLE : View.GONE);
-                    threshold.setVisibility(dynamic ? View.VISIBLE : View.GONE);
-                })
-                .setView(parameters)
-                .setPositiveButton(R.string.common_confirm, null)
-                .setNegativeButton(R.string.common_cancel, null)
-                .create();
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
-                    boolean dynamic = !magic && selected[0] >= 16;
-                    try {
-                        int retryCount = magic ? 0 : Integer.parseInt(retry.getText().toString());
-                        int minQValue = dynamic ? Integer.parseInt(minQ.getText().toString()) : 0;
-                        int maxQValue = dynamic ? Integer.parseInt(maxQ.getText().toString()) : 15;
-                        int thresholdValue = dynamic
-                                ? Integer.parseInt(threshold.getText().toString()) : 1;
-                        if (retryCount < 0 || retryCount > 10) {
-                            toast(R.string.config_q_retry_invalid);
-                            return;
-                        }
-                        if (minQValue < 0 || minQValue > 15 || maxQValue < 0
-                                || maxQValue > 15 || minQValue > maxQValue) {
-                            toast(R.string.config_q_range_invalid);
-                            return;
-                        }
-                        if (thresholdValue < 0 || thresholdValue > 255) {
-                            toast(R.string.config_q_threshold_invalid);
-                            return;
-                        }
-                        dialog.dismiss();
-                        int qValue = selected[0] % 16;
-                        boolean unchanged = configuration != null
-                                && configuration.dynamicQ == dynamic
-                                && configuration.qValue == qValue
-                                && configuration.qRetryCount == retryCount
-                                && (!dynamic || (configuration.qMinValue == minQValue
-                                && configuration.qMaxValue == maxQValue
-                                && configuration.qThresholdMultiplier == thresholdValue));
-                        if (unchanged) { return; }
-                        confirmAndApply(R.string.config_q_value_label, choices[selected[0]],
-                                () -> session.setQ(dynamic, qValue, minQValue, maxQValue,
-                                        retryCount, thresholdValue),
-                                R.string.config_q_set_failed, () -> {});
-                    } catch (NumberFormatException error) {
-                        toast(R.string.config_q_value_invalid);
-                    }
-                }));
-        dialog.show();
-    }
+    // Q值设置相关方法已移除 (showQDialog 完整删除)
 
     private void showRm610PowerDialog() {
         if (!requireReaderOnline()) { return; }
         String[] values = Rm610PowerLevels.nonCmtLabels();
         int selected = configuration == null ? -1 : configuration.powerTenthsDbm;
+
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.config_rm610_power)
+                .setCustomTitle(createDialogTitle(R.string.config_transmit_power))
                 .setSingleChoiceItems(values, selected, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == selected) { return; }
@@ -781,14 +724,18 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 .show();
     }
 
-    private EditText qParameterInput(@StringRes int hint, int value) {
-        EditText input = new EditText(requireContext());
-        input.setHint(hint);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setSingleLine(true);
-        input.setText(String.valueOf(value));
-        return input;
+    /** 创建居中显示的弹窗标题 */
+    private TextView createDialogTitle(@StringRes int titleRes) {
+        TextView titleView = new TextView(requireContext());
+        titleView.setText(titleRes);
+        titleView.setTextSize(15); // 标题字号 15sp
+        titleView.setGravity(android.view.Gravity.CENTER);
+        titleView.setPadding(0, 40, 0, 20);
+        titleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.rfid_text));
+        return titleView;
     }
+
+    // Q值参数输入方法已移除 (qParameterInput)
 
     // ========== Module-aware UI ==========
 
@@ -806,7 +753,9 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 ? R.string.config_power_max_rm610 : R.string.config_power_max);
         powerValueView.setClickable(isRm610Discrete && connected);
         blfRow.setVisibility(isRm8011 ? View.GONE : View.VISIBLE);
-        boolean supportsModeSwitch = subtype.supportsInventoryModeSwitch();
+        // RM610 同属于 R2000 系列，支持工作模式切换
+        boolean supportsModeSwitch = subtype.supportsInventoryModeSwitch()
+                || subtype == ModuleSubtype.RM610;
         workModeRow.setEnabled(supportsModeSwitch && connected);
         if (!supportsModeSwitch) {
             workModeView.setText(workModeLabel(1));
@@ -856,13 +805,28 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             Supplier<CompletableFuture<Integer>> action, @StringRes int failureMessage,
             Runnable rollback) {
         boolean power = settingName == R.string.config_transmit_power;
+
+        // 构建带红色高亮的确认消息
+        String settingText = getString(settingName);
+        String template = power
+                ? getString(R.string.config_power_confirm_message, "%s")
+                : getString(R.string.config_setting_confirm_message, settingText, "%s");
+
+        // 创建带颜色的消息
+        android.text.SpannableString message = new android.text.SpannableString(
+                template.replace("%s", newValueLabel));
+        int start = message.toString().indexOf(newValueLabel.toString());
+        if (start >= 0) {
+            message.setSpan(new android.text.style.ForegroundColorSpan(
+                    ContextCompat.getColor(requireContext(), R.color.rfid_danger)),
+                    start, start + newValueLabel.length(),
+                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
         new MessageDialog.Builder(requireActivity())
                 .setTitle(power ? R.string.config_power_confirm_title
-                        : R.string.config_setting_confirm_title)
-                .setMessage(power
-                        ? getString(R.string.config_power_confirm_message, newValueLabel)
-                        : getString(R.string.config_setting_confirm_message,
-                        getString(settingName), newValueLabel))
+                        : settingName)  // 使用具体的设置名称作为标题
+                .setMessage(message)
                 .setCancel(R.string.common_cancel)
                 .setConfirm(R.string.common_confirm)
                 .setListener(new MessageDialog.OnListener() {

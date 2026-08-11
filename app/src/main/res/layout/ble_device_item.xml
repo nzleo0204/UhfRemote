@@ -1,55 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_72"
+    android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/dp_8">
+    android:paddingHorizontal="10dp"
+    android:paddingVertical="10dp"
+    android:minHeight="56dp">
 
+    <!-- 蓝牙图标（28dp） -->
+    <ImageView
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:background="@drawable/rfid_chip_blue_bg"
+        android:padding="5dp"
+        android:src="@drawable/rfid_bluetooth_ic"
+        app:tint="@color/white"
+        android:contentDescription="@null" />
+
+    <!-- 设备信息（名称+地址） -->
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="vertical"
-        android:paddingEnd="@dimen/dp_12">
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
 
+        <!-- 设备名称（再小一个字号：13sp） -->
         <TextView
             android:id="@+id/tv_ble_device_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_15" />
+            android:textSize="13sp" />
 
+        <!-- MAC 地址（11sp） -->
         <TextView
             android:id="@+id/tv_ble_device_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_4"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/rfid_text_muted"
-            android:textSize="@dimen/sp_12" />
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
     </LinearLayout>
 
+    <!-- RSSI 信号强度 -->
     <TextView
         android:id="@+id/tv_ble_device_rssi"
-        android:layout_width="@dimen/dp_72"
-        android:layout_height="match_parent"
-        android:ellipsize="end"
-        android:gravity="center_vertical|end"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:singleLine="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="50dp"
+        android:gravity="end|center_vertical"
         android:textColor="@color/rfid_text_secondary"
-        android:textSize="@dimen/sp_12" />
+        android:textSize="11sp" />
 </LinearLayout>

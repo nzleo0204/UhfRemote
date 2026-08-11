@@ -102,9 +102,9 @@
                 android:text="@string/config_group_power" />
 
             <LinearLayout
+                android:id="@+id/row_config_power"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_12"
+                android:layout_height="@dimen/dp_44"
                 android:gravity="center_vertical">
 
                 <TextView
@@ -113,11 +113,8 @@
 
                 <TextView
                     android:id="@+id/tv_config_power_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/rfid_primary_soft"
-                    android:textSize="@dimen/sp_16"
-                    tools:text="26 dBm" />
+                    style="@style/RfidValueChip"
+                    tools:text="20 dBm" />
             </LinearLayout>
 
             <SeekBar
@@ -317,7 +314,7 @@
                 android:text="@string/config_group_rate" />
 
             <include layout="@layout/rfid_config_row_blf" />
-            <include layout="@layout/rfid_config_row_q" />
+            <!-- Q值设置已移除 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_config_refresh"
                 style="@style/RfidTextButton"
