@@ -10,8 +10,9 @@
 
 ## 2. Reader 核心
 
-`ReaderSessionManager` 是 UI 使用的会话门面。它负责 SDK 串行执行、BLE/Wi-Fi
-传输编排、握手、断连清理，以及需要跨模块保持原子性的掩码切换流程。
+`ReaderSessionManager` 是 UI 使用的会话门面，只保留稳定的公开 API，并把调用委托给
+包内 `ReaderSessionCoordinator`。协调器负责 SDK 串行执行、BLE/Wi-Fi 传输编排、
+握手、断连清理，以及需要跨模块保持原子性的掩码切换流程。
 
 门面将稳定、可独立测试的状态交给以下组件：
 
@@ -30,7 +31,7 @@
 - BLE 回调和 Android 网络回调不直接执行阻塞 SDK 操作。
 - `ReaderStatePublisher` 把观察者通知切换到 Android 主线程。
 - 盘点标签先在线程安全的 `InventoryAccumulator` 中合并，再以 100ms 间隔发布快照。
-- `ReaderSessionManager` 的公开状态通过 `volatile` 或线程安全组件跨线程读取。
+- `ReaderSessionCoordinator` 的共享状态通过 `volatile` 或线程安全组件跨线程读取。
 
 ## 4. 连接数据流
 
