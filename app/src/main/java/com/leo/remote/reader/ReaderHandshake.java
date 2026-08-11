@@ -38,7 +38,7 @@ final class ReaderHandshake {
         return new Result(info, gateway.readConfiguration(info.subtype));
     }
 
-    static Result perform(UhfSdkGateway gateway, ReaderConfigCache cache,
+    static Result perform(UhfSdkGateway gateway, ReaderConfigurationStore cache,
             IntConsumer progress) throws ReaderException {
         progress.accept(R.string.handshake_updating_params);
         ReaderModuleInfo info = gateway.readModuleInfo();
@@ -60,7 +60,7 @@ final class ReaderHandshake {
     }
 
     static ReaderConfiguration readConfigurationStepwise(UhfSdkGateway gateway,
-            ModuleSubtype subtype, ReaderConfigCache cache, IntConsumer progress) {
+            ModuleSubtype subtype, ReaderConfigurationStore cache, IntConsumer progress) {
         ReaderConfiguration fallback = cache.loadConfiguration(subtype);
         if (fallback == null) { fallback = ReaderConfigCache.getDefaultConfiguration(subtype); }
 

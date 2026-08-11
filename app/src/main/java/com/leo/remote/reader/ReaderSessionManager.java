@@ -50,16 +50,15 @@ public final class ReaderSessionManager {
     private final WifiNetworkMonitor wifiMonitor;
     private final MMKV storage;
     private final ReaderConfigCache configCache;
+    private final ReaderConfigurationManager configurationManager;
 
     private volatile ReaderState state = ReaderState.disconnected();
-    private volatile ReaderConfiguration configuration;
     private volatile ReaderTag currentTag;
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
     private volatile boolean inventoryMaskApplied;
     private final InventoryMaskSelection inventoryMaskSelection = new InventoryMaskSelection();
     private volatile InventoryMaskConfig singleTagMask;
-    private volatile int inventoryMode = 1;
     private volatile boolean pendingDisconnectAlert;
     private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
     private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
@@ -104,6 +103,8 @@ public final class ReaderSessionManager {
         statePublisher = new ReaderStatePublisher();
         storage = MMKV.mmkvWithID(MMKV_ID);
         configCache = new ReaderConfigCache();
+        configurationManager = new ReaderConfigurationManager(gateway, configCache,
+                statePublisher);
         bleTransport = new BleTransport(new BleTransport.Listener() {
             @Override
             public void onPhase(long attemptId, ConnectionPhase phase, String message) {
@@ -152,9 +153,9 @@ public final class ReaderSessionManager {
     }
 
     public ReaderState getState() { return state; }
-    public ReaderConfiguration getConfiguration() { return configuration; }
+    public ReaderConfiguration getConfiguration() { return configurationManager.getConfiguration(); }
     public ReaderTag getCurrentTag() { return currentTag; }
-    public int getInventoryMode() { return inventoryMode; }
+    public int getInventoryMode() { return configurationManager.getInventoryMode(); }
     public boolean isPendingDisconnectAlert() { return pendingDisconnectAlert; }
     public DisconnectReason getLastUnexpectedReason() { return lastUnexpectedReason; }
     public void acknowledgeDisconnect() { pendingDisconnectAlert = false; }
@@ -162,6 +163,7 @@ public final class ReaderSessionManager {
     public void addObserver(@NonNull ReaderObserver observer) {
         statePublisher.addObserver(observer, () -> {
             observer.onReaderStateChanged(state);
+            ReaderConfiguration configuration = configurationManager.getConfiguration();
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
             if (currentTag != null) { observer.onCurrentTagChanged(currentTag); }
             observer.onInventoryMaskChanged(inventoryMask);
@@ -199,7 +201,7 @@ public final class ReaderSessionManager {
         ReaderState previousState = state;
         long generation = connectionGeneration.incrementAndGet();
         if (!isValidIpv4(normalized)) {
-            configuration = null;
+            configurationManager.clear();
             clearCurrentTag();
             publish(new ReaderState.Builder().transport(TransportType.WIFI).phase(ConnectionPhase.FAILED)
                     .device("Wi-Fi reader", normalized).message("Invalid reader IP address")
@@ -209,7 +211,7 @@ public final class ReaderSessionManager {
             return;
         }
         startConnectionService();
-        configuration = null;
+        configurationManager.clear();
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.WIFI)
                 .phase(ConnectionPhase.CONNECTING).device("Wi-Fi reader", normalized)
@@ -248,7 +250,7 @@ public final class ReaderSessionManager {
         Log.i(TAG, "connect BLE name=" + device.getName() + " address=" + device.getAddress());
         ReaderState previousState = state;
         long generation = connectionGeneration.incrementAndGet();
-        configuration = null;
+        configurationManager.clear();
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.BLE)
                 .phase(ConnectionPhase.CONNECTING).device(device.getName(), device.getAddress())
@@ -283,7 +285,7 @@ public final class ReaderSessionManager {
         ConnectionPhase phase = state.getPhase();
         if (phase == ConnectionPhase.DISCONNECTED || phase == ConnectionPhase.FAILED) {
             connectionGeneration.incrementAndGet();
-            configuration = null;
+            configurationManager.clear();
             clearCurrentTag();
             if (state.getTransport() != TransportType.NONE || state.getDisconnectReason() != DisconnectReason.NONE) {
                 publish(new ReaderState.Builder().disconnectReason(reason).build());
@@ -296,7 +298,7 @@ public final class ReaderSessionManager {
                 .inventoryRunning(false).message("Disconnecting").build());
         sdkExecutor.execute(() -> {
             disconnectTransportInternal();
-            configuration = null;
+            configurationManager.clear();
             clearCurrentTag();
             if (isCurrentConnection(generation)) {
                 publish(new ReaderState.Builder().disconnectReason(reason).build());
@@ -356,7 +358,7 @@ public final class ReaderSessionManager {
                 notifyMask(null);
             }
             status = monitorSdkStatus(gateway.setProtocol(protocol));
-            ReaderConfiguration current = configuration;
+            ReaderConfiguration current = configurationManager.getConfiguration();
             InventoryArea mappedArea = InventoryArea.of(protocol,
                     current == null ? 0 : current.inventoryArea);
             int mappedAddress = current == null || mappedArea.isBaseOnly()
@@ -371,17 +373,12 @@ public final class ReaderSessionManager {
             if (status == 0) {
                 clearCurrentTag();
                 if (current != null) {
-                    configuration = new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
-                            current.blfProfile, current.session, current.target, current.dynamicQ,
-                            current.qValue, current.qMinValue, current.qMaxValue,
-                            current.qRetryCount, current.qThresholdMultiplier,
-                            current.qToggleTarget, current.qRepeatUntilNoTags,
+                    configurationManager.updateProtocolArea(state.getModuleSubtype(),
                             mappedArea.getValue(), mappedAddress, mappedLength);
-                    configCache.saveConfiguration(state.getModuleSubtype(), configuration);
                 }
                 inventory.clear();
                 publish(state.buildUpon().protocol(protocol).inventoryRunning(false).build());
-                notifyConfiguration();
+                configurationManager.publishCurrent();
                 notifyInventory();
             }
             return status;
@@ -389,17 +386,12 @@ public final class ReaderSessionManager {
     }
 
     public void setInventoryMode(int mode) {
-        if (mode < 0 || mode > 2) { return; }
         ModuleSubtype subtype = state.getModuleSubtype();
-        inventoryMode = subtype.supportsInventoryModeSwitch() ? mode : 1;
-        if (inventoryMode != mode) {
+        int effectiveMode = configurationManager.setInventoryMode(subtype, mode);
+        if (mode >= 0 && mode <= 2 && effectiveMode != mode) {
             Log.w(TAG, "inventory mode " + mode + " unsupported on " + subtype
                     + "; fall back to high performance");
         }
-        if (configuration != null) {
-            configCache.saveConfiguration(state.getModuleSubtype(), buildConfigurationSnapshot());
-        }
-        notifyConfiguration();
     }
 
     public CompletableFuture<Integer> setInventoryArea(int area, int address, int wordLen) {
@@ -408,49 +400,26 @@ public final class ReaderSessionManager {
             return CompletableFuture.completedFuture(-31);
         }
         return submitConnected(() -> {
-            int effectiveAddress = area == 0 ? 0 : address;
-            int effectiveLength = area == 0 ? 0 : wordLen;
-            int status = monitorSdkStatus(gateway.setInventoryArea(area, effectiveAddress,
-                    effectiveLength));
-            ReaderConfiguration current = configuration;
-            if (current == null) { return status; }
-            return updateConfiguration(status, new ReaderConfiguration(current.powerTenthsDbm,
-                    inventoryMode, current.blfProfile, current.session, current.target,
-                    current.dynamicQ, current.qValue, current.qMinValue, current.qMaxValue,
-                    current.qRetryCount, current.qThresholdMultiplier, current.qToggleTarget,
-                    current.qRepeatUntilNoTags, area, effectiveAddress, effectiveLength));
+            return monitorSdkStatus(configurationManager.setInventoryArea(
+                    state.getModuleSubtype(), area, address, wordLen));
         });
     }
 
     public CompletableFuture<Integer> refreshConfiguration() {
         return submitConnected(() -> {
-            ReaderConfiguration refreshed = ReaderHandshake.readConfigurationStepwise(gateway,
-                    state.getModuleSubtype(), configCache, ignored -> {});
-            configuration = refreshed;
-            inventoryMode = refreshed.inventoryMode;
-            notifyConfiguration();
+            configurationManager.refresh(state.getModuleSubtype());
             return 0;
         }, false);
     }
 
     public CompletableFuture<Integer> setPower(int powerTenthsDbm) {
-        return submitConnected(() -> updateConfiguration(gateway.setPowerTenthsDbm(powerTenthsDbm),
-                new ReaderConfiguration(powerTenthsDbm, inventoryMode, configuration.blfProfile,
-                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue,
-                        configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
-                        configuration.qThresholdMultiplier, configuration.qToggleTarget,
-                        configuration.qRepeatUntilNoTags, configuration.inventoryArea,
-                        configuration.inventoryAddress, configuration.inventoryWordLen)), false);
+        return submitConnected(() -> configurationManager.setPower(
+                state.getModuleSubtype(), powerTenthsDbm), false);
     }
 
     public CompletableFuture<Integer> setBlf(int profile) {
-        return submitConnected(() -> updateConfiguration(monitorSdkStatus(gateway.setBlfProfile(profile)),
-                new ReaderConfiguration(configuration.powerTenthsDbm, inventoryMode, profile,
-                        configuration.session, configuration.target, configuration.dynamicQ, configuration.qValue,
-                        configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
-                        configuration.qThresholdMultiplier, configuration.qToggleTarget,
-                        configuration.qRepeatUntilNoTags, configuration.inventoryArea,
-                        configuration.inventoryAddress, configuration.inventoryWordLen)));
+        return submitConnected(() -> monitorSdkStatus(configurationManager.setBlf(
+                state.getModuleSubtype(), profile)));
     }
 
     /** Changes only Session; Target and the handshake Sel value are preserved. */
@@ -460,39 +429,28 @@ public final class ReaderSessionManager {
         }
         return submitConnected(() -> {
             ModuleSubtype subtype = state.getModuleSubtype();
+            ReaderConfiguration configuration = configurationManager.getConfiguration();
             int target = configuration.target;
             int selected = configCache.loadSelected(subtype);
-            int status = monitorSdkStatus(gateway.setSession(subtype, session, target, selected));
+            int status = monitorSdkStatus(configurationManager.applySession(
+                    subtype, session, selected));
             Log.i(TAG, "setSession S" + session + " target=" + target
                     + " selected=" + selected + " status=" + status);
             if (status == 0 && inventoryMaskApplied) {
                 gateway.applyInventoryMask(state.getProtocol(), subtype, inventoryMask);
             }
-            return updateConfiguration(status, new ReaderConfiguration(
-                    configuration.powerTenthsDbm, inventoryMode, configuration.blfProfile,
-                    session, target, configuration.dynamicQ, configuration.qValue,
-                    configuration.qMinValue, configuration.qMaxValue, configuration.qRetryCount,
-                    configuration.qThresholdMultiplier, configuration.qToggleTarget,
-                    configuration.qRepeatUntilNoTags, configuration.inventoryArea,
-                    configuration.inventoryAddress, configuration.inventoryWordLen));
+            if (status == 0) {
+                configurationManager.commitSession(subtype, session);
+            }
+            return status;
         });
     }
 
     public CompletableFuture<Integer> setQ(boolean dynamic, int qValue, int minQValue,
             int maxQValue, int retryCount, int thresholdMultiplier) {
         return submitConnected(() -> {
-            int status = state.getModuleSubtype() == ModuleSubtype.RM8011
-                    ? gateway.setMagicQuery(configuration.session, configuration.target, qValue)
-                    : gateway.setQ(dynamic, qValue, minQValue, maxQValue, retryCount,
-                    thresholdMultiplier, configuration.qToggleTarget,
-                    configuration.qRepeatUntilNoTags);
-            return updateConfiguration(monitorSdkStatus(status), new ReaderConfiguration(configuration.powerTenthsDbm,
-                    inventoryMode, configuration.blfProfile, configuration.session,
-                    configuration.target, state.getModuleSubtype() != ModuleSubtype.RM8011 && dynamic, qValue,
-                    minQValue, maxQValue, retryCount, thresholdMultiplier,
-                    configuration.qToggleTarget, configuration.qRepeatUntilNoTags,
-                    configuration.inventoryArea, configuration.inventoryAddress,
-                    configuration.inventoryWordLen));
+            return monitorSdkStatus(configurationManager.setQ(state.getModuleSubtype(), dynamic,
+                    qValue, minQValue, maxQValue, retryCount, thresholdMultiplier));
         });
     }
 
@@ -502,7 +460,7 @@ public final class ReaderSessionManager {
 
     /** Starts inventory on the SDK executor with the current mask flag. */
     private int startInventoryInternal() {
-        ReaderConfiguration current = configuration;
+        ReaderConfiguration current = configurationManager.getConfiguration();
         int area = current == null ? 0 : current.inventoryArea;
         int address = current == null ? 0 : current.inventoryAddress;
         int wordLen = current == null ? 0 : current.inventoryWordLen;
@@ -524,7 +482,7 @@ public final class ReaderSessionManager {
                 inventoryMaskApplied = status == 0;
             }
         }
-        if (status == 0 && inventoryMode == 2) {
+        if (status == 0 && configurationManager.getInventoryMode() == 2) {
             int schedulerStatus = gateway.setLowPowerScheduler(0, 30, 100);
             if (schedulerStatus == STATUS_UNSUPPORTED) {
                 Log.w(TAG, "low-power inventory scheduler is unsupported; "
@@ -537,7 +495,9 @@ public final class ReaderSessionManager {
             }
         }
         int maskFlag = inventoryMaskApplied ? 1 : 0;
-        if (status == 0) { status = gateway.startInventory(inventoryMode, maskFlag); }
+        if (status == 0) {
+            status = gateway.startInventory(configurationManager.getInventoryMode(), maskFlag);
+        }
         status = monitorSdkStatus(status);
         if (status == 0) {
             publish(state.buildUpon().inventoryRunning(true).build());
@@ -790,8 +750,7 @@ public final class ReaderSessionManager {
                             .message(application.getString(resourceId)).build()));
             if (!isCurrentConnection(generation)) { return; }
             ReaderModuleInfo info = result.moduleInfo;
-            inventoryMode = result.configuration.inventoryMode;
-            configuration = result.configuration;
+            configurationManager.restore(result.configuration);
             if (inventoryMask != null && inventoryMaskProtocol != TagProtocol.ISO_18000_6C) {
                 inventoryMask = null;
                 inventoryMaskProtocol = null;
@@ -811,7 +770,7 @@ public final class ReaderSessionManager {
                     .message("").errorCode(0).inventoryRunning(false).build());
             pendingDisconnectAlert = false;
             lastUnexpectedReason = DisconnectReason.NONE;
-            notifyConfiguration();
+            configurationManager.publishCurrent();
             if (state.getTransport() == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
         } catch (ReaderException error) {
             Log.e(TAG, "RM70XX handshake failed code=" + error.getErrorCode()
@@ -937,7 +896,7 @@ public final class ReaderSessionManager {
         long generation = connectionGeneration.incrementAndGet();
         sdkExecutor.execute(() -> {
             disconnectTransportInternal(transport, lostState.isInventoryRunning());
-            configuration = null;
+            configurationManager.clear();
             clearCurrentTag();
             if (isCurrentConnection(generation)) {
                 publishFailure(transport, message, errorCode, reason);
@@ -964,7 +923,7 @@ public final class ReaderSessionManager {
         inventoryMaskApplied = false;
         inventoryMaskSelection.clear();
         notifyMask(null);
-        configuration = null;
+        configurationManager.clear();
         clearCurrentTag();
         pendingDisconnectAlert = true;
         lastUnexpectedReason = reason;
@@ -983,15 +942,6 @@ public final class ReaderSessionManager {
             currentTag = null;
             statePublisher.publishCurrentTag(null);
         }
-    }
-
-    private int updateConfiguration(int status, ReaderConfiguration updated) {
-        if (status == 0) {
-            configuration = updated;
-            configCache.saveConfiguration(state.getModuleSubtype(), updated);
-            notifyConfiguration();
-        }
-        return status;
     }
 
     private <T> CompletableFuture<T> submitConnected(Callable<T> operation) {
@@ -1072,23 +1022,6 @@ public final class ReaderSessionManager {
         ReaderConnectionService service = connectionService;
         if (service != null) { service.updateReaderState(updated); }
         statePublisher.publishState(updated);
-    }
-
-    private void notifyConfiguration() {
-        ReaderConfiguration current = configuration;
-        if (current == null) { return; }
-        ReaderConfiguration updated = buildConfigurationSnapshot();
-        configuration = updated;
-        statePublisher.publishConfiguration(updated);
-    }
-
-    private ReaderConfiguration buildConfigurationSnapshot() {
-        ReaderConfiguration current = configuration;
-        return new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
-                current.blfProfile, current.session, current.target, current.dynamicQ, current.qValue,
-                current.qMinValue, current.qMaxValue, current.qRetryCount,
-                current.qThresholdMultiplier, current.qToggleTarget, current.qRepeatUntilNoTags,
-                current.inventoryArea, current.inventoryAddress, current.inventoryWordLen);
     }
 
     private void scheduleInventoryUpdate() {

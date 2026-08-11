@@ -3,7 +3,7 @@ package com.leo.remote.reader;
 import com.tencent.mmkv.MMKV;
 
 /** Module-scoped persistent fallback values for reader configuration. */
-public final class ReaderConfigCache {
+public final class ReaderConfigCache implements ReaderConfigurationStore {
     private static final String MMKV_ID = "reader_config_cache";
     private final MMKV mmkv;
 
@@ -11,6 +11,7 @@ public final class ReaderConfigCache {
         mmkv = MMKV.mmkvWithID(MMKV_ID);
     }
 
+    @Override
     public void saveConfiguration(ModuleSubtype subtype, ReaderConfiguration config) {
         String prefix = prefix(subtype);
         mmkv.encode(prefix + "power", config.powerTenthsDbm);
@@ -31,6 +32,7 @@ public final class ReaderConfigCache {
         mmkv.encode(prefix + "inventoryWordLen", config.inventoryWordLen);
     }
 
+    @Override
     public ReaderConfiguration loadConfiguration(ModuleSubtype subtype) {
         String prefix = prefix(subtype);
         if (!mmkv.contains(prefix + "power")) { return null; }
@@ -55,10 +57,12 @@ public final class ReaderConfigCache {
     }
 
     /** Keeps the handshake Sel value separate from the user-visible configuration. */
+    @Override
     public void saveSelected(ModuleSubtype subtype, int selected) {
         mmkv.encode(prefix(subtype) + "selected", selected);
     }
 
+    @Override
     public int loadSelected(ModuleSubtype subtype) {
         return mmkv.decodeInt(prefix(subtype) + "selected", 0);
     }
