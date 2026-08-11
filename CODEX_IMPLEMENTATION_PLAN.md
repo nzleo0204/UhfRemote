@@ -5,6 +5,24 @@
 **代码规模**: 15,062 行 Java 代码，130 个文件  
 **执行方式**: 由 Codex 按阶段执行
 
+## 执行状态（2026-08-11）
+
+- ✅ 已完成 17 个应用层类命名统一与 `fl_home_root` 布局 ID 修正。
+- ✅ 已提取并集成 `ReaderStatePublisher`、`ReaderConfigurationManager`、
+  `ReaderTagOperations`、`ReaderInventoryController`、`ReaderConnectionManager`。
+- ✅ `ReaderSessionManager` 已收敛为 138 行公开门面；跨连接、握手和掩码恢复的
+  原子时序保留在包内 `ReaderSessionCoordinator`。
+- ✅ Reader 核心单元测试通过；计划点名的 7 个核心类行覆盖率 81.9%，
+  指令覆盖率 78.6%。
+- ✅ `lintDebug`、`assembleDebug`、`assembleRelease` 均执行成功，Release mapping
+  确认 Reader 核心类未混淆。
+- ✅ 已完成架构文档与真机页面回归，未发现应用崩溃。
+- ⚠️ Lint 当前为 0 errors / 271 warnings，均为存量项目或第三方依赖告警，本轮未用
+  baseline 隐藏，也未进行计划外全仓清理。
+- ⚠️ BLE、Wi-Fi、真实盘点和 CSV 导出仍需要实际 RFID 读写器配合做硬件验收。
+
+> 下文复选框是原始执行模板，当前状态以上述实测结果为准。
+
 ---
 
 ## 📋 执行概述
@@ -743,4 +761,3 @@ Co-Authored-By: Codex <codex@anthropic.com>"
 **预计完成**: 3-4 周后
 
 **开始执行前请确认已理解所有任务！**
-
