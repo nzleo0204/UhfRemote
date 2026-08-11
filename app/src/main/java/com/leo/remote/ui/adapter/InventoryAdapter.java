@@ -169,9 +169,7 @@ public final class InventoryAdapter extends ListAdapter<InventoryItem, Inventory
     private void bindVisibility(ViewHolder holder, InventoryItem item) {
         holder.dataRow.setVisibility(item.getData().isEmpty() ? View.GONE : View.VISIBLE);
         holder.rssi.setVisibility(rssiVisible ? View.VISIBLE : View.GONE);
-        boolean showChip = chipVisible && !item.getData().isEmpty()
-                && !item.getChipModel().isEmpty();
-        holder.chipRow.setVisibility(showChip ? View.VISIBLE : View.GONE);
+        holder.chipRow.setVisibility(chipVisible ? View.VISIBLE : View.GONE);
         boolean maskMatches = InventoryMaskMatcher.matches(maskConfig, currentProtocol,
                 currentArea, inventoryAddress, item);
         holder.maskLock.setImageResource(maskMatches

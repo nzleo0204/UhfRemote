@@ -18,6 +18,10 @@ public final class ChipModelFormatter {
                     ? (chinese.isEmpty() ? english : chinese)
                     : (english.isEmpty() ? chinese : english);
         }
+        String tid = tag.data.trim().toUpperCase(Locale.US);
+        if (tid.startsWith("E28011") || tid.startsWith("E28012")) {
+            return "Impinj Monza";
+        }
         return tag.tidPrefix == 0 ? ""
                 : String.format(Locale.US, "未知(%08X)", tag.tidPrefix);
     }

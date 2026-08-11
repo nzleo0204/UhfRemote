@@ -258,6 +258,14 @@ public class ReaderDomainTest {
     }
 
     @Test
+    public void identifiesImpinjChipFromTidWhenSdkMetadataIsMissing() {
+        assertEquals("Impinj Monza", ChipModelFormatter.format(
+                new ReaderTag("EPC", "E2801160600002041891F8C0", -50, 0, 1, "", 0)));
+        assertEquals("Impinj Monza", ChipModelFormatter.format(
+                new ReaderTag("EPC", "e280120000000000", -50, 0, 1, "", 0)));
+    }
+
+    @Test
     public void exposesProtocolSpecificInventoryAreas() {
         assertEquals(4, InventoryArea.forProtocol(TagProtocol.ISO_18000_6C).size());
         assertEquals(2, InventoryArea.forProtocol(TagProtocol.ISO_18000_6B).size());
