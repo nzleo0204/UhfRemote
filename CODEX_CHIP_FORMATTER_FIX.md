@@ -1,5 +1,16 @@
 # ChipModelFormatter 修复计划
 
+## 执行状态（2026-08-11）
+
+- ✅ `ChipModelFormatter` 已移除对 `tag.data` 的硬编码识别，只格式化 SDK 提供的
+  `chipModel`，未识别时显示 `tidPrefix`。
+- ✅ 双语型号格式化已提取为独立方法，字段职责边界已补充到类注释。
+- ✅ 三个计划指定的定向测试、全量 Debug 单元测试和 Debug APK 构建通过。
+- ✅ 真机连接 `RFID-BT860`，在 `EPC+TID`、起始地址 0 下完成盘点；14 个标签均显示
+  SDK 返回的芯片型号 `IMPINJ Manza4QT`，期间无应用崩溃。
+
+> 本计划已执行完成，以下内容保留为实施与验证记录。
+
 ## 📋 执行摘要
 
 **目标**：修复 ChipModelFormatter 的字段混用问题，移除不必要的硬编码芯片识别逻辑。

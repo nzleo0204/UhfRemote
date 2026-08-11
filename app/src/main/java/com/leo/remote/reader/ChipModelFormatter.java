@@ -2,7 +2,12 @@ package com.leo.remote.reader;
 
 import java.util.Locale;
 
-/** Converts SDK chip metadata into the label shown in the inventory list. */
+/**
+ * Formats chip metadata recognized by the UHF SDK.
+ *
+ * <p>Chip recognition belongs to the SDK. This class only selects a localized name and falls
+ * back to the SDK-provided TID prefix when the model is unknown.</p>
+ */
 public final class ChipModelFormatter {
     private ChipModelFormatter() {}
 
@@ -10,19 +15,19 @@ public final class ChipModelFormatter {
         if (tag == null) { return ""; }
         String model = tag.chipModel.trim();
         if (!model.isEmpty()) {
-            String[] names = model.split("\\|", -1);
-            String english = names[0].trim();
-            if (names.length == 1) { return english; }
-            String chinese = names[1].trim();
-            return Locale.getDefault().getLanguage().startsWith("zh")
-                    ? (chinese.isEmpty() ? english : chinese)
-                    : (english.isEmpty() ? chinese : english);
-        }
-        String tid = tag.data.trim().toUpperCase(Locale.US);
-        if (tid.startsWith("E28011") || tid.startsWith("E28012")) {
-            return "Impinj Monza";
+            return formatBilingualModel(model);
         }
         return tag.tidPrefix == 0 ? ""
                 : String.format(Locale.US, "未知(%08X)", tag.tidPrefix);
+    }
+
+    private static String formatBilingualModel(String model) {
+        String[] names = model.split("\\|", -1);
+        String english = names[0].trim();
+        if (names.length == 1) { return english; }
+        String chinese = names[1].trim();
+        return Locale.getDefault().getLanguage().startsWith("zh")
+                ? (chinese.isEmpty() ? english : chinese)
+                : (english.isEmpty() ? chinese : english);
     }
 }

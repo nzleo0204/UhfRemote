@@ -228,7 +228,7 @@ public class ReaderDomainTest {
     }
 
     @Test
-    public void formatsSdkChipNameAndUnknownTidPrefix() {
+    public void formatsChipModelForDifferentLocales() {
         Locale previous = Locale.getDefault();
         try {
             Locale.setDefault(Locale.CHINA);
@@ -258,11 +258,23 @@ public class ReaderDomainTest {
     }
 
     @Test
-    public void identifiesImpinjChipFromTidWhenSdkMetadataIsMissing() {
-        assertEquals("Impinj Monza", ChipModelFormatter.format(
-                new ReaderTag("EPC", "E2801160600002041891F8C0", -50, 0, 1, "", 0)));
-        assertEquals("Impinj Monza", ChipModelFormatter.format(
-                new ReaderTag("EPC", "e280120000000000", -50, 0, 1, "", 0)));
+    public void showsTidPrefixWhenSdkMetadataIsMissing() {
+        assertEquals("未知(E2801160)", ChipModelFormatter.format(
+                new ReaderTag("EPC", "任意数据", -50, 0, 1, "", 0xE2801160)));
+        assertEquals("", ChipModelFormatter.format(
+                new ReaderTag("EPC", "任意数据", -50, 0, 1, "", 0)));
+    }
+
+    @Test
+    public void formatsSdkProvidedChipModel() {
+        assertEquals("IMPINJ Monza M750", ChipModelFormatter.format(
+                new ReaderTag("EPC", "任意数据", -50, 0, 1,
+                        "IMPINJ Monza M750", 0xE2801160)));
+
+        ReaderTag fudan = new ReaderTag("EPC", "任意数据", -50, 0, 1,
+                "Fudan FM13UF011E|复旦 FM13UF011E", 0xE0040150);
+        String result = ChipModelFormatter.format(fudan);
+        assertTrue(result.equals("Fudan FM13UF011E") || result.equals("复旦 FM13UF011E"));
     }
 
     @Test
