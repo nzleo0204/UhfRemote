@@ -6,6 +6,12 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     int sessionStatus;
     int qStatus;
     int inventoryAreaStatus;
+    int applyInventoryStatus;
+    int startStatus;
+    int stopStatus;
+    int lowPowerStatus;
+    int applyMaskStatus;
+    int clearMaskStatus;
     int writeStatus;
     int lockStatus;
     int killStatus;
@@ -15,9 +21,12 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     int lastSelected;
     int lastQ;
     int lastInventoryArea;
+    int lastInventoryMode;
+    int lastMaskFlag;
     boolean magicQueryUsed;
     ReaderTag inventoryOnceResult;
     byte[] readResult = new byte[0];
+    int[] queryValues = new int[] {0, 0, 0};
 
     @Override public int initialize() { return 0; }
     @Override public void deinitialize() {}
@@ -30,13 +39,17 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     @Override public ReaderModuleInfo readModuleInfo() { return null; }
     @Override public int setProtocol(TagProtocol protocol) { return 0; }
     @Override public int applyInventoryParams(TagProtocol protocol, int area, int address,
-            int wordLen) { return 0; }
-    @Override public int startInventory(int mode, int maskFlag) { return 0; }
-    @Override public int stopInventory() { return 0; }
+            int wordLen) { return applyInventoryStatus; }
+    @Override public int startInventory(int mode, int maskFlag) {
+        lastInventoryMode = mode;
+        lastMaskFlag = maskFlag;
+        return startStatus;
+    }
+    @Override public int stopInventory() { return stopStatus; }
     @Override public void setInventoryListener(InventoryListener listener) {}
     @Override public void setInventoryStopListener(InventoryStopListener listener) {}
     @Override public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,
-            int inventoryOffTime) { return 0; }
+            int inventoryOffTime) { return lowPowerStatus; }
     @Override public ReaderTag inventoryOnce(int timeoutMs) { return inventoryOnceResult; }
     @Override public ReaderConfiguration readConfiguration(ModuleSubtype subtype) { return null; }
 
@@ -82,14 +95,14 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     @Override public int[] getInventoryArea() { return new int[] {0, 0, 0}; }
     @Override public Integer getPowerTenthsDbm() { return lastPower; }
     @Override public Integer getBlfProfile() { return lastBlf; }
-    @Override public int[] getQueryValues(ModuleSubtype subtype) { return new int[] {0, 0, 0}; }
+    @Override public int[] getQueryValues(ModuleSubtype subtype) { return queryValues; }
     @Override public ReaderQParams getQParams(ModuleSubtype subtype) {
         return ReaderQParams.fixed(lastQ, 0, 1, 0);
     }
     @Override public int applyInventoryMask(TagProtocol protocol, ModuleSubtype subtype,
-            InventoryMaskConfig config) { return 0; }
+            InventoryMaskConfig config) { return applyMaskStatus; }
     @Override public int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype,
-            int selected) { return 0; }
+            int selected) { return clearMaskStatus; }
     @Override public int setTargetMask(TagProtocol protocol, ModuleSubtype subtype,
             ReaderTag tag) { return 0; }
     @Override public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype,
