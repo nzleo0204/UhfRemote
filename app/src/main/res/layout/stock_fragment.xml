@@ -1,34 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stock_fragment_root"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/ll_title_bar"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_56"
         android:background="@color/rfid_nav_bg"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/dp_16">
-
-        <ImageView
-            android:id="@+id/iv_title_back"
-            android:layout_width="@dimen/dp_40"
-            android:layout_height="@dimen/dp_40"
-            android:padding="@dimen/dp_10"
-            android:src="@drawable/rfid_back_ic" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/stock_query_title"
-            android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_18" />
-    </LinearLayout>
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="@string/home_nav_stock"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/sp_18" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,6 +31,7 @@
             android:background="@drawable/rfid_field_bg"
             android:hint="搜索标签型号、技术规格..."
             android:importantForAutofill="no"
+            android:imeOptions="actionSearch"
             android:inputType="text"
             android:paddingHorizontal="@dimen/dp_12"
             android:singleLine="true"

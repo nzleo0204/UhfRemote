@@ -7,15 +7,16 @@
 
 ## 执行状态（2026-08-11）
 
-- ✅ 原 `ShipmentQueryActivity` 内容已迁移到 `ShipmentFragment`，旧 Activity、Manifest
-  声明及孤立布局已删除。
+- ✅ 原 `StockQueryActivity` 的实时库存查询内容已迁移到 `StockFragment`，旧 Activity、
+  Manifest 声明及孤立布局已删除。
 - ✅ 底部导航已调整为“配置、盘点、单标签、库存、我的”五项，“我的”页面不再显示
   实时库存查询入口。
-- ✅ 库存页下拉刷新、上拉加载和列表状态保留，Debug/Release 构建通过。
-- ✅ 真机已验证五项导航、库存列表显示、刷新与滚动；现代帧统计 janky frame 3.69%，
-  期间无应用崩溃。
+- ✅ “我的”页面保留“发货情况与单号”，继续跳转 `ShipmentQueryActivity`；发货查询
+  Activity、Manifest 声明及布局均保留。
+- ✅ 库存页下拉刷新、上拉加载和列表状态保留，Debug 构建及单元测试通过。
+- ✅ 真机已验证库存页、发货菜单入口和发货单号查询二级页，期间无应用崩溃。
 
-> 下文复选框是原始执行模板，当前状态以上述实测结果为准。
+> 下文是最初写反迁移对象的历史执行模板，不再作为实现依据；当前状态以上述纠正结果为准。
 
 ---
 
@@ -28,7 +29,8 @@
 ├── 盘点 (InventoryFragment)
 ├── 单标签 (SingleTagFragment)
 └── 我的 (MineFragment)
-    └── 点击"实时库存查询" → 跳转到 ShipmentQueryActivity
+    ├── 点击"实时库存查询" → 跳转到 StockQueryActivity
+    └── 点击"发货情况与单号" → 跳转到 ShipmentQueryActivity
 ```
 
 ### 目标结构
@@ -37,17 +39,19 @@
 ├── 配置 (ReaderConfigFragment)
 ├── 盘点 (InventoryFragment)
 ├── 单标签 (SingleTagFragment)
-├── 库存 (ShipmentFragment) ← 新增，原 ShipmentQueryActivity 内容
+├── 库存 (StockFragment) ← 新增，原 StockQueryActivity 内容
 └── 我的 (MineFragment)
-    └── 移除"实时库存查询"入口
+    ├── 移除"实时库存查询"入口
+    └── 保留"发货情况与单号" → ShipmentQueryActivity
 ```
 
 ### 改动说明
-1. ✅ 将 `ShipmentQueryActivity` 的内容转换为 `ShipmentFragment`
+1. ✅ 将 `StockQueryActivity` 的内容转换为 `StockFragment`
 2. ✅ 在底部导航栏添加"库存"标签（第4个位置）
 3. ✅ 从"我的"页面移除"实时库存查询"入口
-4. ✅ 更新导航图标和文案
-5. ✅ 保持其他功能不变
+4. ✅ 保留"发货情况与单号"及 `ShipmentQueryActivity`
+5. ✅ 更新导航图标和文案
+6. ✅ 保持其他功能不变
 
 ---
 
