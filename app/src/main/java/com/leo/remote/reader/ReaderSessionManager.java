@@ -51,14 +51,13 @@ public final class ReaderSessionManager {
     private final MMKV storage;
     private final ReaderConfigCache configCache;
     private final ReaderConfigurationManager configurationManager;
+    private final ReaderTagOperations tagOperations;
 
     private volatile ReaderState state = ReaderState.disconnected();
-    private volatile ReaderTag currentTag;
     private volatile InventoryMaskConfig inventoryMask;
     private volatile TagProtocol inventoryMaskProtocol;
     private volatile boolean inventoryMaskApplied;
     private final InventoryMaskSelection inventoryMaskSelection = new InventoryMaskSelection();
-    private volatile InventoryMaskConfig singleTagMask;
     private volatile boolean pendingDisconnectAlert;
     private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
     private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
@@ -105,6 +104,7 @@ public final class ReaderSessionManager {
         configCache = new ReaderConfigCache();
         configurationManager = new ReaderConfigurationManager(gateway, configCache,
                 statePublisher);
+        tagOperations = new ReaderTagOperations(gateway, statePublisher);
         bleTransport = new BleTransport(new BleTransport.Listener() {
             @Override
             public void onPhase(long attemptId, ConnectionPhase phase, String message) {
@@ -154,7 +154,7 @@ public final class ReaderSessionManager {
 
     public ReaderState getState() { return state; }
     public ReaderConfiguration getConfiguration() { return configurationManager.getConfiguration(); }
-    public ReaderTag getCurrentTag() { return currentTag; }
+    public ReaderTag getCurrentTag() { return tagOperations.getCurrentTag(); }
     public int getInventoryMode() { return configurationManager.getInventoryMode(); }
     public boolean isPendingDisconnectAlert() { return pendingDisconnectAlert; }
     public DisconnectReason getLastUnexpectedReason() { return lastUnexpectedReason; }
@@ -165,9 +165,10 @@ public final class ReaderSessionManager {
             observer.onReaderStateChanged(state);
             ReaderConfiguration configuration = configurationManager.getConfiguration();
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
+            ReaderTag currentTag = tagOperations.getCurrentTag();
             if (currentTag != null) { observer.onCurrentTagChanged(currentTag); }
             observer.onInventoryMaskChanged(inventoryMask);
-            observer.onSingleTagMaskChanged(singleTagMask);
+            observer.onSingleTagMaskChanged(tagOperations.getSingleTagMask());
             observer.onInventoryChanged(inventory.snapshot(), inventory.getTotalReads());
         });
     }
@@ -638,45 +639,42 @@ public final class ReaderSessionManager {
     }
 
     public void setSingleTagMask(@Nullable InventoryMaskConfig config) {
-        singleTagMask = config;
-        notifySingleTagMask(config);
+        tagOperations.setSingleTagMask(config);
     }
 
     @Nullable
     public InventoryMaskConfig getSingleTagMask() {
-        return singleTagMask;
+        return tagOperations.getSingleTagMask();
     }
 
     public CompletableFuture<ReaderTag> readSingleTag() {
         return submitConnected(() -> {
             int status = stopInventoryInternal();
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
-            ReaderTag tag = gateway.inventoryOnce(1500);
-            currentTag = tag;
-            statePublisher.publishCurrentTag(tag);
-            return tag;
+            return tagOperations.readSingleTag();
         });
     }
 
     public CompletableFuture<byte[]> readCurrentTag(int length, int address, int bank, byte[] password) {
         TagProtocol protocol = state.getProtocol();
-        return withTargetMask(() -> gateway.readTag(protocol, length, address, bank, password, 2000));
+        return withTargetMask(() -> tagOperations.read(protocol, length, address, bank, password));
     }
 
     public CompletableFuture<Integer> writeCurrentTag(int length, int address, int bank,
             byte[] password, byte[] data) {
         TagProtocol protocol = state.getProtocol();
         return withTargetMask(() -> monitorSdkStatus(
-                gateway.writeTag(protocol, length, address, bank, password, data, 2500)));
+                tagOperations.write(protocol, length, address, bank, password, data)));
     }
 
     public CompletableFuture<Integer> lockCurrentTag(byte[] password, int bank, int policy) {
-        return with6cTargetMask(() -> monitorSdkStatus(gateway.lockTag(password, bank, policy, 2500)));
+        return with6cTargetMask(() -> monitorSdkStatus(
+                tagOperations.lock(password, bank, policy)));
     }
 
     public CompletableFuture<Integer> killCurrentTag(byte[] accessPassword, byte[] killPassword) {
         return with6cTargetMask(() -> monitorSdkStatus(
-                gateway.killTag(accessPassword, killPassword, 2500)));
+                tagOperations.kill(accessPassword, killPassword)));
     }
 
     private <T> CompletableFuture<T> with6cTargetMask(Callable<T> operation) {
@@ -690,7 +688,7 @@ public final class ReaderSessionManager {
 
     private <T> CompletableFuture<T> withTargetMask(Callable<T> operation) {
         return submitConnected(() -> {
-            if (currentTag == null) {
+            if (tagOperations.getCurrentTag() == null) {
                 throw new ReaderException("Read a target tag first", -40);
             }
             int status = stopInventoryInternal();
@@ -703,7 +701,7 @@ public final class ReaderSessionManager {
                 if (status != 0) { throw new ReaderException("Unable to clear inventory mask", status); }
                 inventoryMaskApplied = false;
             }
-            InventoryMaskConfig activeMask = singleTagMask;
+            InventoryMaskConfig activeMask = tagOperations.getSingleTagMask();
             int selectedBeforeTargetMask = 0;
             if (activeMask != null) {
                 selectedBeforeTargetMask = maskToRestore == null
@@ -937,11 +935,7 @@ public final class ReaderSessionManager {
     }
 
     private void clearCurrentTag() {
-        if (singleTagMask != null) { setSingleTagMask(null); }
-        if (currentTag != null) {
-            currentTag = null;
-            statePublisher.publishCurrentTag(null);
-        }
+        tagOperations.clearCurrentTag();
     }
 
     private <T> CompletableFuture<T> submitConnected(Callable<T> operation) {
@@ -1041,10 +1035,6 @@ public final class ReaderSessionManager {
 
     private void notifyMask(@Nullable InventoryMaskConfig config) {
         statePublisher.publishMask(config);
-    }
-
-    private void notifySingleTagMask(@Nullable InventoryMaskConfig config) {
-        statePublisher.publishSingleTagMask(config);
     }
 
 }

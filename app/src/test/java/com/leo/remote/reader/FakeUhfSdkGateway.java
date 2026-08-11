@@ -6,6 +6,9 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     int sessionStatus;
     int qStatus;
     int inventoryAreaStatus;
+    int writeStatus;
+    int lockStatus;
+    int killStatus;
     int lastPower;
     int lastBlf;
     int lastSession;
@@ -13,6 +16,8 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     int lastQ;
     int lastInventoryArea;
     boolean magicQueryUsed;
+    ReaderTag inventoryOnceResult;
+    byte[] readResult = new byte[0];
 
     @Override public int initialize() { return 0; }
     @Override public void deinitialize() {}
@@ -32,7 +37,7 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     @Override public void setInventoryStopListener(InventoryStopListener listener) {}
     @Override public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,
             int inventoryOffTime) { return 0; }
-    @Override public ReaderTag inventoryOnce(int timeoutMs) { return null; }
+    @Override public ReaderTag inventoryOnce(int timeoutMs) { return inventoryOnceResult; }
     @Override public ReaderConfiguration readConfiguration(ModuleSubtype subtype) { return null; }
 
     @Override
@@ -90,11 +95,13 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     @Override public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype,
             int selected) { return 0; }
     @Override public byte[] readTag(TagProtocol protocol, int length, int address, int bank,
-            byte[] password, int timeoutMs) { return new byte[0]; }
+            byte[] password, int timeoutMs) { return readResult; }
     @Override public int writeTag(TagProtocol protocol, int length, int address, int bank,
-            byte[] password, byte[] data, int timeoutMs) { return 0; }
-    @Override public int lockTag(byte[] password, int bank, int policy, int timeoutMs) { return 0; }
+            byte[] password, byte[] data, int timeoutMs) { return writeStatus; }
+    @Override public int lockTag(byte[] password, int bank, int policy, int timeoutMs) {
+        return lockStatus;
+    }
     @Override public int killTag(byte[] accessPassword, byte[] killPassword, int timeoutMs) {
-        return 0;
+        return killStatus;
     }
 }
