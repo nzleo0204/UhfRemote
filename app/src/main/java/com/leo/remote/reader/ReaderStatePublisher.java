@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 
 /**
  * Reader 状态发布器
@@ -23,11 +24,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public final class ReaderStatePublisher {
     
-    private final Handler mainHandler;
+    private final Consumer<Runnable> dispatcher;
     private final CopyOnWriteArraySet<ReaderObserver> observers = new CopyOnWriteArraySet<>();
     
     public ReaderStatePublisher() {
-        this.mainHandler = new Handler(Looper.getMainLooper());
+        this(new Handler(Looper.getMainLooper())::post);
+    }
+
+    ReaderStatePublisher(@NonNull Consumer<Runnable> dispatcher) {
+        this.dispatcher = dispatcher;
     }
     
     /**
@@ -37,6 +42,11 @@ public final class ReaderStatePublisher {
      */
     public void addObserver(@NonNull ReaderObserver observer) {
         observers.add(observer);
+    }
+
+    void addObserver(@NonNull ReaderObserver observer, @NonNull Runnable initialStateDispatch) {
+        observers.add(observer);
+        dispatch(initialStateDispatch);
     }
     
     /**
@@ -54,7 +64,7 @@ public final class ReaderStatePublisher {
      * @param state 新的 Reader 状态
      */
     public void publishState(@NonNull ReaderState state) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onReaderStateChanged(state);
             }
@@ -68,7 +78,7 @@ public final class ReaderStatePublisher {
      * @param totalReads 总读取次数
      */
     public void publishInventoryUpdate(@NonNull List<InventoryItem> items, long totalReads) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onInventoryChanged(items, totalReads);
             }
@@ -81,7 +91,7 @@ public final class ReaderStatePublisher {
      * @param tag 当前标签，null 表示清除
      */
     public void publishCurrentTag(@Nullable ReaderTag tag) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onCurrentTagChanged(tag);
             }
@@ -94,7 +104,7 @@ public final class ReaderStatePublisher {
      * @param configuration 新的配置，null 表示未配置
      */
     public void publishConfiguration(@Nullable ReaderConfiguration configuration) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onReaderConfigurationChanged(configuration);
             }
@@ -107,7 +117,7 @@ public final class ReaderStatePublisher {
      * @param mask Mask 配置，null 表示清除
      */
     public void publishMask(@Nullable InventoryMaskConfig mask) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onInventoryMaskChanged(mask);
             }
@@ -120,9 +130,22 @@ public final class ReaderStatePublisher {
      * @param reason 断开原因
      */
     public void notifyUnexpectedDisconnect(@NonNull DisconnectReason reason) {
-        mainHandler.post(() -> {
+        dispatch(() -> {
             for (ReaderObserver observer : observers) {
                 observer.onReaderUnexpectedDisconnect(reason);
+            }
+        });
+    }
+
+    /**
+     * 发布单标签 Mask 配置变更。
+     *
+     * @param mask Mask 配置，null 表示清除
+     */
+    public void publishSingleTagMask(@Nullable InventoryMaskConfig mask) {
+        dispatch(() -> {
+            for (ReaderObserver observer : observers) {
+                observer.onSingleTagMaskChanged(mask);
             }
         });
     }
@@ -141,5 +164,9 @@ public final class ReaderStatePublisher {
      */
     public void clearObservers() {
         observers.clear();
+    }
+
+    private void dispatch(@NonNull Runnable callback) {
+        dispatcher.accept(callback);
     }
 }

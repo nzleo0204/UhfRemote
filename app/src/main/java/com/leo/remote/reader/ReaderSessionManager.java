@@ -41,7 +41,7 @@ public final class ReaderSessionManager {
     private final Application application;
     private volatile ExecutorService sdkExecutor;
     private final Handler mainHandler;
-    private final CopyOnWriteArraySet<ReaderObserver> observers = new CopyOnWriteArraySet<>();
+    private final ReaderStatePublisher statePublisher;
     private final InventoryAccumulator inventory = new InventoryAccumulator();
     private final AtomicBoolean inventoryUpdateScheduled = new AtomicBoolean();
     private final AtomicLong connectionGeneration = new AtomicLong();
@@ -101,6 +101,7 @@ public final class ReaderSessionManager {
         this.gateway = gateway;
         sdkExecutor = createSdkExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
+        statePublisher = new ReaderStatePublisher();
         storage = MMKV.mmkvWithID(MMKV_ID);
         configCache = new ReaderConfigCache();
         bleTransport = new BleTransport(new BleTransport.Listener() {
@@ -159,8 +160,7 @@ public final class ReaderSessionManager {
     public void acknowledgeDisconnect() { pendingDisconnectAlert = false; }
 
     public void addObserver(@NonNull ReaderObserver observer) {
-        observers.add(observer);
-        mainHandler.post(() -> {
+        statePublisher.addObserver(observer, () -> {
             observer.onReaderStateChanged(state);
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
             if (currentTag != null) { observer.onCurrentTagChanged(currentTag); }
@@ -170,7 +170,9 @@ public final class ReaderSessionManager {
         });
     }
 
-    public void removeObserver(@NonNull ReaderObserver observer) { observers.remove(observer); }
+    public void removeObserver(@NonNull ReaderObserver observer) {
+        statePublisher.removeObserver(observer);
+    }
 
     public String getSavedWifiAddress() {
         String value = storage == null ? null : storage.decodeString(KEY_WIFI_ADDRESS, "");
@@ -691,7 +693,7 @@ public final class ReaderSessionManager {
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
             ReaderTag tag = gateway.inventoryOnce(1500);
             currentTag = tag;
-            mainHandler.post(() -> observers.forEach(observer -> observer.onCurrentTagChanged(tag)));
+            statePublisher.publishCurrentTag(tag);
             return tag;
         });
     }
@@ -968,8 +970,7 @@ public final class ReaderSessionManager {
         lastUnexpectedReason = reason;
         publish(state.buildUpon().phase(ConnectionPhase.DISCONNECTED).inventoryRunning(false)
                 .message(message).errorCode(errorCode).disconnectReason(reason).build());
-        mainHandler.post(() -> observers.forEach(observer ->
-                observer.onReaderUnexpectedDisconnect(reason)));
+        statePublisher.notifyUnexpectedDisconnect(reason);
     }
 
     private boolean isCurrentConnection(long generation) {
@@ -980,7 +981,7 @@ public final class ReaderSessionManager {
         if (singleTagMask != null) { setSingleTagMask(null); }
         if (currentTag != null) {
             currentTag = null;
-            mainHandler.post(() -> observers.forEach(observer -> observer.onCurrentTagChanged(null)));
+            statePublisher.publishCurrentTag(null);
         }
     }
 
@@ -1070,7 +1071,7 @@ public final class ReaderSessionManager {
         state = updated;
         ReaderConnectionService service = connectionService;
         if (service != null) { service.updateReaderState(updated); }
-        mainHandler.post(() -> observers.forEach(observer -> observer.onReaderStateChanged(updated)));
+        statePublisher.publishState(updated);
     }
 
     private void notifyConfiguration() {
@@ -1078,7 +1079,7 @@ public final class ReaderSessionManager {
         if (current == null) { return; }
         ReaderConfiguration updated = buildConfigurationSnapshot();
         configuration = updated;
-        mainHandler.post(() -> observers.forEach(observer -> observer.onReaderConfigurationChanged(updated)));
+        statePublisher.publishConfiguration(updated);
     }
 
     private ReaderConfiguration buildConfigurationSnapshot() {
@@ -1102,17 +1103,15 @@ public final class ReaderSessionManager {
     private void notifyInventory() {
         List<InventoryItem> snapshot = inventory.snapshot();
         long total = inventory.getTotalReads();
-        mainHandler.post(() -> observers.forEach(observer -> observer.onInventoryChanged(snapshot, total)));
+        statePublisher.publishInventoryUpdate(snapshot, total);
     }
 
     private void notifyMask(@Nullable InventoryMaskConfig config) {
-        mainHandler.post(() -> observers.forEach(observer ->
-                observer.onInventoryMaskChanged(config)));
+        statePublisher.publishMask(config);
     }
 
     private void notifySingleTagMask(@Nullable InventoryMaskConfig config) {
-        mainHandler.post(() -> observers.forEach(observer ->
-                observer.onSingleTagMaskChanged(config)));
+        statePublisher.publishSingleTagMask(config);
     }
 
 }
