@@ -14,10 +14,10 @@
 
 ### 整改目标
 1. ✅ P1 修复完成（混淆、网络安全、部分命名）
-2. ⏳ 统一命名规范
-3. ⏳ 重构 ReaderSessionManager
-4. ⏳ 建立单元测试体系
-5. ⏳ 完善架构文档
+2. ✅ 统一命名规范
+3. ✅ 拆分 Reader 核心状态与操作模块
+4. ✅ 建立单元测试体系
+5. ✅ 完善架构文档
 
 ## 📊 项目结构
 
@@ -45,9 +45,8 @@ UhfRemote/
 ## 📝 文档
 
 - [执行计划](CODEX_IMPLEMENTATION_PLAN.md) - Codex 执行的详细整改计划
-- [架构文档](docs/ARCHITECTURE.md) - 待完善
+- [架构文档](docs/ARCHITECTURE.md) - Reader 核心、线程模型与数据流
 
 ## 🤝 贡献
 
 由 Codex 执行整改计划，人工审查和验证。
-
