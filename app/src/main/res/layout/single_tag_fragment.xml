@@ -40,9 +40,27 @@
                 android:layout_margin="@dimen/dp_16"
                 android:orientation="vertical">
 
-                <TextView
-                    style="@style/RfidGroupTitle"
-                    android:text="@string/single_group_current" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/RfidGroupTitle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/single_group_current" />
+
+                    <ImageView
+                        android:id="@+id/iv_single_mask_lock"
+                        android:layout_width="@dimen/dp_24"
+                        android:layout_height="@dimen/dp_24"
+                        android:contentDescription="@string/inventory_mask_lock_open"
+                        android:padding="@dimen/dp_4"
+                        android:src="@drawable/rfid_lock_open_ic"
+                        app:tint="@color/rfid_text_muted" />
+                </LinearLayout>
 
                 <include layout="@layout/rfid_single_info_epc" />
                 <include layout="@layout/rfid_single_info_tid" />

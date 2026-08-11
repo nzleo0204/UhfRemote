@@ -264,6 +264,7 @@
     <string name="single_preview_tid">E2801160600002041891F8C0</string>
     <string name="single_preview_chip">Impinj Monza R6</string>
     <string name="single_preview_rssi">-62 dBm</string>
+    <string name="single_data_label">数据</string>
     <string name="single_page_title">单标签操作</string>
     <string name="single_group_current">当前标签信息</string>
     <string name="single_group_operations">标签操作</string>

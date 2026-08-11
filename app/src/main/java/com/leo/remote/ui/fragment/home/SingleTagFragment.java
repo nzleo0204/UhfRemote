@@ -26,8 +26,10 @@ import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.HexCodec;
+import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.InventoryMaskConfig;
 import com.leo.remote.reader.ProtocolEncoding;
+import com.leo.remote.reader.ReaderConfiguration;
 import com.leo.remote.reader.ReaderObserver;
 import com.leo.remote.reader.ReaderSessionManager;
 import com.leo.remote.reader.ReaderState;
@@ -45,7 +47,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     // ========== Fields ==========
     private ReaderSessionManager session;
     private TextView readButton;
+    private TextView idLabelView;
     private TextView epcView;
+    private TextView dataLabelView;
     private TextView tidView;
     private TextView chipView;
     private TextView rssiView;
@@ -63,8 +67,10 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private TextView maskLengthHintView;
     private TextView maskStatusView;
     private ImageView maskExpandView;
+    private ImageView maskLockIcon;
     private ReaderTag currentTag;
     private ReaderState readerState = ReaderState.disconnected();
+    private ReaderConfiguration configuration;
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
 
@@ -76,7 +82,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     @Override
     protected void initView() {
         readButton = findViewById(R.id.tv_single_read);
+        idLabelView = findViewById(R.id.tv_single_id_label);
         epcView = findViewById(R.id.tv_single_epc);
+        dataLabelView = findViewById(R.id.tv_single_data_label);
         tidView = findViewById(R.id.tv_single_tid);
         chipView = findViewById(R.id.tv_single_chip);
         rssiView = findViewById(R.id.tv_single_rssi);
@@ -94,6 +102,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
         maskStatusView = findViewById(R.id.tv_inventory_mask_status);
         maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
+        maskLockIcon = findViewById(R.id.iv_single_mask_lock);
 
         maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -161,14 +170,21 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             currentTag = null;
             bindTag(null);
         }
+        updateTagDisplay();
         refreshOperations();
         updateMaskControls();
     }
 
     @Override
+    public void onReaderConfigurationChanged(ReaderConfiguration value) {
+        configuration = value;
+        updateTagDisplay();
+    }
+
+    @Override
     public void onCurrentTagChanged(ReaderTag tag) {
         currentTag = tag;
-        bindTag(tag);
+        updateTagDisplay();
         refreshOperations();
     }
 
@@ -510,14 +526,30 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         maskToggleButton.setTextColor(ContextCompat.getColorStateList(requireContext(),
                 R.color.rfid_primary_button_text));
         maskToggleButton.setEnabled(connected && (masked || formValid));
-        maskStatusView.setVisibility(masked ? View.VISIBLE : View.GONE);
+        maskStatusView.setVisibility(View.VISIBLE);
         if (masked) {
             Object bank = maskBankSpinner.getSelectedItem();
             String bankLabel = bank == null ? "" : bank.toString();
-            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_red_bg);
+            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_green_bg);
+            maskStatusView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
             maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
                     activeMask.offsetBits, activeMask.lengthBits));
+        } else {
+            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_gray_bg);
+            maskStatusView.setTextColor(ContextCompat.getColor(
+                    requireContext(), R.color.rfid_text_secondary));
+            maskStatusView.setText(R.string.inventory_mask_inactive);
         }
+        updateMaskLockIcon(masked);
+    }
+
+    private void updateMaskLockIcon(boolean masked) {
+        maskLockIcon.setImageResource(masked
+                ? R.drawable.rfid_lock_closed_ic : R.drawable.rfid_lock_open_ic);
+        maskLockIcon.setImageTintList(ContextCompat.getColorStateList(requireContext(),
+                masked ? R.color.rfid_warning : R.color.rfid_text_muted));
+        maskLockIcon.setContentDescription(getString(masked
+                ? R.string.inventory_mask_lock_closed : R.string.inventory_mask_lock_open));
     }
 
     private boolean updateMaskLengthHint() {
@@ -605,6 +637,16 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             return false;
         }
         return true;
+    }
+
+    private void updateTagDisplay() {
+        InventoryArea area = InventoryArea.of(readerState.getProtocol(),
+                configuration == null ? 0 : configuration.inventoryArea);
+        String[] headers = area.getColumnHeader().split("/", 2);
+        idLabelView.setText(headers[0]);
+        dataLabelView.setText(headers.length == 2 ? headers[1]
+                : getString(R.string.single_data_label));
+        bindTag(currentTag);
     }
 
     private void bindTag(ReaderTag tag) {
