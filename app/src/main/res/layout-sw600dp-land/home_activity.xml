@@ -15,7 +15,7 @@
         android:background="@color/rfid_nav_bg"
         android:elevation="@dimen/dp_10"
         android:paddingVertical="@dimen/dp_14"
-        tools:itemCount="4"
+        tools:itemCount="5"
         tools:listitem="@layout/home_navigation_item" />
 
     <View

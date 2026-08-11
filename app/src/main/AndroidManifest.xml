@@ -86,12 +86,6 @@
             android:launchMode="singleTop" />
 
         <activity
-            android:name=".ui.activity.ShipmentQueryActivity"
-            android:exported="false"
-            android:label="@string/shipment_query_title"
-            android:launchMode="singleTop" />
-
-        <activity
             android:name=".ui.activity.FeedbackActivity"
             android:exported="false"
             android:label="@string/feedback_title"

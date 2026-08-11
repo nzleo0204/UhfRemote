@@ -144,9 +144,7 @@
                 android:orientation="vertical">
 
                 <TextView style="@style/RfidGroupTitle" android:text="功能菜单" />
-                <include layout="@layout/rfid_mine_menu_stock" />
                 <include layout="@layout/rfid_mine_menu_order" />
-                <include layout="@layout/rfid_mine_menu_shipment" />
                 <include layout="@layout/rfid_mine_menu_feedback" />
             </LinearLayout>
 

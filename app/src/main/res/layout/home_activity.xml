@@ -26,8 +26,8 @@
             android:background="@color/rfid_nav_bg"
             android:elevation="0dp"
             android:orientation="vertical"
-            app:spanCount="4"
-            tools:itemCount="4"
+            app:spanCount="5"
+            tools:itemCount="5"
             tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             tools:listitem="@layout/home_navigation_item" />
     </LinearLayout>

@@ -30,10 +30,10 @@
     <string name="home_nav_config">配置</string>
     <string name="home_nav_inventory">盘点</string>
     <string name="home_nav_tag">单标签</string>
+    <string name="home_nav_shipment">库存</string>
     <string name="home_nav_mine">我的</string>
     <string name="stock_query_title">实时库存查询</string>
     <string name="order_progress_title">订单进度查询</string>
-    <string name="shipment_query_title">发货单号查询</string>
     <string name="feedback_title">问题与需求提交</string>
     <string name="theme_setting_title">显示主题</string>
     <string name="theme_mode_system">跟随系统</string>

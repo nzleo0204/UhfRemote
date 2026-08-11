@@ -19,8 +19,6 @@ import com.leo.remote.data.repository.RepositoryProvider;
 import com.leo.remote.ui.activity.FeedbackActivity;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.activity.OrderProgressActivity;
-import com.leo.remote.ui.activity.ShipmentQueryActivity;
-import com.leo.remote.ui.activity.StockQueryActivity;
 import com.leo.remote.util.ThemeModeManager;
 import com.tencent.mmkv.MMKV;
 
@@ -70,9 +68,7 @@ public final class MineFragment extends AppFragment<HomeActivity> {
         inputGuard = findViewById(R.id.v_mine_input_guard);
         rootView = findViewById(R.id.fl_mine_root);
 
-        findViewById(R.id.ll_mine_stock).setOnClickListener(v -> StockQueryActivity.start(getAttachActivity()));
         findViewById(R.id.ll_mine_order).setOnClickListener(v -> OrderProgressActivity.start(getAttachActivity()));
-        findViewById(R.id.ll_mine_shipment).setOnClickListener(v -> ShipmentQueryActivity.start(getAttachActivity()));
         findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> FeedbackActivity.start(getAttachActivity()));
         loginButton.setOnClickListener(v -> login());
         findViewById(R.id.ll_mine_theme_setting).setOnClickListener(v -> showThemeDialog());

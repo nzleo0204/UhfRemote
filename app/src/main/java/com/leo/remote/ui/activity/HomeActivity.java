@@ -23,6 +23,7 @@ import com.leo.remote.ui.adapter.common.NavigationAdapter.NavigationItem;
 import com.leo.remote.ui.fragment.home.InventoryFragment;
 import com.leo.remote.ui.fragment.home.MineFragment;
 import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
+import com.leo.remote.ui.fragment.home.ShipmentFragment;
 import com.leo.remote.ui.fragment.home.SingleTagFragment;
 import com.leo.remote.reader.ReaderSessionManager;
 
@@ -33,6 +34,7 @@ import com.leo.remote.reader.ReaderSessionManager;
  * - 配置页：Reader 连接和参数配置
  * - 盘点页：批量标签盘点
  * - 单标签页：单个标签读写操作
+ * - 库存页：发货批次和运单状态
  * - 我的页：业务功能入口
  *
  * 平板设备使用侧边导航栏（layout-sw600dp-land）
@@ -101,6 +103,8 @@ public final class HomeActivity extends AppActivity
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_inventory_ic)));
         navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_tag),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_tag_ic)));
+        navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_shipment),
+                ContextCompat.getDrawable(this, R.drawable.rfid_nav_shipment_ic)));
         navigationAdapter.addItem(new NavigationItem(getString(R.string.home_nav_mine),
                 ContextCompat.getDrawable(this, R.drawable.rfid_nav_mine_ic)));
         navigationAdapter.setOnNavigationListener(this);
@@ -123,6 +127,7 @@ public final class HomeActivity extends AppActivity
         pagerAdapter.addFragment(ReaderConfigFragment.newInstance());
         pagerAdapter.addFragment(InventoryFragment.newInstance());
         pagerAdapter.addFragment(SingleTagFragment.newInstance());
+        pagerAdapter.addFragment(ShipmentFragment.newInstance());
         pagerAdapter.addFragment(MineFragment.newInstance());
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(pageChangeListener);
@@ -177,6 +182,7 @@ public final class HomeActivity extends AppActivity
             case 1:
             case 2:
             case 3:
+            case 4:
                 viewPager.setCurrentItem(fragmentIndex);
                 navigationAdapter.setSelectedPosition(fragmentIndex);
                 break;
@@ -201,6 +207,7 @@ public final class HomeActivity extends AppActivity
             case 1:
             case 2:
             case 3:
+            case 4:
                 viewPager.setCurrentItem(position);
                 return true;
             default:

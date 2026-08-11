@@ -5,42 +5,31 @@
     android:background="@color/rfid_page_bg"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/ll_title_bar"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_56"
         android:background="@color/rfid_nav_bg"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/dp_16">
-
-        <ImageView
-            android:id="@+id/iv_title_back"
-            android:layout_width="@dimen/dp_40"
-            android:layout_height="@dimen/dp_40"
-            android:padding="@dimen/dp_10"
-            android:src="@drawable/rfid_back_ic" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/shipment_query_title"
-            android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_18" />
-    </LinearLayout>
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="@string/home_nav_shipment"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/sp_18" />
 
     <com.scwang.smart.refresh.layout.SmartRefreshLayout
         android:id="@+id/srl_shipment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_shipment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipToPadding="false"
                 android:padding="@dimen/dp_16" />
 
             <TextView
@@ -52,5 +41,4 @@
                 android:textSize="@dimen/sp_14" />
         </FrameLayout>
     </com.scwang.smart.refresh.layout.SmartRefreshLayout>
-
 </LinearLayout>
