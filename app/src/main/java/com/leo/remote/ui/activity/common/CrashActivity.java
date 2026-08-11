@@ -69,11 +69,11 @@ public final class CrashActivity extends AppActivity {
         application.startActivity(intent);
     }
 
-    private TextView mTitleView;
-    private DrawerLayout mDrawerLayout;
-    private TextView mInfoView;
-    private TextView mMessageView;
-    private String mStackTrace;
+    private TextView titleView;
+    private DrawerLayout drawerLayout;
+    private TextView infoView;
+    private TextView messageView;
+    private String stackTrace;
 
     @Override
     protected int getLayoutId() {
@@ -82,10 +82,10 @@ public final class CrashActivity extends AppActivity {
 
     @Override
     protected void initView() {
-        mTitleView = findViewById(R.id.tv_crash_title);
-        mDrawerLayout = findViewById(R.id.dl_crash_drawer);
-        mInfoView = findViewById(R.id.tv_crash_info);
-        mMessageView = findViewById(R.id.tv_crash_message);
+        titleView = findViewById(R.id.tv_crash_title);
+        drawerLayout = findViewById(R.id.dl_crash_drawer);
+        infoView = findViewById(R.id.tv_crash_info);
+        messageView = findViewById(R.id.tv_crash_message);
         setOnClickListener(R.id.iv_crash_info, R.id.iv_crash_share, R.id.iv_crash_restart);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -109,7 +109,7 @@ public final class CrashActivity extends AppActivity {
             return;
         }
 
-        mTitleView.setText(throwable.getClass().getSimpleName());
+        titleView.setText(throwable.getClass().getSimpleName());
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -118,9 +118,9 @@ public final class CrashActivity extends AppActivity {
         if (cause != null) {
             cause.printStackTrace(printWriter);
         }
-        mStackTrace = stringWriter.toString();
-        Matcher matcher = CODE_REGEX.matcher(mStackTrace);
-        SpannableStringBuilder spannable = new SpannableStringBuilder(mStackTrace);
+        stackTrace = stringWriter.toString();
+        Matcher matcher = CODE_REGEX.matcher(stackTrace);
+        SpannableStringBuilder spannable = new SpannableStringBuilder(stackTrace);
         if (spannable.length() > 0) {
             while (matcher.find()) {
                 // 不包含左括号（
@@ -130,7 +130,7 @@ public final class CrashActivity extends AppActivity {
 
                 // 代码信息颜色
                 int codeColor = Color.parseColor("#999999");
-                int lineIndex = mStackTrace.lastIndexOf("at ", start);
+                int lineIndex = stackTrace.lastIndexOf("at ", start);
                 if (lineIndex != -1) {
                     String lineData = spannable.subSequence(lineIndex, start).toString();
                     if (TextUtils.isEmpty(lineData)) {
@@ -154,7 +154,7 @@ public final class CrashActivity extends AppActivity {
                 // 设置下划线
                 spannable.setSpan(new UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            mMessageView.setText(spannable);
+            messageView.setText(spannable);
         }
 
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -232,11 +232,11 @@ public final class CrashActivity extends AppActivity {
                     } catch (UnknownHostException ignored) {
                         builder.append("异常");
                     }
-                    post(() -> mInfoView.setText(builder));
+                    post(() -> infoView.setText(builder));
                 });
 
             } else {
-                mInfoView.setText(builder);
+                infoView.setText(builder);
             }
 
         } catch (PackageManager.NameNotFoundException e) {
@@ -250,12 +250,12 @@ public final class CrashActivity extends AppActivity {
     public void onClick(@NonNull View view) {
         int viewId = view.getId();
         if (viewId == R.id.iv_crash_info) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
+            drawerLayout.openDrawer(GravityCompat.START);
         } else if (viewId == R.id.iv_crash_share) {
             // 分享文本
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, mStackTrace);
+            intent.putExtra(Intent.EXTRA_TEXT, stackTrace);
             Intent chooserIntent = Intent.createChooser(intent, "");
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(chooserIntent);

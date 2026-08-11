@@ -18,7 +18,7 @@ public final class PermissionDescriptionPopup {
     public static final class Builder
             extends BasePopupWindow.Builder<Builder> {
 
-        private final TextView mDescriptionView;
+        private final TextView descriptionView;
 
         public Builder(@NonNull Context context) {
             super(context);
@@ -31,14 +31,14 @@ public final class PermissionDescriptionPopup {
             setTouchable(true);
             setOutsideTouchable(true);
 
-            mDescriptionView = findViewById(R.id.tv_permission_description_message);
+            descriptionView = findViewById(R.id.tv_permission_description_message);
         }
 
         /**
          * 设置权限说明文案
          */
         public Builder setDescription(CharSequence text) {
-            mDescriptionView.setText(text);
+            descriptionView.setText(text);
             return this;
         }
     }

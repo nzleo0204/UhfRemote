@@ -28,15 +28,15 @@ import com.leo.remote.R;
 public final class StatusLayout extends FrameLayout {
 
     /** 主布局 */
-    private ViewGroup mMainLayout;
+    private ViewGroup mainLayout;
     /** 提示图标 */
-    private LottieAnimationView mLottieView;
+    private LottieAnimationView lottieView;
     /** 提示文本 */
-    private TextView mTextView;
+    private TextView textView;
     /** 重试按钮 */
-    private TextView mRetryView;
+    private TextView retryView;
     /** 重试监听 */
-    private OnRetryListener mListener;
+    private OnRetryListener listener;
 
     public StatusLayout(@NonNull Context context) {
         this(context, null);
@@ -55,7 +55,7 @@ public final class StatusLayout extends FrameLayout {
      */
     public void show() {
 
-        if (mMainLayout == null) {
+        if (mainLayout == null) {
             //初始化布局
             initLayout();
         }
@@ -63,27 +63,27 @@ public final class StatusLayout extends FrameLayout {
         if (isShow()) {
             return;
         }
-        mRetryView.setVisibility(mListener == null ? View.INVISIBLE : View.VISIBLE);
+        retryView.setVisibility(listener == null ? View.INVISIBLE : View.VISIBLE);
         // 显示布局
-        mMainLayout.setVisibility(VISIBLE);
+        mainLayout.setVisibility(VISIBLE);
     }
 
     /**
      * 隐藏
      */
     public void hide() {
-        if (mMainLayout == null || !isShow()) {
+        if (mainLayout == null || !isShow()) {
             return;
         }
         //隐藏布局
-        mMainLayout.setVisibility(INVISIBLE);
+        mainLayout.setVisibility(INVISIBLE);
     }
 
     /**
      * 是否显示了
      */
     public boolean isShow() {
-        return mMainLayout != null && mMainLayout.getVisibility() == VISIBLE;
+        return mainLayout != null && mainLayout.getVisibility() == VISIBLE;
     }
 
     /**
@@ -94,26 +94,26 @@ public final class StatusLayout extends FrameLayout {
     }
 
     public void setIcon(Drawable drawable) {
-        if (mLottieView == null) {
+        if (lottieView == null) {
             return;
         }
-        if (mLottieView.isAnimating()) {
-            mLottieView.cancelAnimation();
+        if (lottieView.isAnimating()) {
+            lottieView.cancelAnimation();
         }
-        mLottieView.setImageDrawable(drawable);
+        lottieView.setImageDrawable(drawable);
     }
 
     /**
      * 设置提示动画
      */
     public void setAnimResource(@RawRes int id) {
-        if (mLottieView == null) {
+        if (lottieView == null) {
             return;
         }
 
-        mLottieView.setAnimation(id);
-        if (!mLottieView.isAnimating()) {
-            mLottieView.playAnimation();
+        lottieView.setAnimation(id);
+        if (!lottieView.isAnimating()) {
+            lottieView.playAnimation();
         }
     }
 
@@ -125,13 +125,13 @@ public final class StatusLayout extends FrameLayout {
     }
 
     public void setHint(CharSequence text) {
-        if (mTextView == null) {
+        if (textView == null) {
             return;
         }
         if (text == null) {
             text = "";
         }
-        mTextView.setText(text);
+        textView.setText(text);
     }
 
     /**
@@ -139,46 +139,46 @@ public final class StatusLayout extends FrameLayout {
      */
     private void initLayout() {
 
-        mMainLayout = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.widget_status_layout, this, false);
+        mainLayout = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.widget_status_layout, this, false);
 
-        mLottieView = mMainLayout.findViewById(R.id.iv_status_icon);
-        mTextView = mMainLayout.findViewById(R.id.tv_status_text);
-        mRetryView = mMainLayout.findViewById(R.id.btn_status_retry);
+        lottieView = mainLayout.findViewById(R.id.iv_status_icon);
+        textView = mainLayout.findViewById(R.id.tv_status_text);
+        retryView = mainLayout.findViewById(R.id.btn_status_retry);
 
-        if (mMainLayout.getBackground() == null) {
+        if (mainLayout.getBackground() == null) {
             // 默认使用 windowBackground 作为背景
             TypedArray typedArray = getContext().obtainStyledAttributes(new int[]{android.R.attr.windowBackground});
-            mMainLayout.setBackground(typedArray.getDrawable(0));
-            mMainLayout.setClickable(true);
+            mainLayout.setBackground(typedArray.getDrawable(0));
+            mainLayout.setClickable(true);
             typedArray.recycle();
         }
 
-        mRetryView.setOnClickListener(mClickWrapper);
+        retryView.setOnClickListener(clickWrapper);
 
-        addView(mMainLayout);
+        addView(mainLayout);
     }
 
     /**
      * 设置重试监听器
      */
     public void setOnRetryListener(OnRetryListener listener) {
-        mListener = listener;
+        this.listener = listener;
         if (isShow()) {
-            mRetryView.setVisibility(mListener == null ? View.INVISIBLE : View.VISIBLE);
+            retryView.setVisibility(listener == null ? View.INVISIBLE : View.VISIBLE);
         }
     }
 
     /**
      * 点击事件包装类
      */
-    private final OnClickListener mClickWrapper = new OnClickListener() {
+    private final OnClickListener clickWrapper = new OnClickListener() {
 
         @Override
         public void onClick(View v) {
-            if (mListener == null) {
+            if (listener == null) {
                 return;
             }
-            mListener.onRetry(StatusLayout.this);
+            listener.onRetry(StatusLayout.this);
         }
     };
 

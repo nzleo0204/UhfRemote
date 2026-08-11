@@ -24,19 +24,19 @@ public final class StyleDialog {
     public static class Builder<B extends StyleDialog.Builder<?>>
             extends BaseDialog.Builder<B> {
 
-        private boolean mClickDismiss = true;
+        private boolean clickDismiss = true;
 
         @NonNull
-        private final ViewGroup mContainerLayout;
+        private final ViewGroup containerLayout;
         @NonNull
-        private final TextView mTitleView;
+        private final TextView titleView;
 
         @NonNull
-        private final TextView mCancelView;
+        private final TextView cancelView;
         @NonNull
-        private final View mLineView;
+        private final View lineView;
         @NonNull
-        private final TextView mConfirmView;
+        private final TextView confirmView;
 
         public Builder(@NonNull Context context) {
             super(context);
@@ -45,20 +45,20 @@ public final class StyleDialog {
             setAnimStyle(BaseDialog.ANIM_IOS);
             setGravity(Gravity.CENTER);
 
-            mContainerLayout = findViewById(R.id.ll_ui_container);
-            mTitleView = findViewById(R.id.tv_ui_title);
-            mCancelView  = findViewById(R.id.tv_ui_cancel);
-            mLineView = findViewById(R.id.v_ui_line);
-            mConfirmView  = findViewById(R.id.tv_ui_confirm);
-            setOnClickListener(mCancelView, mConfirmView);
+            containerLayout = findViewById(R.id.ll_ui_container);
+            titleView = findViewById(R.id.tv_ui_title);
+            cancelView  = findViewById(R.id.tv_ui_cancel);
+            lineView = findViewById(R.id.v_ui_line);
+            confirmView  = findViewById(R.id.tv_ui_confirm);
+            setOnClickListener(cancelView, confirmView);
         }
 
         public B setCustomView(@LayoutRes int id) {
-            return setCustomView(LayoutInflater.from(getContext()).inflate(id, mContainerLayout, false));
+            return setCustomView(LayoutInflater.from(getContext()).inflate(id, containerLayout, false));
         }
 
         public B setCustomView(View view) {
-            mContainerLayout.addView(view, 1);
+            containerLayout.addView(view, 1);
             return (B) this;
         }
 
@@ -66,7 +66,7 @@ public final class StyleDialog {
             return setTitle(getString(id));
         }
         public B setTitle(CharSequence text) {
-            mTitleView.setText(text);
+            titleView.setText(text);
             return (B) this;
         }
 
@@ -74,8 +74,8 @@ public final class StyleDialog {
             return setCancel(getString(id));
         }
         public B setCancel(CharSequence text) {
-            mCancelView.setText(text);
-            mLineView.setVisibility((text == null || "".equals(text.toString())) ? View.GONE : View.VISIBLE);
+            cancelView.setText(text);
+            lineView.setVisibility((text == null || "".equals(text.toString())) ? View.GONE : View.VISIBLE);
             return (B) this;
         }
 
@@ -83,17 +83,17 @@ public final class StyleDialog {
             return setConfirm(getString(id));
         }
         public B setConfirm(CharSequence text) {
-            mConfirmView.setText(text);
+            confirmView.setText(text);
             return (B) this;
         }
 
         public B setClickDismiss(boolean enable) {
-            mClickDismiss = enable;
+            clickDismiss = enable;
             return (B) this;
         }
 
         public void performClickDismiss() {
-            if (!mClickDismiss) {
+            if (!clickDismiss) {
               return;
             }
             dismiss();

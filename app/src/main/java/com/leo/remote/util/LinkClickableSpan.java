@@ -12,14 +12,14 @@ import androidx.annotation.NonNull;
  */
 public class LinkClickableSpan extends ClickableSpan {
 
-   private final String mTargetUrl;
+   private final String targetUrl;
 
    public LinkClickableSpan(@NonNull String url) {
-      mTargetUrl = url;
+      targetUrl = url;
    }
 
    @Override
    public void onClick(@NonNull View widget) {
-      UrlLauncher.open(widget.getContext(), mTargetUrl);
+      UrlLauncher.open(widget.getContext(), targetUrl);
    }
 }

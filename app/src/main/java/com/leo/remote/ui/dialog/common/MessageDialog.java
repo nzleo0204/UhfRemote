@@ -24,37 +24,37 @@ public final class MessageDialog {
             extends StyleDialog.Builder<Builder> {
 
         @Nullable
-        private OnListener mListener;
+        private OnListener listener;
 
         @NonNull
-        private final TextView mMessageView;
+        private final TextView messageView;
 
         public Builder(@NonNull Context context) {
             super(context);
             setCustomView(R.layout.message_dialog);
-            mMessageView = findViewById(R.id.tv_message_message);
+            messageView = findViewById(R.id.tv_message_message);
 
             // 让 TextView 支持滚动
-            mMessageView.setMovementMethod(new ScrollingMovementMethod());
+            messageView.setMovementMethod(new ScrollingMovementMethod());
         }
 
         public Builder setMessage(@StringRes int id) {
             return setMessage(getString(id));
         }
         public Builder setMessage(CharSequence text) {
-            mMessageView.setText(text);
+            messageView.setText(text);
             return this;
         }
 
         public Builder setListener(@Nullable OnListener listener) {
-            mListener = listener;
+            this.listener = listener;
             return this;
         }
 
         @Override
         public BaseDialog create() {
             // 如果内容为空就抛出异常
-            if (TextUtils.isEmpty(mMessageView.getText().toString())) {
+            if (TextUtils.isEmpty(messageView.getText().toString())) {
                 throw new IllegalArgumentException("Dialog message not null");
             }
             return super.create();
@@ -66,22 +66,22 @@ public final class MessageDialog {
             int viewId = view.getId();
             if (viewId == R.id.tv_ui_confirm) {
                 performClickDismiss();
-                if (mListener == null) {
+                if (listener == null) {
                     return;
                 }
-                mListener.onConfirm(getDialog());
+                listener.onConfirm(getDialog());
             } else if (viewId == R.id.tv_ui_cancel) {
                 performClickDismiss();
-                if (mListener == null) {
+                if (listener == null) {
                     return;
                 }
-                mListener.onCancel(getDialog());
+                listener.onCancel(getDialog());
             }
         }
 
         @NonNull
         public TextView getMessageView() {
-            return mMessageView;
+            return messageView;
         }
     }
 

@@ -26,27 +26,27 @@ import com.scwang.smart.refresh.layout.simple.SimpleComponent;
  */
 public final class SmartBallPulseFooter extends SimpleComponent implements RefreshFooter {
 
-    private final TimeInterpolator mInterpolator = new AccelerateDecelerateInterpolator();
+    private final TimeInterpolator interpolator = new AccelerateDecelerateInterpolator();
 
-    private boolean mNoMoreData;
+    private boolean noMoreData;
 
-    private boolean mManualNormalColor;
-    private boolean mManualAnimationColor;
+    private boolean manualNormalColor;
+    private boolean manualAnimationColor;
 
-    private final Paint mPaint;
+    private final Paint paint;
 
-    private int mNormalColor = Color.parseColor("#EEEEEE");
-    private int[] mAnimatingColor = {
+    private int normalColor = Color.parseColor("#EEEEEE");
+    private int[] animatingColor = {
             Color.parseColor("#30B399"),
             Color.parseColor("#FF4600"),
             Color.parseColor("#142DCC")};
 
-    private final float mCircleSpacing;
+    private final float circleSpacing;
 
-    private long mStartTime = 0;
-    private boolean mStarted = false;
+    private long startTime = 0;
+    private boolean started = false;
 
-    private final float mTextWidth;
+    private final float textWidth;
 
     public SmartBallPulseFooter(@NonNull Context context) {
         this(context, null);
@@ -57,36 +57,36 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
 
         setMinimumHeight((int) SmallestWidthAdaptation.dp2px(context, 60));
 
-        mPaint = new Paint();
-        mPaint.setColor(Color.WHITE);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setAntiAlias(true);
+        paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setAntiAlias(true);
 
         mSpinnerStyle = SpinnerStyle.Translate;
 
-        mCircleSpacing = SmallestWidthAdaptation.dp2px(context, 2);
-        mPaint.setTextSize(SmallestWidthAdaptation.sp2px(context, 14));
-        mTextWidth = mPaint.measureText(getContext().getString(R.string.common_no_more_data));
+        circleSpacing = SmallestWidthAdaptation.dp2px(context, 2);
+        paint.setTextSize(SmallestWidthAdaptation.sp2px(context, 14));
+        textWidth = paint.measureText(getContext().getString(R.string.common_no_more_data));
     }
 
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
         final int width = getWidth();
         final int height = getHeight();
-        if (mNoMoreData) {
-            mPaint.setColor(Color.parseColor("#898989"));
-            canvas.drawText(getContext().getString(R.string.common_no_more_data),(width - mTextWidth) / 2,(height - mPaint.getTextSize()) / 2, mPaint);
+        if (noMoreData) {
+            paint.setColor(Color.parseColor("#898989"));
+            canvas.drawText(getContext().getString(R.string.common_no_more_data),(width - textWidth) / 2,(height - paint.getTextSize()) / 2, paint);
         } else {
-            float radius = (Math.min(width, height) - mCircleSpacing * 2) / 7;
-            float x = width / 2f - (radius * 2 + mCircleSpacing);
+            float radius = (Math.min(width, height) - circleSpacing * 2) / 7;
+            float x = width / 2f - (radius * 2 + circleSpacing);
             float y = height / 2f;
             final long now = System.currentTimeMillis();
             for (int i = 0; i < 3; i++) {
-                long time = now - mStartTime - 120 * (i + 1);
+                long time = now - startTime - 120 * (i + 1);
                 float percent = time > 0 ? ((time % 750) / 750f) : 0;
-                percent = mInterpolator.getInterpolation(percent);
+                percent = interpolator.getInterpolation(percent);
                 canvas.save();
-                float translateX = x + (radius * 2) * i + mCircleSpacing * i;
+                float translateX = x + (radius * 2) * i + circleSpacing * i;
 
                 if (percent < 0.5) {
                     float scale = 1 - percent * 2 * 0.7f;
@@ -98,55 +98,55 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
                     canvas.translate(translateX, translateY);
                 }
 
-                mPaint.setColor(mAnimatingColor[i % mAnimatingColor.length]);
-                canvas.drawCircle(0, 0, radius / 3, mPaint);
+                paint.setColor(animatingColor[i % animatingColor.length]);
+                canvas.drawCircle(0, 0, radius / 3, paint);
                 canvas.restore();
             }
         }
 
-        if (mStarted) {
+        if (started) {
             postInvalidate();
         }
     }
 
     @Override
     public void onStartAnimator(@NonNull RefreshLayout layout, int height, int maxDragHeight) {
-        if (mStarted) {
+        if (started) {
             return;
         }
 
         invalidate();
-        mStarted = true;
-        mStartTime = System.currentTimeMillis();
+        started = true;
+        startTime = System.currentTimeMillis();
     }
 
     @Override
     public int onFinish(@NonNull RefreshLayout layout, boolean success) {
-        mStarted = false;
-        mStartTime = 0;
-        mPaint.setColor(mNormalColor);
+        started = false;
+        startTime = 0;
+        paint.setColor(normalColor);
         return 0;
     }
 
     @Override
     public void setPrimaryColors(@ColorInt int... colors) {
-        if (!mManualAnimationColor && colors.length > 1) {
+        if (!manualAnimationColor && colors.length > 1) {
             setAnimatingColor(colors[0]);
-            mManualAnimationColor = false;
+            manualAnimationColor = false;
         }
-        if (!mManualNormalColor) {
+        if (!manualNormalColor) {
             if (colors.length > 1) {
                 setNormalColor(colors[1]);
             } else if (colors.length > 0) {
                 setNormalColor(ColorUtils.compositeColors(Color.parseColor("#99FFFFFF"), colors[0]));
             }
-            mManualNormalColor = false;
+            manualNormalColor = false;
         }
     }
 
     @Override
     public boolean setNoMoreData(boolean noMoreData) {
-        mNoMoreData = noMoreData;
+        this.noMoreData = noMoreData;
         return true;
     }
 
@@ -156,19 +156,19 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
     }
 
     public SmartBallPulseFooter setNormalColor(@ColorInt int color) {
-        mNormalColor = color;
-        mManualNormalColor = true;
-        if (!mStarted) {
-            mPaint.setColor(color);
+        normalColor = color;
+        manualNormalColor = true;
+        if (!started) {
+            paint.setColor(color);
         }
         return this;
     }
 
     public SmartBallPulseFooter setAnimatingColor(@ColorInt int color) {
-        mAnimatingColor = new int[]{color};
-        mManualAnimationColor = true;
-        if (mStarted) {
-            mPaint.setColor(color);
+        animatingColor = new int[]{color};
+        manualAnimationColor = true;
+        if (started) {
+            paint.setColor(color);
         }
         return this;
     }

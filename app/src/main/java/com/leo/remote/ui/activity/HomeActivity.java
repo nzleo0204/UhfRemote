@@ -133,7 +133,7 @@ public final class HomeActivity extends AppActivity
     @Nullable
     @Override
     public View getImmersionTopView() {
-        return findViewById(R.id.ll_home_root);
+        return findViewById(R.id.fl_home_root);
     }
 
     @Nullable

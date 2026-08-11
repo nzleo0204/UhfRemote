@@ -44,31 +44,31 @@ public abstract class AppActivity extends BaseActivity
     private static WeakReference<AppActivity> sResumedActivity = new WeakReference<>(null);
 
     /** 标题栏对象 */
-    private TitleBar mTitleBar;
+    private TitleBar titleBar;
     /** 状态栏沉浸 */
-    private ImmersionBar mImmersionBar;
+    private ImmersionBar immersionBar;
 
     /** 加载对话框 */
-    private WaitDialog.Builder mDialog;
+    private WaitDialog.Builder dialog;
     /** 对话框数量 */
-    private int mDialogCount;
-    private ReaderSessionManager mReaderSession;
-    private MessageDialog.Builder mDisconnectDialog;
+    private int dialogCount;
+    private ReaderSessionManager readerSession;
+    private MessageDialog.Builder disconnectDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!ActivityManager.isMainProcess(this)) { return; }
-        mReaderSession = ReaderSessionManager.getInstance(getApplication());
-        mReaderSession.addObserver(this);
+        readerSession = ReaderSessionManager.getInstance(getApplication());
+        readerSession.addObserver(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         sResumedActivity = new WeakReference<>(this);
-        if (mReaderSession != null && mReaderSession.isPendingDisconnectAlert()) {
-            showDisconnectDialog(mReaderSession.getLastUnexpectedReason());
+        if (readerSession != null && readerSession.isPendingDisconnectAlert()) {
+            showDisconnectDialog(readerSession.getLastUnexpectedReason());
         }
     }
 
@@ -82,7 +82,7 @@ public abstract class AppActivity extends BaseActivity
      * 当前加载对话框是否在显示中
      */
     public boolean isShowDialog() {
-        return mDialog != null && mDialog.isShowing();
+        return dialog != null && dialog.isShowing();
     }
 
     /**
@@ -97,19 +97,19 @@ public abstract class AppActivity extends BaseActivity
             return;
         }
 
-        mDialogCount++;
+        dialogCount++;
         postDelayed(() -> {
-            if (mDialogCount <= 0 || isFinishing() || isDestroyed()) {
+            if (dialogCount <= 0 || isFinishing() || isDestroyed()) {
                 return;
             }
 
-            if (mDialog == null) {
-                mDialog = new WaitDialog.Builder(this)
+            if (dialog == null) {
+                dialog = new WaitDialog.Builder(this)
                         .setCancelable(false);
             }
-            mDialog.setMessage(message);
-            if (!mDialog.isShowing()) {
-                mDialog.show();
+            dialog.setMessage(message);
+            if (!dialog.isShowing()) {
+                dialog.show();
             }
         }, 300);
     }
@@ -122,15 +122,15 @@ public abstract class AppActivity extends BaseActivity
             return;
         }
 
-        if (mDialogCount > 0) {
-            mDialogCount--;
+        if (dialogCount > 0) {
+            dialogCount--;
         }
 
-        if (mDialogCount != 0 || mDialog == null || !mDialog.isShowing()) {
+        if (dialogCount != 0 || dialog == null || !dialog.isShowing()) {
             return;
         }
 
-        mDialog.dismiss();
+        dialog.dismiss();
     }
 
     @Override
@@ -238,10 +238,10 @@ public abstract class AppActivity extends BaseActivity
      */
     @NonNull
     public ImmersionBar getStatusBarConfig() {
-        if (mImmersionBar == null) {
-            mImmersionBar = createStatusBarConfig();
+        if (immersionBar == null) {
+            immersionBar = createStatusBarConfig();
         }
-        return mImmersionBar;
+        return immersionBar;
     }
 
     /**
@@ -285,10 +285,10 @@ public abstract class AppActivity extends BaseActivity
     @Nullable
     @Override
     public TitleBar acquireTitleBar() {
-        if (mTitleBar == null) {
-            mTitleBar = findTitleBar(getContentView());
+        if (titleBar == null) {
+            titleBar = findTitleBar(getContentView());
         }
-        return mTitleBar;
+        return titleBar;
     }
 
     /**
@@ -314,15 +314,15 @@ public abstract class AppActivity extends BaseActivity
 
     /** Blocks reader-dependent actions and repeats the strong disconnect prompt when offline. */
     protected boolean requireReaderOnline() {
-        if (mReaderSession != null && mReaderSession.getState().isConnected()) { return true; }
-        showDisconnectDialog(mReaderSession == null
-                ? DisconnectReason.NONE : mReaderSession.getLastUnexpectedReason());
+        if (readerSession != null && readerSession.getState().isConnected()) { return true; }
+        showDisconnectDialog(readerSession == null
+                ? DisconnectReason.NONE : readerSession.getLastUnexpectedReason());
         return false;
     }
 
     private void showDisconnectDialog(DisconnectReason reason) {
         if (isFinishing() || isDestroyed()
-                || (mDisconnectDialog != null && mDisconnectDialog.isShowing())) {
+                || (disconnectDialog != null && disconnectDialog.isShowing())) {
             return;
         }
         @StringRes int message = disconnectReasonText(reason);
@@ -345,13 +345,13 @@ public abstract class AppActivity extends BaseActivity
                         openReaderConfig();
                     }
                 });
-        mDisconnectDialog = builder;
+        disconnectDialog = builder;
         builder.show();
     }
 
     private void acknowledgeDisconnectDialog() {
-        if (mReaderSession != null) { mReaderSession.acknowledgeDisconnect(); }
-        mDisconnectDialog = null;
+        if (readerSession != null) { readerSession.acknowledgeDisconnect(); }
+        disconnectDialog = null;
     }
 
     private void openReaderConfig() {
@@ -393,15 +393,15 @@ public abstract class AppActivity extends BaseActivity
 
     @Override
     protected void onDestroy() {
-        if (mReaderSession != null) { mReaderSession.removeObserver(this); }
+        if (readerSession != null) { readerSession.removeObserver(this); }
         if (sResumedActivity.get() == this) { sResumedActivity.clear(); }
-        if (mDisconnectDialog != null) { mDisconnectDialog.dismiss(); }
-        mDisconnectDialog = null;
+        if (disconnectDialog != null) { disconnectDialog.dismiss(); }
+        disconnectDialog = null;
         super.onDestroy();
         if (isShowDialog()) {
             hideLoadingDialog();
         }
-        mDialog = null;
+        dialog = null;
     }
 
 }

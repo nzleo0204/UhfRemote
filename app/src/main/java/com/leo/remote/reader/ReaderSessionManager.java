@@ -22,6 +22,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * RFID Reader 会话门面，统一管理连接、配置、盘点和标签操作。
+ *
+ * <p>所有 UHF SDK 调用串行运行在 {@code uhf-sdk} 线程；观察者回调切回主线程。
+ * 连接代次用于丢弃过期异步结果，公开状态字段使用 {@code volatile} 保证跨线程可见性。</p>
+ */
 @SuppressLint("LogNotTimber")
 public final class ReaderSessionManager {
     private static final String TAG = "UhfReader";

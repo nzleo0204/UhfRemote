@@ -24,9 +24,9 @@ public abstract class TitleBarFragment<A extends AppActivity>
         extends AppFragment<A> implements TitleBarAction, ImmersionAction {
 
     /** 标题栏对象 */
-    private TitleBar mTitleBar;
+    private TitleBar titleBar;
     /** 状态栏沉浸 */
-    private ImmersionBar mImmersionBar;
+    private ImmersionBar immersionBar;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -98,10 +98,10 @@ public abstract class TitleBarFragment<A extends AppActivity>
      */
     @NonNull
     protected ImmersionBar getStatusBarConfig() {
-        if (mImmersionBar == null) {
-            mImmersionBar = createStatusBarConfig();
+        if (immersionBar == null) {
+            immersionBar = createStatusBarConfig();
         }
-        return mImmersionBar;
+        return immersionBar;
     }
 
     /**
@@ -140,10 +140,10 @@ public abstract class TitleBarFragment<A extends AppActivity>
     @Override
     @Nullable
     public TitleBar acquireTitleBar() {
-        if (mTitleBar == null || !isLoading()) {
-            mTitleBar = findTitleBar(getView());
+        if (titleBar == null || !isLoading()) {
+            titleBar = findTitleBar(getView());
         }
-        return mTitleBar;
+        return titleBar;
     }
 
     @Nullable

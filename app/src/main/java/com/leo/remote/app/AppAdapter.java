@@ -24,16 +24,16 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
 
     /** 列表数据 */
     @NonNull
-    private List<T> mDataSet = new ArrayList<>();
+    private List<T> dataSet = new ArrayList<>();
 
     /** 当前列表的页码，默认为第一页，用于分页加载功能 */
-    private int mPageNumber = 1;
+    private int pageNumber = 1;
 
     /** 是否是最后一页，默认为false，用于分页加载功能 */
-    private boolean mLastPage;
+    private boolean lastPage;
 
     /** 标记对象 */
-    private Object mTag;
+    private Object tag;
 
     public AppAdapter(@NonNull Context context) {
         super(context);
@@ -48,7 +48,7 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      * 获取数据总数
      */
     public int getCount() {
-        return mDataSet.size();
+        return dataSet.size();
     }
 
     /**
@@ -57,9 +57,9 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
     @SuppressLint("NotifyDataSetChanged")
     public void setData(@Nullable List<T> data) {
         if (data == null) {
-            mDataSet.clear();
+            dataSet.clear();
         } else {
-            mDataSet = data;
+            dataSet = data;
         }
         notifyDataSetChanged();
     }
@@ -69,7 +69,7 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      */
     @NonNull
     public List<T> getData() {
-        return mDataSet;
+        return dataSet;
     }
 
     /**
@@ -80,8 +80,8 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
             return;
         }
 
-        mDataSet.addAll(data);
-        notifyItemRangeInserted(mDataSet.size() - data.size(), data.size());
+        dataSet.addAll(data);
+        notifyItemRangeInserted(dataSet.size() - data.size(), data.size());
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      */
     @SuppressLint("NotifyDataSetChanged")
     public void clearData() {
-        mDataSet.clear();
+        dataSet.clear();
         notifyDataSetChanged();
     }
 
@@ -107,21 +107,21 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
         if (item == null) {
             return false;
         }
-        return mDataSet.contains(item);
+        return dataSet.contains(item);
     }
 
     /**
      * 获取某个位置上的数据
      */
     public T getItem(@IntRange(from = 0) int position) {
-        return mDataSet.get(position);
+        return dataSet.get(position);
     }
 
     /**
      * 更新某个位置上的数据
      */
     public void setItem(@IntRange(from = 0) int position, @NonNull T item) {
-        mDataSet.set(position, item);
+        dataSet.set(position, item);
         notifyItemChanged(position);
     }
 
@@ -129,15 +129,15 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      * 添加单条数据
      */
     public void addItem(@NonNull T item) {
-        addItem(mDataSet.size(), item);
+        addItem(dataSet.size(), item);
     }
 
     public void addItem(@IntRange(from = 0) int position, @NonNull T item) {
-        if (position < mDataSet.size()) {
-            mDataSet.add(position, item);
+        if (position < dataSet.size()) {
+            dataSet.add(position, item);
         } else {
-            mDataSet.add(item);
-            position = mDataSet.size() - 1;
+            dataSet.add(item);
+            position = dataSet.size() - 1;
         }
         notifyItemInserted(position);
     }
@@ -146,14 +146,14 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      * 删除单条数据
      */
     public void removeItem(@NonNull T item) {
-        int index = mDataSet.indexOf(item);
+        int index = dataSet.indexOf(item);
         if (index != -1) {
             removeItem(index);
         }
     }
 
     public void removeItem(@IntRange(from = 0) int position) {
-        mDataSet.remove(position);
+        dataSet.remove(position);
         notifyItemRemoved(position);
     }
 
@@ -161,28 +161,28 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      * 获取当前的页码
      */
     public int getPageNumber() {
-        return mPageNumber;
+        return pageNumber;
     }
 
     /**
      * 设置当前的页码
      */
     public void setPageNumber(@IntRange(from = 0) int number) {
-        mPageNumber = number;
+        pageNumber = number;
     }
 
     /**
      * 当前是否为最后一页
      */
     public boolean isLastPage() {
-        return mLastPage;
+        return lastPage;
     }
 
     /**
      * 设置是否为最后一页
      */
     public void setLastPage(boolean lastPage) {
-        mLastPage = lastPage;
+        this.lastPage = lastPage;
     }
 
     /**
@@ -190,14 +190,14 @@ public abstract class AppAdapter<T> extends BaseAdapter<AppAdapter<T>.AppViewHol
      */
     @Nullable
     public Object getTag() {
-        return mTag;
+        return tag;
     }
 
     /**
      * 设置标记
      */
     public void setTag(@NonNull Object tag) {
-        mTag = tag;
+        this.tag = tag;
     }
 
     public abstract class AppViewHolder extends BaseAdapter<?>.BaseViewHolder {

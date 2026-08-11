@@ -16,13 +16,13 @@ public final class OrientationManager implements Application.ActivityLifecycleCa
 
     private static final int TABLET_SMALLEST_WIDTH_DP = 600;
 
-    private final boolean mTabletDevice;
-    private final int mRequestedOrientation;
+    private final boolean tabletDevice;
+    private final int requestedOrientation;
 
     private OrientationManager(@NonNull Application application) {
-        mTabletDevice = isTabletDevice(application.getResources().getConfiguration(),
+        tabletDevice = isTabletDevice(application.getResources().getConfiguration(),
                 application.getResources().getDisplayMetrics());
-        mRequestedOrientation = mTabletDevice ?
+        requestedOrientation = tabletDevice ?
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
@@ -31,7 +31,7 @@ public final class OrientationManager implements Application.ActivityLifecycleCa
     }
 
     public boolean isTabletDevice() {
-        return mTabletDevice;
+        return tabletDevice;
     }
 
     private static boolean isTabletDevice(@NonNull Configuration configuration,
@@ -45,10 +45,10 @@ public final class OrientationManager implements Application.ActivityLifecycleCa
     }
 
     private void applyOrientation(@NonNull Activity activity) {
-        if (activity.getRequestedOrientation() == mRequestedOrientation) {
+        if (activity.getRequestedOrientation() == requestedOrientation) {
             return;
         }
-        activity.setRequestedOrientation(mRequestedOrientation);
+        activity.setRequestedOrientation(requestedOrientation);
     }
 
     @Override

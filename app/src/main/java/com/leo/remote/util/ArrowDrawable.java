@@ -30,35 +30,35 @@ import com.hjq.smallest.width.SmallestWidthAdaptation;
 @SuppressLint("RtlHardcoded")
 public final class ArrowDrawable extends Drawable {
 
-    private final Builder mBuilder;
-    private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Path mPath;
+    private final Builder builder;
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Path path;
 
     private ArrowDrawable(Builder builder) {
-        mBuilder = builder;
-        mPaint.setStyle(Paint.Style.FILL);
+        this.builder = builder;
+        paint.setStyle(Paint.Style.FILL);
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        if (mBuilder.mShadowSize > 0) {
-            mPaint.setMaskFilter(new BlurMaskFilter(mBuilder.mShadowSize, BlurMaskFilter.Blur.OUTER));
-            mPaint.setColor(mBuilder.mShadowColor);
-            canvas.drawPath(mPath, mPaint);
+        if (builder.shadowSize > 0) {
+            paint.setMaskFilter(new BlurMaskFilter(builder.shadowSize, BlurMaskFilter.Blur.OUTER));
+            paint.setColor(builder.shadowColor);
+            canvas.drawPath(path, paint);
         }
-        mPaint.setMaskFilter(null);
-        mPaint.setColor(mBuilder.mBackgroundColor);
-        canvas.drawPath(mPath, mPaint);
+        paint.setMaskFilter(null);
+        paint.setColor(builder.backgroundColor);
+        canvas.drawPath(path, paint);
     }
 
     @Override
     public void setAlpha(int alpha) {
-        mPaint.setAlpha(alpha);
+        paint.setAlpha(alpha);
     }
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        mPaint.setColorFilter(colorFilter);
+        paint.setColorFilter(colorFilter);
     }
 
     @Override
@@ -70,33 +70,33 @@ public final class ArrowDrawable extends Drawable {
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
     protected void onBoundsChange(@NonNull Rect viewRect) {
-        if (mPath == null) {
-            mPath = new Path();
+        if (path == null) {
+            path = new Path();
         } else {
-            mPath.reset();
+            path.reset();
         }
 
         RectF excludeShadowRectF = new RectF(viewRect);
-        excludeShadowRectF.inset(mBuilder.mShadowSize, mBuilder.mShadowSize);
+        excludeShadowRectF.inset(builder.shadowSize, builder.shadowSize);
 
         PointF centerPointF = new PointF();
 
         // 判断箭头的位置
-        switch (mBuilder.mArrowOrientation) {
+        switch (builder.arrowOrientation) {
             case Gravity.LEFT:
-                excludeShadowRectF.left += mBuilder.mArrowHeight;
+                excludeShadowRectF.left += builder.arrowHeight;
                 centerPointF.x = excludeShadowRectF.left;
                 break;
             case Gravity.RIGHT:
-                excludeShadowRectF.right -= mBuilder.mArrowHeight;
+                excludeShadowRectF.right -= builder.arrowHeight;
                 centerPointF.x = excludeShadowRectF.right;
                 break;
             case Gravity.TOP:
-                excludeShadowRectF.top += mBuilder.mArrowHeight;
+                excludeShadowRectF.top += builder.arrowHeight;
                 centerPointF.y = excludeShadowRectF.top;
                 break;
             case Gravity.BOTTOM:
-                excludeShadowRectF.bottom -= mBuilder.mArrowHeight;
+                excludeShadowRectF.bottom -= builder.arrowHeight;
                 centerPointF.y = excludeShadowRectF.bottom;
                 break;
             default:
@@ -104,51 +104,51 @@ public final class ArrowDrawable extends Drawable {
         }
 
         // 判断箭头的重心
-        switch (mBuilder.mArrowGravity) {
+        switch (builder.arrowGravity) {
             case Gravity.LEFT:
-                centerPointF.x = excludeShadowRectF.left + mBuilder.mArrowHeight;
+                centerPointF.x = excludeShadowRectF.left + builder.arrowHeight;
                 break;
             case Gravity.CENTER_HORIZONTAL:
                 centerPointF.x = viewRect.width() / 2f;
                 break;
             case Gravity.RIGHT:
-                centerPointF.x = excludeShadowRectF.right - mBuilder.mArrowHeight;
+                centerPointF.x = excludeShadowRectF.right - builder.arrowHeight;
                 break;
             case Gravity.TOP:
-                centerPointF.y = excludeShadowRectF.top + mBuilder.mArrowHeight;
+                centerPointF.y = excludeShadowRectF.top + builder.arrowHeight;
                 break;
             case Gravity.CENTER_VERTICAL:
                 centerPointF.y = viewRect.height() / 2f;
                 break;
             case Gravity.BOTTOM:
-                centerPointF.y = excludeShadowRectF.bottom - mBuilder.mArrowHeight;
+                centerPointF.y = excludeShadowRectF.bottom - builder.arrowHeight;
                 break;
             default:
                 break;
         }
 
         // 更新箭头偏移量
-        centerPointF.x += mBuilder.mArrowOffsetX;
-        centerPointF.y += mBuilder.mArrowOffsetY;
+        centerPointF.x += builder.arrowOffsetX;
+        centerPointF.y += builder.arrowOffsetY;
 
-        switch (mBuilder.mArrowGravity) {
+        switch (builder.arrowGravity) {
             case Gravity.LEFT:
             case Gravity.RIGHT:
             case Gravity.CENTER_HORIZONTAL:
-                centerPointF.x = Math.max(centerPointF.x, excludeShadowRectF.left + mBuilder.mRadius + mBuilder.mArrowHeight);
-                centerPointF.x = Math.min(centerPointF.x, excludeShadowRectF.right - mBuilder.mRadius - mBuilder.mArrowHeight);
+                centerPointF.x = Math.max(centerPointF.x, excludeShadowRectF.left + builder.radius + builder.arrowHeight);
+                centerPointF.x = Math.min(centerPointF.x, excludeShadowRectF.right - builder.radius - builder.arrowHeight);
                 break;
             case Gravity.TOP:
             case Gravity.BOTTOM:
             case Gravity.CENTER_VERTICAL:
-                centerPointF.y = Math.max(centerPointF.y, excludeShadowRectF.top + mBuilder.mRadius + mBuilder.mArrowHeight);
-                centerPointF.y = Math.min(centerPointF.y, excludeShadowRectF.bottom - mBuilder.mRadius - mBuilder.mArrowHeight);
+                centerPointF.y = Math.max(centerPointF.y, excludeShadowRectF.top + builder.radius + builder.arrowHeight);
+                centerPointF.y = Math.min(centerPointF.y, excludeShadowRectF.bottom - builder.radius - builder.arrowHeight);
                 break;
             default:
                 break;
         }
 
-        switch (mBuilder.mArrowOrientation) {
+        switch (builder.arrowOrientation) {
             case Gravity.LEFT:
             case Gravity.RIGHT:
                 centerPointF.x = Math.max(centerPointF.x, excludeShadowRectF.left);
@@ -165,14 +165,14 @@ public final class ArrowDrawable extends Drawable {
 
         // 箭头区域（其实是旋转了 90 度后的正方形区域）
         Path arrowPath = new Path();
-        arrowPath.moveTo(centerPointF.x - mBuilder.mArrowHeight, centerPointF.y);
-        arrowPath.lineTo(centerPointF.x, centerPointF.y - mBuilder.mArrowHeight);
-        arrowPath.lineTo(centerPointF.x + mBuilder.mArrowHeight, centerPointF.y);
-        arrowPath.lineTo(centerPointF.x, centerPointF.y + mBuilder.mArrowHeight);
+        arrowPath.moveTo(centerPointF.x - builder.arrowHeight, centerPointF.y);
+        arrowPath.lineTo(centerPointF.x, centerPointF.y - builder.arrowHeight);
+        arrowPath.lineTo(centerPointF.x + builder.arrowHeight, centerPointF.y);
+        arrowPath.lineTo(centerPointF.x, centerPointF.y + builder.arrowHeight);
         arrowPath.close();
 
-        mPath.addRoundRect(excludeShadowRectF, mBuilder.mRadius, mBuilder.mRadius, Path.Direction.CW);
-        mPath.addPath(arrowPath);
+        path.addRoundRect(excludeShadowRectF, builder.radius, builder.radius, Path.Direction.CW);
+        path.addPath(arrowPath);
 
         invalidateSelf();
     }
@@ -181,44 +181,44 @@ public final class ArrowDrawable extends Drawable {
 
         /** 上下文对象 */
         @NonNull
-        private final Context mContext;
+        private final Context context;
         /** 箭头高度 */
-        private int mArrowHeight;
+        private int arrowHeight;
         /** 背景圆角大小 */
-        private int mRadius;
+        private int radius;
         /** 箭头方向 */
-        private int mArrowOrientation;
+        private int arrowOrientation;
         /** 箭头重心 */
-        private int mArrowGravity;
+        private int arrowGravity;
         /** 箭头水平方向偏移 */
-        private int mArrowOffsetX;
+        private int arrowOffsetX;
         /** 箭头垂直方向偏移 */
-        private int mArrowOffsetY;
+        private int arrowOffsetY;
         /** 阴影大小 */
-        private int mShadowSize;
+        private int shadowSize;
         /** 背景颜色 */
-        private int mBackgroundColor;
+        private int backgroundColor;
         /** 阴影颜色 */
-        private int mShadowColor;
+        private int shadowColor;
 
         public Builder(@NonNull Context context) {
-            mContext = context;
-            mBackgroundColor = ContextCompat.getColor(context, R.color.black);
-            mShadowColor = ContextCompat.getColor(context, R.color.black20);
-            mArrowHeight = (int) SmallestWidthAdaptation.dp2px(context, 6);
-            mRadius = (int) SmallestWidthAdaptation.dp2px(context, 4);
-            mShadowSize = 0;
-            mArrowOffsetX = 0;
-            mArrowOffsetY = 0;
-            mArrowOrientation = Gravity.NO_GRAVITY;
-            mArrowGravity = Gravity.NO_GRAVITY;
+            this.context = context;
+            backgroundColor = ContextCompat.getColor(context, R.color.black);
+            shadowColor = ContextCompat.getColor(context, R.color.black20);
+            arrowHeight = (int) SmallestWidthAdaptation.dp2px(context, 6);
+            radius = (int) SmallestWidthAdaptation.dp2px(context, 4);
+            shadowSize = 0;
+            arrowOffsetX = 0;
+            arrowOffsetY = 0;
+            arrowOrientation = Gravity.NO_GRAVITY;
+            arrowGravity = Gravity.NO_GRAVITY;
         }
 
         /**
          * 设置背景色
          */
         public Builder setBackgroundColor(@ColorInt int color) {
-            mBackgroundColor = color;
+            backgroundColor = color;
             return this;
         }
 
@@ -226,7 +226,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置阴影色
          */
         public Builder setShadowColor(@ColorInt int color) {
-            mShadowColor = color;
+            shadowColor = color;
             return this;
         }
 
@@ -234,7 +234,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置箭头高度
          */
         public Builder setArrowHeight(int height) {
-            mArrowHeight = height;
+            arrowHeight = height;
             return this;
         }
 
@@ -242,7 +242,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置浮窗圆角半径
          */
         public Builder setRadius(int radius) {
-            mRadius = radius;
+            this.radius = radius;
             return this;
         }
 
@@ -250,12 +250,12 @@ public final class ArrowDrawable extends Drawable {
          * 设置箭头方向（左上右下）
          */
         public Builder setArrowOrientation(int orientation) {
-            switch (orientation = Gravity.getAbsoluteGravity(orientation, mContext.getResources().getConfiguration().getLayoutDirection())) {
+            switch (orientation = Gravity.getAbsoluteGravity(orientation, context.getResources().getConfiguration().getLayoutDirection())) {
                 case Gravity.LEFT:
                 case Gravity.TOP:
                 case Gravity.RIGHT:
                 case Gravity.BOTTOM:
-                    mArrowOrientation = orientation;
+                    arrowOrientation = orientation;
                     break;
                 default:
                     // 箭头只能在左上右下这四个位置
@@ -268,9 +268,9 @@ public final class ArrowDrawable extends Drawable {
          * 设置箭头布局重心
          */
         public Builder setArrowGravity(int gravity) {
-            gravity = Gravity.getAbsoluteGravity(gravity, mContext.getResources().getConfiguration().getLayoutDirection());
+            gravity = Gravity.getAbsoluteGravity(gravity, context.getResources().getConfiguration().getLayoutDirection());
             if (gravity == Gravity.CENTER) {
-                switch (mArrowOrientation) {
+                switch (arrowOrientation) {
                     case Gravity.LEFT:
                     case Gravity.RIGHT:
                         gravity = Gravity.CENTER_VERTICAL;
@@ -286,13 +286,13 @@ public final class ArrowDrawable extends Drawable {
             switch (gravity) {
                 case Gravity.LEFT:
                 case Gravity.RIGHT:
-                    if (mArrowOrientation == Gravity.LEFT || mArrowOrientation == Gravity.RIGHT) {
+                    if (arrowOrientation == Gravity.LEFT || arrowOrientation == Gravity.RIGHT) {
                         throw new IllegalArgumentException("The arrow direction cannot be the same as the arrow gravity");
                     }
                     break;
                 case Gravity.TOP:
                 case Gravity.BOTTOM:
-                    if (mArrowOrientation == Gravity.TOP || mArrowOrientation == Gravity.BOTTOM) {
+                    if (arrowOrientation == Gravity.TOP || arrowOrientation == Gravity.BOTTOM) {
                         throw new IllegalArgumentException("The arrow direction cannot be the same as the arrow gravity");
                     }
                     break;
@@ -303,7 +303,7 @@ public final class ArrowDrawable extends Drawable {
                     // 箭头只能在左上右下这四个位置
                     throw new IllegalArgumentException("The arrow can only be in the four positions: left, top, right, and bottom");
             }
-            mArrowGravity = gravity;
+            arrowGravity = gravity;
             return this;
         }
 
@@ -311,7 +311,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置箭头在 x 轴的偏移量
          */
         public Builder setArrowOffsetX(int offsetX) {
-            mArrowOffsetX = offsetX;
+            arrowOffsetX = offsetX;
             return this;
         }
 
@@ -319,7 +319,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置箭头在 y 轴的偏移量
          */
         public Builder setArrowOffsetY(int offsetY) {
-            mArrowOffsetY = offsetY;
+            arrowOffsetY = offsetY;
             return this;
         }
 
@@ -327,7 +327,7 @@ public final class ArrowDrawable extends Drawable {
          * 设置阴影宽度
          */
         public Builder setShadowSize(int size) {
-            mShadowSize = size;
+            shadowSize = size;
             return this;
         }
 
@@ -335,7 +335,7 @@ public final class ArrowDrawable extends Drawable {
          * 构建 Drawable
          */
         public ArrowDrawable build() {
-            if (mArrowOrientation == Gravity.NO_GRAVITY || mArrowGravity == Gravity.NO_GRAVITY) {
+            if (arrowOrientation == Gravity.NO_GRAVITY || arrowGravity == Gravity.NO_GRAVITY) {
                 // 必须要先设置箭头的方向及重心
                 throw new IllegalArgumentException("You must set the direction and gravity of the arrow");
             }
@@ -347,10 +347,10 @@ public final class ArrowDrawable extends Drawable {
          */
         public void apply(View view) {
             view.setBackground(build());
-            if (mShadowSize > 0 || mArrowHeight > 0) {
+            if (shadowSize > 0 || arrowHeight > 0) {
                 if (view.getPaddingTop() == 0 && view.getBottom() == 0 &&
                         view.getPaddingLeft() == 0 && view.getPaddingRight() == 0) {
-                    view.setPadding(mShadowSize, mShadowSize + mArrowHeight, mShadowSize, mShadowSize);
+                    view.setPadding(shadowSize, shadowSize + arrowHeight, shadowSize, shadowSize);
                 }
             }
         }

@@ -21,7 +21,7 @@ public final class WaitDialog {
             extends BaseDialog.Builder<Builder> {
 
         @NonNull
-        private final TextView mMessageView;
+        private final TextView messageView;
 
         public Builder(@NonNull Context context) {
             super(context);
@@ -30,7 +30,7 @@ public final class WaitDialog {
             setBackgroundDimEnabled(false);
             setCancelable(false);
 
-            mMessageView = findViewById(R.id.tv_wait_message);
+            messageView = findViewById(R.id.tv_wait_message);
         }
 
         public Builder setMessage(@StringRes int id) {
@@ -38,8 +38,8 @@ public final class WaitDialog {
         }
 
         public Builder setMessage(@Nullable CharSequence text) {
-            mMessageView.setText(text);
-            mMessageView.setVisibility(text == null ? View.GONE : View.VISIBLE);
+            messageView.setText(text);
+            messageView.setVisibility(text == null ? View.GONE : View.VISIBLE);
             return this;
         }
     }

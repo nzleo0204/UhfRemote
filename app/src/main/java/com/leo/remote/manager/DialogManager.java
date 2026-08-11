@@ -33,10 +33,10 @@ public final class DialogManager implements LifecycleEventObserver, BaseDialog.O
     }
 
     @NonNull
-    private final List<BaseDialog> mDialogList = new ArrayList<>();
+    private final List<BaseDialog> dialogList = new ArrayList<>();
 
     @NonNull
-    private final Map<BaseDialog, Integer> mDialogPriority = new HashMap<>();
+    private final Map<BaseDialog, Integer> dialogPriority = new HashMap<>();
 
     private DialogManager(LifecycleOwner lifecycleOwner) {
         lifecycleOwner.getLifecycle().addObserver(this);
@@ -47,7 +47,7 @@ public final class DialogManager implements LifecycleEventObserver, BaseDialog.O
      */
     @NonNull
     public List<BaseDialog> getDialogList() {
-        return mDialogList;
+        return dialogList;
     }
 
     public void addDialog(@Nullable BaseDialog dialog) {
@@ -64,14 +64,14 @@ public final class DialogManager implements LifecycleEventObserver, BaseDialog.O
             return;
         }
 
-        if (mDialogList.contains(dialog)) {
+        if (dialogList.contains(dialog)) {
             return;
         }
 
-        int dialogIndex = mDialogList.size();
-        for (int i = 0; i < mDialogList.size(); i++) {
-            BaseDialog itemDialog = mDialogList.get(i);
-            Integer itemPriority = mDialogPriority.get(itemDialog);
+        int dialogIndex = dialogList.size();
+        for (int i = 0; i < dialogList.size(); i++) {
+            BaseDialog itemDialog = dialogList.get(i);
+            Integer itemPriority = dialogPriority.get(itemDialog);
             if (itemPriority == null) {
                 continue;
             }
@@ -79,18 +79,18 @@ public final class DialogManager implements LifecycleEventObserver, BaseDialog.O
                 dialogIndex = i;
             }
         }
-        mDialogList.add(dialogIndex, dialog);
-        mDialogPriority.put(dialog, priority);
+        dialogList.add(dialogIndex, dialog);
+        dialogPriority.put(dialog, priority);
     }
 
     /**
      * 排队显示 Dialog
      */
     public void startShow() {
-        if (mDialogList.isEmpty()) {
+        if (dialogList.isEmpty()) {
             return;
         }
-        BaseDialog firstDialog = mDialogList.get(0);
+        BaseDialog firstDialog = dialogList.get(0);
         if (!firstDialog.isShowing()) {
             firstDialog.addOnDismissListener(this);
             firstDialog.show();
@@ -101,24 +101,24 @@ public final class DialogManager implements LifecycleEventObserver, BaseDialog.O
      * 取消所有 Dialog 的显示
      */
     public void clearShow() {
-        if (mDialogList.isEmpty()) {
+        if (dialogList.isEmpty()) {
             return;
         }
-        BaseDialog firstDialog = mDialogList.get(0);
+        BaseDialog firstDialog = dialogList.get(0);
         if (firstDialog.isShowing()) {
             firstDialog.removeOnDismissListener(this);
             firstDialog.dismiss();
         }
-        mDialogList.clear();
-        mDialogPriority.clear();
+        dialogList.clear();
+        dialogPriority.clear();
     }
 
     @Override
     public void onDismiss(@NonNull BaseDialog dialog) {
         dialog.removeOnDismissListener(this);
-        mDialogList.remove(dialog);
-        mDialogPriority.remove(dialog);
-        for (BaseDialog nextDialog : mDialogList) {
+        dialogList.remove(dialog);
+        dialogPriority.remove(dialog);
+        for (BaseDialog nextDialog : dialogList) {
             if (!nextDialog.isShowing()) {
                 nextDialog.addOnDismissListener(this);
                 nextDialog.show();

@@ -42,18 +42,18 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
     private static final int CIRCLE_BG_LIGHT = Color.parseColor("#FAFAFA");
     private static final float MAX_PROGRESS_ANGLE = 0.8f;
 
-    private boolean mFinished;
-    private int mCircleDiameter;
-    private final ImageView mCircleView;
-    private final MaterialProgressDrawable mProgressDrawable;
+    private boolean finished;
+    private int circleDiameter;
+    private final ImageView circleView;
+    private final MaterialProgressDrawable progressDrawable;
 
-    private int mWaveHeight;
-    private int mHeadHeight;
-    private final Path mBezierPath;
-    private final Paint mBezierPaint;
-    private RefreshState mRefreshState;
-    private boolean mShowBezierWave = false;
-    private boolean mScrollableWhenRefreshing = true;
+    private int waveHeight;
+    private int headHeight;
+    private final Path bezierPath;
+    private final Paint bezierPaint;
+    private RefreshState refreshState;
+    private boolean showBezierWave = false;
+    private boolean scrollableWhenRefreshing = true;
 
     public MaterialHeader(@NonNull Context context) {
         this(context, null);
@@ -65,45 +65,45 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
         mSpinnerStyle = SpinnerStyle.MatchLayout;
         setMinimumHeight((int) SmallestWidthAdaptation.dp2px(context, 100));
 
-        mProgressDrawable = new MaterialProgressDrawable(this);
-        mProgressDrawable.setColorSchemeColors(
+        progressDrawable = new MaterialProgressDrawable(this);
+        progressDrawable.setColorSchemeColors(
                 Color.parseColor("#0099CC"),
                 Color.parseColor("#FF4444"),
                 Color.parseColor("#669900"),
                 Color.parseColor("#AA66CC"),
                 Color.parseColor("#FF8800"));
-        mCircleView = new CircleImageView(context, CIRCLE_BG_LIGHT);
-        mCircleView.setImageDrawable(mProgressDrawable);
-        mCircleView.setAlpha(0f);
-        addView(mCircleView);
+        circleView = new CircleImageView(context, CIRCLE_BG_LIGHT);
+        circleView.setImageDrawable(progressDrawable);
+        circleView.setAlpha(0f);
+        addView(circleView);
 
-        mCircleDiameter = (int) SmallestWidthAdaptation.dp2px(context, 40);
+        circleDiameter = (int) SmallestWidthAdaptation.dp2px(context, 40);
 
-        mBezierPath = new Path();
-        mBezierPaint = new Paint();
-        mBezierPaint.setAntiAlias(true);
-        mBezierPaint.setStyle(Paint.Style.FILL);
+        bezierPath = new Path();
+        bezierPaint = new Paint();
+        bezierPaint.setAntiAlias(true);
+        bezierPaint.setStyle(Paint.Style.FILL);
 
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MaterialHeader);
-        mShowBezierWave = typedArray.getBoolean(R.styleable.MaterialHeader_srlShowBezierWave, mShowBezierWave);
-        mScrollableWhenRefreshing = typedArray.getBoolean(R.styleable.MaterialHeader_srlScrollableWhenRefreshing, mScrollableWhenRefreshing);
-        mBezierPaint.setColor(typedArray.getColor(R.styleable.MaterialHeader_srlPrimaryColor, Color.parseColor("#11BBFF")));
+        showBezierWave = typedArray.getBoolean(R.styleable.MaterialHeader_srlShowBezierWave, showBezierWave);
+        scrollableWhenRefreshing = typedArray.getBoolean(R.styleable.MaterialHeader_srlScrollableWhenRefreshing, scrollableWhenRefreshing);
+        bezierPaint.setColor(typedArray.getColor(R.styleable.MaterialHeader_srlPrimaryColor, Color.parseColor("#11BBFF")));
         if (typedArray.hasValue(R.styleable.MaterialHeader_srlShadowRadius)) {
             int radius = typedArray.getDimensionPixelOffset(R.styleable.MaterialHeader_srlShadowRadius, 0);
             int color = typedArray.getColor(R.styleable.MaterialHeader_mhShadowColor, Color.parseColor("#000000"));
-            mBezierPaint.setShadowLayer(radius, 0, 0, color);
+            bezierPaint.setShadowLayer(radius, 0, 0, color);
             setLayerType(LAYER_TYPE_SOFTWARE, null);
         }
 
-        mShowBezierWave = typedArray.getBoolean(R.styleable.MaterialHeader_mhShowBezierWave, mShowBezierWave);
-        mScrollableWhenRefreshing = typedArray.getBoolean(R.styleable.MaterialHeader_mhScrollableWhenRefreshing, mScrollableWhenRefreshing);
+        showBezierWave = typedArray.getBoolean(R.styleable.MaterialHeader_mhShowBezierWave, showBezierWave);
+        scrollableWhenRefreshing = typedArray.getBoolean(R.styleable.MaterialHeader_mhScrollableWhenRefreshing, scrollableWhenRefreshing);
         if (typedArray.hasValue(R.styleable.MaterialHeader_mhPrimaryColor)) {
-            mBezierPaint.setColor(typedArray.getColor(R.styleable.MaterialHeader_mhPrimaryColor, Color.parseColor("#11BBFF")));
+            bezierPaint.setColor(typedArray.getColor(R.styleable.MaterialHeader_mhPrimaryColor, Color.parseColor("#11BBFF")));
         }
         if (typedArray.hasValue(R.styleable.MaterialHeader_mhShadowRadius)) {
             int radius = typedArray.getDimensionPixelOffset(R.styleable.MaterialHeader_mhShadowRadius, 0);
             int color = typedArray.getColor(R.styleable.MaterialHeader_mhShadowColor, Color.parseColor("#000000"));
-            mBezierPaint.setShadowLayer(radius, 0, 0, color);
+            bezierPaint.setShadowLayer(radius, 0, 0, color);
             setLayerType(LAYER_TYPE_SOFTWARE, null);
         }
 
@@ -113,8 +113,8 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.setMeasuredDimension(getSize(widthMeasureSpec), getSize(heightMeasureSpec));
-        mCircleView.measure(MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY));
+        circleView.measure(MeasureSpec.makeMeasureSpec(circleDiameter, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(circleDiameter, MeasureSpec.EXACTLY));
     }
 
     @Override
@@ -123,63 +123,63 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
             return;
         }
         final int width = getMeasuredWidth();
-        int circleWidth = mCircleView.getMeasuredWidth();
-        int circleHeight = mCircleView.getMeasuredHeight();
+        int circleWidth = circleView.getMeasuredWidth();
+        int circleHeight = circleView.getMeasuredHeight();
 
-        if (isInEditMode() && mHeadHeight > 0) {
-            int circleTop = mHeadHeight - circleHeight / 2;
-            mCircleView.layout((width / 2 - circleWidth / 2), circleTop,
+        if (isInEditMode() && headHeight > 0) {
+            int circleTop = headHeight - circleHeight / 2;
+            circleView.layout((width / 2 - circleWidth / 2), circleTop,
                     (width / 2 + circleWidth / 2), circleTop + circleHeight);
 
-            mProgressDrawable.showArrow(true);
-            mProgressDrawable.setStartEndTrim(0f, MAX_PROGRESS_ANGLE);
-            mProgressDrawable.setArrowScale(1);
-            mCircleView.setAlpha(1f);
-            mCircleView.setVisibility(VISIBLE);
+            progressDrawable.showArrow(true);
+            progressDrawable.setStartEndTrim(0f, MAX_PROGRESS_ANGLE);
+            progressDrawable.setArrowScale(1);
+            circleView.setAlpha(1f);
+            circleView.setVisibility(VISIBLE);
         } else {
-            mCircleView.layout((width / 2 - circleWidth / 2), -circleHeight, (width / 2 + circleWidth / 2), 0);
+            circleView.layout((width / 2 - circleWidth / 2), -circleHeight, (width / 2 + circleWidth / 2), 0);
         }
     }
 
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
-        if (mShowBezierWave) {
+        if (showBezierWave) {
             // 重置画笔
-            mBezierPath.reset();
-            mBezierPath.lineTo(0, mHeadHeight);
+            bezierPath.reset();
+            bezierPath.lineTo(0, headHeight);
             // 绘制贝塞尔曲线
-            mBezierPath.quadTo(getMeasuredWidth() / 2f, mHeadHeight + mWaveHeight * 1.9f, getMeasuredWidth(), mHeadHeight);
-            mBezierPath.lineTo(getMeasuredWidth(), 0);
-            canvas.drawPath(mBezierPath, mBezierPaint);
+            bezierPath.quadTo(getMeasuredWidth() / 2f, headHeight + waveHeight * 1.9f, getMeasuredWidth(), headHeight);
+            bezierPath.lineTo(getMeasuredWidth(), 0);
+            canvas.drawPath(bezierPath, bezierPaint);
         }
         super.dispatchDraw(canvas);
     }
 
     @Override
     public void onInitialized(@NonNull RefreshKernel kernel, int height, int maxDragHeight) {
-        if (!mShowBezierWave) {
+        if (!showBezierWave) {
             kernel.requestDefaultTranslationContentFor(this, false);
         }
         if (isInEditMode()) {
-            mWaveHeight = mHeadHeight = height / 2;
+            waveHeight = headHeight = height / 2;
         }
     }
 
     @Override
     public void onMoving(boolean dragging, float percent, int offset, int height, int maxDragHeight) {
-        if (mRefreshState == RefreshState.Refreshing) {
+        if (refreshState == RefreshState.Refreshing) {
             return;
         }
 
-        if (mShowBezierWave) {
-            mHeadHeight = Math.min(offset, height);
-            mWaveHeight = Math.max(0, offset - height);
+        if (showBezierWave) {
+            headHeight = Math.min(offset, height);
+            waveHeight = Math.max(0, offset - height);
             postInvalidate();
         }
 
-        if (dragging || (!mProgressDrawable.isRunning() && !mFinished)) {
+        if (dragging || (!progressDrawable.isRunning() && !finished)) {
 
-            if (mRefreshState != RefreshState.Refreshing) {
+            if (refreshState != RefreshState.Refreshing) {
                 float originalDragPercent = 1f * offset / height;
 
                 float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
@@ -190,42 +190,42 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
                 float tensionPercent = (float) ((tensionSlingshotPercent / 4) - Math.pow(
                         (tensionSlingshotPercent / 4), 2)) * 2f;
                 float strokeStart = adjustedPercent * .8f;
-                mProgressDrawable.showArrow(true);
-                mProgressDrawable.setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
-                mProgressDrawable.setArrowScale(Math.min(1f, adjustedPercent));
+                progressDrawable.showArrow(true);
+                progressDrawable.setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
+                progressDrawable.setArrowScale(Math.min(1f, adjustedPercent));
 
                 float rotation = (-0.25f + .4f * adjustedPercent + tensionPercent * 2) * .5f;
-                mProgressDrawable.setProgressRotation(rotation);
+                progressDrawable.setProgressRotation(rotation);
             }
 
-            float targetY = offset / 2f + mCircleDiameter / 2f;
-            mCircleView.setTranslationY(Math.min(offset, targetY));
-            mCircleView.setAlpha(Math.min(1f, 4f * offset / mCircleDiameter));
+            float targetY = offset / 2f + circleDiameter / 2f;
+            circleView.setTranslationY(Math.min(offset, targetY));
+            circleView.setAlpha(Math.min(1f, 4f * offset / circleDiameter));
         }
     }
 
     @Override
     public void onReleased(@NonNull RefreshLayout layout, int height, int maxDragHeight) {
-        mProgressDrawable.start();
+        progressDrawable.start();
     }
 
     @Override
     public void onStateChanged(@NonNull RefreshLayout refreshLayout, @NonNull RefreshState oldState, @NonNull RefreshState newState) {
-        mRefreshState = newState;
+        refreshState = newState;
         if (newState == RefreshState.PullDownToRefresh) {
-            mFinished = false;
-            mCircleView.setVisibility(VISIBLE);
-            mCircleView.setTranslationY(0);
-            mCircleView.setScaleX(1);
-            mCircleView.setScaleY(1);
+            finished = false;
+            circleView.setVisibility(VISIBLE);
+            circleView.setTranslationY(0);
+            circleView.setScaleX(1);
+            circleView.setScaleY(1);
         }
     }
 
     @Override
     public int onFinish(@NonNull RefreshLayout layout, boolean success) {
-        mProgressDrawable.stop();
-        mCircleView.animate().scaleX(0).scaleY(0);
-        mFinished = true;
+        progressDrawable.stop();
+        circleView.animate().scaleX(0).scaleY(0);
+        finished = true;
         return 0;
     }
 
@@ -238,7 +238,7 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
     }
 
     public MaterialHeader setProgressBackgroundColor(@ColorInt int color) {
-        mCircleView.setBackgroundColor(color);
+        circleView.setBackgroundColor(color);
         return this;
     }
 
@@ -248,7 +248,7 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
      * @param colors ColorScheme
      */
     public MaterialHeader setColorSchemeColors(@ColorInt int... colors) {
-        mProgressDrawable.setColorSchemeColors(colors);
+        progressDrawable.setColorSchemeColors(colors);
         return this;
     }
 
@@ -275,16 +275,16 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
             return this;
         }
         if (style == BALL_STYLE_LARGE) {
-            mCircleDiameter = (int) SmallestWidthAdaptation.dp2px(getContext(), 56);
+            circleDiameter = (int) SmallestWidthAdaptation.dp2px(getContext(), 56);
         } else {
-            mCircleDiameter = (int) SmallestWidthAdaptation.dp2px(getContext(), 40);
+            circleDiameter = (int) SmallestWidthAdaptation.dp2px(getContext(), 40);
         }
         // force the bounds of the progress circle inside the circle view to
         // update by setting it to null before updating its size and then
         // re-setting it
-        mCircleView.setImageDrawable(null);
-        mProgressDrawable.updateSizes(style);
-        mCircleView.setImageDrawable(mProgressDrawable);
+        circleView.setImageDrawable(null);
+        progressDrawable.updateSizes(style);
+        circleView.setImageDrawable(progressDrawable);
         return this;
     }
 
@@ -292,7 +292,7 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
      * 是否显示贝塞尔图形
      */
     public MaterialHeader setShowBezierWave(boolean show) {
-        mShowBezierWave = show;
+        showBezierWave = show;
         return this;
     }
 
@@ -300,7 +300,7 @@ public final class MaterialHeader extends SimpleComponent implements RefreshHead
      * 设置实在正在刷新的时候可以上下滚动 Header
      */
     public MaterialHeader setScrollableWhenRefreshing(boolean scrollable) {
-        mScrollableWhenRefreshing = scrollable;
+        scrollableWhenRefreshing = scrollable;
         return this;
     }
 }

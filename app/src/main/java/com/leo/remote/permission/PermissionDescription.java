@@ -36,19 +36,19 @@ public final class PermissionDescription implements OnPermissionDescription {
     private static final int DESCRIPTION_WINDOW_TYPE_POPUP = 1;
 
     /** 权限请求描述弹窗显示类型 */
-    private int mDescriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
+    private int descriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
 
     /** 消息 Token */
     @NonNull
-    private final Object mHandlerToken = new Object();
+    private final Object handlerToken = new Object();
 
     /** 权限申请说明弹窗 */
     @Nullable
-    private PopupWindow mPermissionPopupWindow;
+    private PopupWindow permissionPopupWindow;
 
     /** 权限申请说明对话框 */
     @Nullable
-    private Dialog mPermissionDialog;
+    private Dialog permissionDialog;
 
     @Override
     public void askWhetherRequestPermission(@NonNull Activity activity,
@@ -61,17 +61,17 @@ public final class PermissionDescription implements OnPermissionDescription {
         //    设备的物理屏幕尺寸还小于 8.5 寸（目前大多数小屏平板大多数集中在 8、8.7、8.8、10 寸），
         //    实测 8 寸的平板获取到的物理尺寸到只有 7.958788793906728，所以这里的代码判断基本上是针对 8.5 寸及以上的平板做优化。
         if (isActivityLandscape(activity) && getPhysicalScreenSize(activity) < 8.5) {
-            mDescriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
+            descriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
         } else {
-            mDescriptionWindowType = DESCRIPTION_WINDOW_TYPE_POPUP;
+            descriptionWindowType = DESCRIPTION_WINDOW_TYPE_POPUP;
             for (IPermission permission : requestList) {
                 if (permission.getPermissionPageType(activity) == PermissionPageType.OPAQUE_ACTIVITY) {
-                    mDescriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
+                    descriptionWindowType = DESCRIPTION_WINDOW_TYPE_DIALOG;
                 }
             }
         }
 
-        if (mDescriptionWindowType == DESCRIPTION_WINDOW_TYPE_POPUP) {
+        if (descriptionWindowType == DESCRIPTION_WINDOW_TYPE_POPUP) {
             continueRequestRunnable.run();
             return;
         }
@@ -86,7 +86,7 @@ public final class PermissionDescription implements OnPermissionDescription {
 
     @Override
     public void onRequestPermissionStart(@NonNull Activity activity, @NonNull List<IPermission> requestList) {
-        if (mDescriptionWindowType != DESCRIPTION_WINDOW_TYPE_POPUP) {
+        if (descriptionWindowType != DESCRIPTION_WINDOW_TYPE_POPUP) {
             return;
         }
 
@@ -98,13 +98,13 @@ public final class PermissionDescription implements OnPermissionDescription {
         // 这样做是为了避免 PopupWindow 显示了又马上消失，这样就不会出现 PopupWindow 一闪而过的效果，提升用户的视觉体验
         // 最后补充一点：350 毫秒只是一个经验值，经过测试可覆盖大部分机型，具体可根据实际情况进行调整，这里不做强制要求
         // 相关 Github issue 地址：https://github.com/getActivity/XXPermissions/issues/366
-        PermissionTaskHandler.sendTask(showPopupRunnable, mHandlerToken, 350);
+        PermissionTaskHandler.sendTask(showPopupRunnable, handlerToken, 350);
     }
 
     @Override
     public void onRequestPermissionEnd(@NonNull Activity activity, @NonNull List<IPermission> requestList) {
         // 移除跟这个 Token 有关但是没有还没有执行的消息
-        PermissionTaskHandler.cancelTask(mHandlerToken);
+        PermissionTaskHandler.cancelTask(handlerToken);
         // 销毁当前正在显示的弹窗
         dismissPopupWindow();
         dismissDialog();
@@ -127,7 +127,7 @@ public final class PermissionDescription implements OnPermissionDescription {
      */
     private void showDialog(@NonNull Activity activity, @Nullable String dialogTitle, @Nullable String dialogMessage,
         @Nullable String confirmButtonText, @Nullable MessageDialog.OnListener listener) {
-        if (mPermissionDialog != null) {
+        if (permissionDialog != null) {
             dismissDialog();
         }
         if (activity.isFinishing() || activity.isDestroyed()) {
@@ -137,28 +137,28 @@ public final class PermissionDescription implements OnPermissionDescription {
         // java.lang.IllegalStateException: You need to use a Theme.AppCompat theme (or descendant) with this activity
         // 为什么不直接用系统包 AlertDialog 来显示，而是两套规则？因为系统包 AlertDialog 是系统自带的类，不同 Android 版本展现的样式可能不太一样
         // 如果这个 Android 版本比较低，那么这个对话框的样式就会变得很丑，准确来讲也不能说丑，而是当时系统的 UI 设计就是那样，它只是跟随系统的样式而已
-        mPermissionDialog = new MessageDialog.Builder(activity)
+        permissionDialog = new MessageDialog.Builder(activity)
             .setTitle(dialogTitle)
             .setMessage(dialogMessage)
             .setConfirm(confirmButtonText)
             .setCancelable(false)
             .setListener(listener)
             .create();
-        mPermissionDialog.show();
+        permissionDialog.show();
     }
 
     /**
      * 销毁 Dialog
      */
     private void dismissDialog() {
-        if (mPermissionDialog == null) {
+        if (permissionDialog == null) {
             return;
         }
-        if (!mPermissionDialog.isShowing()) {
+        if (!permissionDialog.isShowing()) {
             return;
         }
-        mPermissionDialog.dismiss();
-        mPermissionDialog = null;
+        permissionDialog.dismiss();
+        permissionDialog = null;
     }
 
     /**
@@ -167,31 +167,31 @@ public final class PermissionDescription implements OnPermissionDescription {
      * @param content               弹窗显示的内容
      */
     private void showPopupWindow(@NonNull Activity activity, @NonNull String content) {
-        if (mPermissionPopupWindow != null) {
+        if (permissionPopupWindow != null) {
             dismissPopupWindow();
         }
         if (activity.isFinishing() || activity.isDestroyed()) {
             return;
         }
         ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-        mPermissionPopupWindow = new PermissionDescriptionPopup.Builder(activity)
+        permissionPopupWindow = new PermissionDescriptionPopup.Builder(activity)
             .setDescription(content)
             .create();
-        mPermissionPopupWindow.showAtLocation(decorView, Gravity.TOP, 0, 0);
+        permissionPopupWindow.showAtLocation(decorView, Gravity.TOP, 0, 0);
     }
 
     /**
      * 销毁 PopupWindow
      */
     private void dismissPopupWindow() {
-        if (mPermissionPopupWindow == null) {
+        if (permissionPopupWindow == null) {
             return;
         }
-        if (!mPermissionPopupWindow.isShowing()) {
+        if (!permissionPopupWindow.isShowing()) {
             return;
         }
-        mPermissionPopupWindow.dismiss();
-        mPermissionPopupWindow = null;
+        permissionPopupWindow.dismiss();
+        permissionPopupWindow = null;
     }
 
     /**
