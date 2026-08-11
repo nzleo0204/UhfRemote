@@ -19,7 +19,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * RFID Reader 会话门面，统一管理连接、配置、盘点和标签操作。
@@ -40,7 +39,6 @@ public final class ReaderSessionManager {
     private volatile ExecutorService sdkExecutor;
     private final Handler mainHandler;
     private final ReaderStatePublisher statePublisher;
-    private final AtomicLong connectionGeneration = new AtomicLong();
     private final CopyOnWriteArraySet<CompletableFuture<?>> pendingOperations = new CopyOnWriteArraySet<>();
     private final BleTransport bleTransport;
     private final WifiNetworkMonitor wifiMonitor;
@@ -49,10 +47,8 @@ public final class ReaderSessionManager {
     private final ReaderConfigurationManager configurationManager;
     private final ReaderTagOperations tagOperations;
     private final ReaderInventoryController inventoryController;
+    private final ReaderConnectionManager connectionManager;
 
-    private volatile ReaderState state = ReaderState.disconnected();
-    private volatile boolean pendingDisconnectAlert;
-    private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
     private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
     private volatile boolean sdkInitialized;
     private volatile boolean shuttingDown;
@@ -93,6 +89,8 @@ public final class ReaderSessionManager {
         sdkExecutor = createSdkExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
         statePublisher = new ReaderStatePublisher();
+        connectionManager = new ReaderConnectionManager(statePublisher,
+                this::updateConnectionService);
         storage = MMKV.mmkvWithID(MMKV_ID);
         configCache = new ReaderConfigCache();
         configurationManager = new ReaderConfigurationManager(gateway, configCache,
@@ -104,7 +102,7 @@ public final class ReaderSessionManager {
             @Override
             public void onPhase(long attemptId, ConnectionPhase phase, String message) {
                 if (isCurrentConnection(attemptId)) {
-                    publish(state.buildUpon().phase(phase).message(message).errorCode(0).build());
+                    publish(currentState().buildUpon().phase(phase).message(message).errorCode(0).build());
                 }
             }
 
@@ -112,7 +110,7 @@ public final class ReaderSessionManager {
             public void onReady(long attemptId) {
                 if (!isCurrentConnection(attemptId)) { return; }
                 Log.i(TAG, "BLE data channel ready, starting handshake");
-                publish(state.buildUpon().phase(ConnectionPhase.CONNECTING_DATA_CHANNEL)
+                publish(currentState().buildUpon().phase(ConnectionPhase.CONNECTING_DATA_CHANNEL)
                         .message("BLE 数据通道已建立").build());
                 sdkExecutor.execute(() -> performHandshake(attemptId));
             }
@@ -127,36 +125,44 @@ public final class ReaderSessionManager {
             @Override
             public void onDisconnected(long attemptId, String message, int errorCode,
                     DisconnectReason reason) {
-                if (isCurrentConnection(attemptId) && state.getTransport() == TransportType.BLE) {
+                if (isCurrentConnection(attemptId) && currentState().getTransport() == TransportType.BLE) {
                     handleConnectionLost(message, errorCode, reason);
                 }
             }
         });
         wifiMonitor = new WifiNetworkMonitor(application,
                 () -> {
-                    if (state.getTransport() == TransportType.WIFI && state.isConnected()) {
+                    if (currentState().getTransport() == TransportType.WIFI && currentState().isConnected()) {
                         handleConnectionLost("Wi-Fi network lost", -20, DisconnectReason.WIFI_LOST);
                     }
                 });
         gateway.setInventoryListener(tag -> {
-            if (!state.isConnected() || !state.isInventoryRunning()) { return; }
+            if (!currentState().isConnected() || !currentState().isInventoryRunning()) { return; }
             inventoryController.onTag(tag);
         });
         gateway.setInventoryStopListener(this::handleInventoryStopped);
         wifiMonitor.start();
     }
 
-    public ReaderState getState() { return state; }
+    public ReaderState getState() { return currentState(); }
     public ReaderConfiguration getConfiguration() { return configurationManager.getConfiguration(); }
     public ReaderTag getCurrentTag() { return tagOperations.getCurrentTag(); }
     public int getInventoryMode() { return configurationManager.getInventoryMode(); }
-    public boolean isPendingDisconnectAlert() { return pendingDisconnectAlert; }
-    public DisconnectReason getLastUnexpectedReason() { return lastUnexpectedReason; }
-    public void acknowledgeDisconnect() { pendingDisconnectAlert = false; }
+    public boolean isPendingDisconnectAlert() {
+        return connectionManager.isPendingDisconnectAlert();
+    }
+    public DisconnectReason getLastUnexpectedReason() {
+        return connectionManager.getLastUnexpectedReason();
+    }
+    public void acknowledgeDisconnect() { connectionManager.acknowledgeDisconnect(); }
+
+    private ReaderState currentState() {
+        return connectionManager.getState();
+    }
 
     public void addObserver(@NonNull ReaderObserver observer) {
         statePublisher.addObserver(observer, () -> {
-            observer.onReaderStateChanged(state);
+            observer.onReaderStateChanged(currentState());
             ReaderConfiguration configuration = configurationManager.getConfiguration();
             if (configuration != null) { observer.onReaderConfigurationChanged(configuration); }
             ReaderTag currentTag = tagOperations.getCurrentTag();
@@ -194,8 +200,8 @@ public final class ReaderSessionManager {
 
     public void connectWifi(@NonNull String address) {
         String normalized = address.trim();
-        ReaderState previousState = state;
-        long generation = connectionGeneration.incrementAndGet();
+        ReaderState previousState = currentState();
+        long generation = connectionManager.beginAttempt();
         if (!isValidIpv4(normalized)) {
             configurationManager.clear();
             clearCurrentTag();
@@ -244,8 +250,8 @@ public final class ReaderSessionManager {
 
     public void connectBle(@NonNull Device device) {
         Log.i(TAG, "connect BLE name=" + device.getName() + " address=" + device.getAddress());
-        ReaderState previousState = state;
-        long generation = connectionGeneration.incrementAndGet();
+        ReaderState previousState = currentState();
+        long generation = connectionManager.beginAttempt();
         configurationManager.clear();
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.BLE)
@@ -278,19 +284,19 @@ public final class ReaderSessionManager {
     }
 
     public void disconnect(@NonNull DisconnectReason reason) {
-        ConnectionPhase phase = state.getPhase();
+        ConnectionPhase phase = currentState().getPhase();
         if (phase == ConnectionPhase.DISCONNECTED || phase == ConnectionPhase.FAILED) {
-            connectionGeneration.incrementAndGet();
+            connectionManager.beginAttempt();
             configurationManager.clear();
             clearCurrentTag();
-            if (state.getTransport() != TransportType.NONE || state.getDisconnectReason() != DisconnectReason.NONE) {
+            if (currentState().getTransport() != TransportType.NONE || currentState().getDisconnectReason() != DisconnectReason.NONE) {
                 publish(new ReaderState.Builder().disconnectReason(reason).build());
             }
             stopConnectionService();
             return;
         }
-        long generation = connectionGeneration.incrementAndGet();
-        publish(state.buildUpon().phase(ConnectionPhase.DISCONNECTING)
+        long generation = connectionManager.beginAttempt();
+        publish(currentState().buildUpon().phase(ConnectionPhase.DISCONNECTING)
                 .inventoryRunning(false).message("Disconnecting").build());
         sdkExecutor.execute(() -> {
             disconnectTransportInternal();
@@ -310,7 +316,7 @@ public final class ReaderSessionManager {
 
     /** Releases native resources while leaving this session reusable in the live process. */
     public void releaseNative() {
-        connectionGeneration.incrementAndGet();
+        connectionManager.beginAttempt();
         ExecutorService executor = sdkExecutor;
         CompletableFuture<Void> future = new CompletableFuture<>();
         Runnable release = () -> {
@@ -337,14 +343,14 @@ public final class ReaderSessionManager {
 
     public CompletableFuture<Integer> setProtocol(@NonNull TagProtocol protocol) {
         return submitConnected(() -> {
-            if (!state.getModuleSubtype().supportedProtocols().contains(protocol)) {
+            if (!currentState().getModuleSubtype().supportedProtocols().contains(protocol)) {
                 throw new ReaderException("Protocol is not supported by this module", -30);
             }
             int status = stopInventoryInternal();
             if (status != 0) { return status; }
             if (inventoryController.getMask() != null) {
-                status = monitorSdkStatus(gateway.clearInventoryMask(state.getProtocol(),
-                        state.getModuleSubtype(), inventoryMaskRestoreValue()));
+                status = monitorSdkStatus(gateway.clearInventoryMask(currentState().getProtocol(),
+                        currentState().getModuleSubtype(), inventoryMaskRestoreValue()));
                 Log.i(TAG, "clear inventory mask before protocol switch status=" + status);
                 if (status != 0) { return status; }
                 inventoryController.discardMask();
@@ -365,11 +371,11 @@ public final class ReaderSessionManager {
             if (status == 0) {
                 clearCurrentTag();
                 if (current != null) {
-                    configurationManager.updateProtocolArea(state.getModuleSubtype(),
+                    configurationManager.updateProtocolArea(currentState().getModuleSubtype(),
                             mappedArea.getValue(), mappedAddress, mappedLength);
                 }
                 inventoryController.resetInventory();
-                publish(state.buildUpon().protocol(protocol).inventoryRunning(false).build());
+                publish(currentState().buildUpon().protocol(protocol).inventoryRunning(false).build());
                 configurationManager.publishCurrent();
                 inventoryController.publishInventory();
             }
@@ -378,7 +384,7 @@ public final class ReaderSessionManager {
     }
 
     public void setInventoryMode(int mode) {
-        ModuleSubtype subtype = state.getModuleSubtype();
+        ModuleSubtype subtype = currentState().getModuleSubtype();
         int effectiveMode = configurationManager.setInventoryMode(subtype, mode);
         if (mode >= 0 && mode <= 2 && effectiveMode != mode) {
             Log.w(TAG, "inventory mode " + mode + " unsupported on " + subtype
@@ -393,25 +399,25 @@ public final class ReaderSessionManager {
         }
         return submitConnected(() -> {
             return monitorSdkStatus(configurationManager.setInventoryArea(
-                    state.getModuleSubtype(), area, address, wordLen));
+                    currentState().getModuleSubtype(), area, address, wordLen));
         });
     }
 
     public CompletableFuture<Integer> refreshConfiguration() {
         return submitConnected(() -> {
-            configurationManager.refresh(state.getModuleSubtype());
+            configurationManager.refresh(currentState().getModuleSubtype());
             return 0;
         }, false);
     }
 
     public CompletableFuture<Integer> setPower(int powerTenthsDbm) {
         return submitConnected(() -> configurationManager.setPower(
-                state.getModuleSubtype(), powerTenthsDbm), false);
+                currentState().getModuleSubtype(), powerTenthsDbm), false);
     }
 
     public CompletableFuture<Integer> setBlf(int profile) {
         return submitConnected(() -> monitorSdkStatus(configurationManager.setBlf(
-                state.getModuleSubtype(), profile)));
+                currentState().getModuleSubtype(), profile)));
     }
 
     /** Changes only Session; Target and the handshake Sel value are preserved. */
@@ -420,7 +426,7 @@ public final class ReaderSessionManager {
             return CompletableFuture.completedFuture(-31);
         }
         return submitConnected(() -> {
-            ModuleSubtype subtype = state.getModuleSubtype();
+            ModuleSubtype subtype = currentState().getModuleSubtype();
             ReaderConfiguration configuration = configurationManager.getConfiguration();
             int target = configuration.target;
             int selected = configCache.loadSelected(subtype);
@@ -429,7 +435,7 @@ public final class ReaderSessionManager {
             Log.i(TAG, "setSession S" + session + " target=" + target
                     + " selected=" + selected + " status=" + status);
             if (status == 0 && inventoryController.isMaskApplied()) {
-                gateway.applyInventoryMask(state.getProtocol(), subtype,
+                gateway.applyInventoryMask(currentState().getProtocol(), subtype,
                         inventoryController.getMask());
             }
             if (status == 0) {
@@ -442,7 +448,7 @@ public final class ReaderSessionManager {
     public CompletableFuture<Integer> setQ(boolean dynamic, int qValue, int minQValue,
             int maxQValue, int retryCount, int thresholdMultiplier) {
         return submitConnected(() -> {
-            return monitorSdkStatus(configurationManager.setQ(state.getModuleSubtype(), dynamic,
+            return monitorSdkStatus(configurationManager.setQ(currentState().getModuleSubtype(), dynamic,
                     qValue, minQValue, maxQValue, retryCount, thresholdMultiplier));
         });
     }
@@ -453,11 +459,11 @@ public final class ReaderSessionManager {
 
     /** Starts inventory on the SDK executor with the current mask flag. */
     private int startInventoryInternal() {
-        int status = inventoryController.start(state.getProtocol(), state.getModuleSubtype(),
+        int status = inventoryController.start(currentState().getProtocol(), currentState().getModuleSubtype(),
                 configurationManager.getConfiguration(), configurationManager.getInventoryMode());
         status = monitorSdkStatus(status);
         if (status == 0) {
-            publish(state.buildUpon().inventoryRunning(true).build());
+            publish(currentState().buildUpon().inventoryRunning(true).build());
         }
         return status;
     }
@@ -475,13 +481,13 @@ public final class ReaderSessionManager {
     /** Applies a manual inventory mask without changing power, BLF, or Q settings. */
     public CompletableFuture<Integer> applyInventoryMask(@NonNull InventoryMaskConfig config) {
         return submitConnected(() -> {
-            TagProtocol protocol = state.getProtocol();
-            boolean wasRunning = state.isInventoryRunning();
+            TagProtocol protocol = currentState().getProtocol();
+            boolean wasRunning = currentState().isInventoryRunning();
             if (wasRunning) {
                 int stopStatus = stopInventoryInternal();
                 if (stopStatus != 0) { return stopStatus; }
             }
-            ModuleSubtype subtype = state.getModuleSubtype();
+            ModuleSubtype subtype = currentState().getModuleSubtype();
             boolean capturedNow = !inventoryController.isSelectionCaptured();
             if (capturedNow && !captureInventoryMaskSelection(subtype)) {
                 if (wasRunning) { startInventoryInternal(); }
@@ -511,23 +517,23 @@ public final class ReaderSessionManager {
         if (inventoryController.getMask() == null) {
             return CompletableFuture.completedFuture(0);
         }
-        if (!state.isConnected()) {
+        if (!currentState().isConnected()) {
             inventoryController.discardMask();
             return CompletableFuture.completedFuture(0);
         }
         return submitConnected(() -> {
             TagProtocol maskProtocol = inventoryController.getMaskProtocol();
-            TagProtocol protocol = maskProtocol == null ? state.getProtocol() : maskProtocol;
-            boolean wasRunning = state.isInventoryRunning();
+            TagProtocol protocol = maskProtocol == null ? currentState().getProtocol() : maskProtocol;
+            boolean wasRunning = currentState().isInventoryRunning();
             if (wasRunning) {
                 int stopStatus = stopInventoryInternal();
                 if (stopStatus != 0) { return stopStatus; }
             }
             int status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
-                    state.getModuleSubtype(), inventoryMaskRestoreValue()));
+                    currentState().getModuleSubtype(), inventoryMaskRestoreValue()));
             Log.i(TAG, "clearInventoryMask status=" + status);
             if (status == 0) {
-                configCache.saveSelected(state.getModuleSubtype(), inventoryMaskRestoreValue());
+                configCache.saveSelected(currentState().getModuleSubtype(), inventoryMaskRestoreValue());
                 inventoryController.discardMask();
             }
             if (wasRunning) {
@@ -552,7 +558,7 @@ public final class ReaderSessionManager {
     }
 
     private int inventoryMaskRestoreValue() {
-        return inventoryController.restoreValue(state.getModuleSubtype());
+        return inventoryController.restoreValue(currentState().getModuleSubtype());
     }
 
     private int readSelectedForTemporaryMask(ModuleSubtype subtype) throws ReaderException {
@@ -585,13 +591,13 @@ public final class ReaderSessionManager {
     }
 
     public CompletableFuture<byte[]> readCurrentTag(int length, int address, int bank, byte[] password) {
-        TagProtocol protocol = state.getProtocol();
+        TagProtocol protocol = currentState().getProtocol();
         return withTargetMask(() -> tagOperations.read(protocol, length, address, bank, password));
     }
 
     public CompletableFuture<Integer> writeCurrentTag(int length, int address, int bank,
             byte[] password, byte[] data) {
-        TagProtocol protocol = state.getProtocol();
+        TagProtocol protocol = currentState().getProtocol();
         return withTargetMask(() -> monitorSdkStatus(
                 tagOperations.write(protocol, length, address, bank, password, data)));
     }
@@ -607,7 +613,7 @@ public final class ReaderSessionManager {
     }
 
     private <T> CompletableFuture<T> with6cTargetMask(Callable<T> operation) {
-        if (state.getProtocol() != TagProtocol.ISO_18000_6C) {
+        if (currentState().getProtocol() != TagProtocol.ISO_18000_6C) {
             CompletableFuture<T> future = new CompletableFuture<>();
             future.completeExceptionally(new ReaderException("Operation is only supported for ISO 18000-6C", -41));
             return future;
@@ -622,11 +628,11 @@ public final class ReaderSessionManager {
             }
             int status = stopInventoryInternal();
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
-            TagProtocol protocol = state.getProtocol();
+            TagProtocol protocol = currentState().getProtocol();
             InventoryMaskConfig maskToRestore = inventoryController.getMask();
             if (maskToRestore != null) {
                 status = monitorSdkStatus(gateway.clearInventoryMask(protocol,
-                        state.getModuleSubtype(), inventoryMaskRestoreValue()));
+                        currentState().getModuleSubtype(), inventoryMaskRestoreValue()));
                 if (status != 0) { throw new ReaderException("Unable to clear inventory mask", status); }
                 inventoryController.setMaskApplied(false);
             }
@@ -634,13 +640,13 @@ public final class ReaderSessionManager {
             int selectedBeforeTargetMask = 0;
             if (activeMask != null) {
                 selectedBeforeTargetMask = maskToRestore == null
-                        ? readSelectedForTemporaryMask(state.getModuleSubtype())
+                        ? readSelectedForTemporaryMask(currentState().getModuleSubtype())
                         : inventoryMaskRestoreValue();
             }
             try {
                 if (activeMask != null) {
                     status = monitorSdkStatus(gateway.applyInventoryMask(protocol,
-                            state.getModuleSubtype(), activeMask));
+                            currentState().getModuleSubtype(), activeMask));
                     if (status != 0) {
                         throw new ReaderException("Unable to set single-tag mask", status);
                     }
@@ -649,14 +655,14 @@ public final class ReaderSessionManager {
             } finally {
                 if (maskToRestore != null) {
                     int restoreStatus = monitorSdkStatus(gateway.applyInventoryMask(protocol,
-                            state.getModuleSubtype(), maskToRestore));
+                            currentState().getModuleSubtype(), maskToRestore));
                     inventoryController.setMaskApplied(restoreStatus == 0);
                     if (restoreStatus != 0) {
                         throw new ReaderException("Unable to restore inventory mask", restoreStatus);
                     }
                 } else if (activeMask != null) {
                     int clearStatus = monitorSdkStatus(gateway.clearTargetMask(protocol,
-                            state.getModuleSubtype(), selectedBeforeTargetMask));
+                            currentState().getModuleSubtype(), selectedBeforeTargetMask));
                     if (clearStatus != 0) {
                         throw new ReaderException("Unable to clear single-tag mask", clearStatus);
                     }
@@ -668,12 +674,12 @@ public final class ReaderSessionManager {
     private void performHandshake(long generation) {
         if (!isCurrentConnection(generation)) { return; }
         Log.i(TAG, "RM70XX handshake started generation=" + generation
-                + " transport=" + state.getTransport() + " address=" + state.getAddress());
-        publish(state.buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
+                + " transport=" + currentState().getTransport() + " address=" + currentState().getAddress());
+        publish(currentState().buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
                 .message("Verifying RM70XX module").build());
         try {
             ReaderHandshake.Result result = ReaderHandshake.perform(gateway, configCache, resourceId ->
-                    publish(state.buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
+                    publish(currentState().buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
                             .message(application.getString(resourceId)).build()));
             if (!isCurrentConnection(generation)) { return; }
             ReaderModuleInfo info = result.moduleInfo;
@@ -687,21 +693,20 @@ public final class ReaderSessionManager {
                     + " rawSubtype=" + info.rawSubtype + " boardSerial=" + info.boardSerial
                     + " boardVersion=" + info.boardVersion + " moduleSerial=" + info.moduleSerial
                     + " moduleVersion=" + info.moduleVersion);
-            publish(state.buildUpon().phase(ConnectionPhase.CONNECTED)
+            publish(currentState().buildUpon().phase(ConnectionPhase.CONNECTED)
                     .moduleSubtype(info.subtype, info.rawSubtype)
                     .protocol(TagProtocol.ISO_18000_6C)
                     .versions(info.boardSerial, info.boardVersion, info.moduleSerial, info.moduleVersion)
                     .message("").errorCode(0).inventoryRunning(false).build());
-            pendingDisconnectAlert = false;
-            lastUnexpectedReason = DisconnectReason.NONE;
+            connectionManager.clearUnexpectedDisconnect();
             configurationManager.publishCurrent();
-            if (state.getTransport() == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
+            if (currentState().getTransport() == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
         } catch (ReaderException error) {
             Log.e(TAG, "RM70XX handshake failed code=" + error.getErrorCode()
                     + " message=" + error.getMessage(), error);
             disconnectTransportInternal();
             if (isCurrentConnection(generation)) {
-                publishFailure(state.getTransport(), error.getMessage(), error.getErrorCode(),
+                publishFailure(currentState().getTransport(), error.getMessage(), error.getErrorCode(),
                         DisconnectReason.SDK_ERROR);
             }
         }
@@ -751,7 +756,7 @@ public final class ReaderSessionManager {
         synchronized (serviceLock) {
             connectionService = service;
         }
-        service.updateReaderState(state);
+        service.updateReaderState(currentState());
         Log.i(TAG, "reader connection foreground service created");
     }
 
@@ -763,24 +768,24 @@ public final class ReaderSessionManager {
     }
 
     private int stopInventoryInternal() {
-        if (!state.isInventoryRunning()) { return 0; }
-        int status = monitorSdkStatus(inventoryController.stop(state.isInventoryRunning()));
-        if (status == 0) { publish(state.buildUpon().inventoryRunning(false).build()); }
+        if (!currentState().isInventoryRunning()) { return 0; }
+        int status = monitorSdkStatus(inventoryController.stop(currentState().isInventoryRunning()));
+        if (status == 0) { publish(currentState().buildUpon().inventoryRunning(false).build()); }
         return status;
     }
 
     /** 模块自行结束盘点时同步会话状态，避免单次模式按钮停在“停止”。 */
     private void handleInventoryStopped(int status) {
         mainHandler.post(() -> {
-            if (state.isInventoryRunning()) {
+            if (currentState().isInventoryRunning()) {
                 Log.i(TAG, "inventory stopped by reader status=" + status);
-                publish(state.buildUpon().inventoryRunning(false).build());
+                publish(currentState().buildUpon().inventoryRunning(false).build());
             }
         });
     }
 
     private void disconnectTransportInternal() {
-        disconnectTransportInternal(state.getTransport(), state.isInventoryRunning());
+        disconnectTransportInternal(currentState().getTransport(), currentState().isInventoryRunning());
     }
 
     private void disconnectTransportInternal(TransportType transport, boolean inventoryRunning) {
@@ -809,7 +814,7 @@ public final class ReaderSessionManager {
 
     private void handleConnectionLost(String message, int errorCode, DisconnectReason reason) {
         if (shuttingDown) { return; }
-        ReaderState lostState = state;
+        ReaderState lostState = currentState();
         TransportType transport = lostState.getTransport();
         if (reason.isUnexpected() && lostState.getPhase() != ConnectionPhase.DISCONNECTED
                 && lostState.getPhase() != ConnectionPhase.FAILED) {
@@ -817,7 +822,7 @@ public final class ReaderSessionManager {
             sdkExecutor.execute(() -> disconnectTransportInternal(transport, false));
             return;
         }
-        long generation = connectionGeneration.incrementAndGet();
+        long generation = connectionManager.beginAttempt();
         sdkExecutor.execute(() -> {
             disconnectTransportInternal(transport, lostState.isInventoryRunning());
             configurationManager.clear();
@@ -836,7 +841,7 @@ public final class ReaderSessionManager {
     private void handleUnexpectedDisconnect(String message, int errorCode,
             @NonNull DisconnectReason reason) {
         if (!reason.isUnexpected()) { return; }
-        connectionGeneration.incrementAndGet();
+        connectionManager.beginAttempt();
         mainHandler.removeCallbacks(wifiHeartbeat);
         ReaderException failure = new ReaderException(message, errorCode);
         for (CompletableFuture<?> pending : pendingOperations) {
@@ -845,15 +850,13 @@ public final class ReaderSessionManager {
         inventoryController.discardMask();
         configurationManager.clear();
         clearCurrentTag();
-        pendingDisconnectAlert = true;
-        lastUnexpectedReason = reason;
-        publish(state.buildUpon().phase(ConnectionPhase.DISCONNECTED).inventoryRunning(false)
-                .message(message).errorCode(errorCode).disconnectReason(reason).build());
-        statePublisher.notifyUnexpectedDisconnect(reason);
+        connectionManager.publishUnexpectedDisconnect(currentState().buildUpon()
+                .phase(ConnectionPhase.DISCONNECTED).inventoryRunning(false)
+                .message(message).errorCode(errorCode).disconnectReason(reason).build(), reason);
     }
 
     private boolean isCurrentConnection(long generation) {
-        return connectionGeneration.get() == generation;
+        return connectionManager.isCurrent(generation);
     }
 
     private void clearCurrentTag() {
@@ -872,7 +875,7 @@ public final class ReaderSessionManager {
         try {
             sdkExecutor.execute(() -> {
                 try {
-                    if (!state.isConnected()) {
+                    if (!currentState().isConnected()) {
                         throw new ReaderException("Reader is not connected", -50);
                     }
                     future.complete(operation.call());
@@ -895,15 +898,15 @@ public final class ReaderSessionManager {
     private void publishFailure(TransportType transport, String message, int errorCode,
             DisconnectReason reason) {
         Log.e(TAG, "connection failed transport=" + transport + " code=" + errorCode
-                + " address=" + state.getAddress() + " message=" + message);
-        publish(state.buildUpon().transport(transport).phase(ConnectionPhase.FAILED)
+                + " address=" + currentState().getAddress() + " message=" + message);
+        publish(currentState().buildUpon().transport(transport).phase(ConnectionPhase.FAILED)
                 .message(message).errorCode(errorCode).disconnectReason(reason)
                 .inventoryRunning(false).build());
         stopConnectionService();
     }
 
     private int monitorSdkStatus(int status) {
-        if (status != 0 && state.isConnected()) {
+        if (status != 0 && currentState().isConnected()) {
             handleConnectionLost("Reader SDK returned an error", status, DisconnectReason.SDK_ERROR);
         }
         return status;
@@ -916,10 +919,10 @@ public final class ReaderSessionManager {
     }
 
     private void runWifiHeartbeat() {
-        if (!state.isConnected() || state.getTransport() != TransportType.WIFI) { return; }
-        long generation = connectionGeneration.get();
+        if (!currentState().isConnected() || currentState().getTransport() != TransportType.WIFI) { return; }
+        long generation = connectionManager.getGeneration();
         sdkExecutor.execute(() -> {
-            if (!isCurrentConnection(generation) || state.isInventoryRunning()) {
+            if (!isCurrentConnection(generation) || currentState().isInventoryRunning()) {
                 scheduleWifiHeartbeat(generation);
                 return;
             }
@@ -934,10 +937,12 @@ public final class ReaderSessionManager {
     }
 
     private void publish(ReaderState updated) {
-        state = updated;
+        connectionManager.publish(updated);
+    }
+
+    private void updateConnectionService(ReaderState updated) {
         ReaderConnectionService service = connectionService;
         if (service != null) { service.updateReaderState(updated); }
-        statePublisher.publishState(updated);
     }
 
 }
