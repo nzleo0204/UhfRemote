@@ -190,6 +190,13 @@
     <string name="common_close">关闭</string>
     <string name="common_copy">复制</string>
     <string name="common_copied">已复制</string>
+
+    <!-- 单标签页 - 掩码快捷操作 -->
+    <string name="single_fill_mask">掩码</string>
+    <string name="single_mask_filled">掩码已启用</string>
+    <string name="single_mask_active_warning">掩码已启用，请先取消掩码应用</string>
+    <string name="single_mask_empty_warning">掩码数据不能为空</string>
+
     <string name="inventory_empty">尚未发现标签</string>
     <string name="inventory_connect_first">请先连接读写器</string>
     <string name="inventory_start_failed">开始盘点失败</string>

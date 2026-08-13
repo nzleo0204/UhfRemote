@@ -68,6 +68,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private View readDataGroup;
     private TextView readDataView;
     private TextView copyDataButton;
+    private TextView fillEpcMaskButton;      // 新增：EPC 掩码按钮
+    private TextView fillDataMaskButton;     // 新增：数据掩码按钮
+    private View epcGroup;                   // 新增：EPC 组
     private TextView idLabelView;
     private TextView epcView;
     private TextView dataLabelView;
@@ -93,6 +96,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private ReaderConfiguration configuration;
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
+
+    // 新增：当前读取的 Bank 位置（用于填充掩码）
+    private int lastReadBankPosition = -1;
 
     public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
@@ -352,32 +358,64 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     }
 
     private void displayReadResult(byte[] data, int bankPosition, TagProtocol protocol) {
+        // 保存当前读取的 Bank 位置（用于填充掩码）
+        lastReadBankPosition = bankPosition;
+
         // 显示十六进制数据
         String hexData = HexCodec.encode(data, data.length);
         readDataView.setText(hexData);
         readDataGroup.setVisibility(View.VISIBLE);
 
-        // 更新 EPC 显示（如果是读取 EPC 区域）
-        if (protocol == TagProtocol.ISO_18000_6C && bankPosition == 1) {
+        // 根据读取区域动态显示字段
+        boolean isEpcBank = (protocol == TagProtocol.ISO_18000_6C && bankPosition == 1);
+        boolean isTidBank = (protocol == TagProtocol.ISO_18000_6C && bankPosition == 2);
+
+        // EPC：读取 EPC 区域时显示；其他区域读取时也显示（SDK 返回）
+        if (isEpcBank) {
             epcView.setText(hexData);
+            idLabelView.setVisibility(View.VISIBLE);
+            epcView.setVisibility(View.VISIBLE);
+        } else {
+            // 其他区域读取会返回标签的 EPC（需要从 currentTag 获取）
+            if (currentTag != null && !currentTag.id.isEmpty()) {
+                epcView.setText(currentTag.id);
+                idLabelView.setVisibility(View.VISIBLE);
+                epcView.setVisibility(View.VISIBLE);
+            } else {
+                idLabelView.setVisibility(View.GONE);
+                epcView.setVisibility(View.GONE);
+            }
         }
 
-        // 更新 TID 显示（如果是读取 TID 区域）
-        if (protocol == TagProtocol.ISO_18000_6C && bankPosition == 2) {
+        // TID：仅读取 TID 区域时显示
+        if (isTidBank) {
             tidView.setText(hexData);
+            dataLabelView.setVisibility(View.VISIBLE);
+            tidView.setVisibility(View.VISIBLE);
 
-            // 显示芯片型号
+            // 芯片型号：仅 TID 区域显示
             String chipModel = ChipModelFormatter.formatFromTid(hexData);
             if (!chipModel.isEmpty()) {
                 chipView.setText(chipModel);
                 chipView.setVisibility(View.VISIBLE);
+            } else {
+                chipView.setVisibility(View.GONE);
             }
         } else {
+            dataLabelView.setVisibility(View.GONE);
+            tidView.setVisibility(View.GONE);
             chipView.setVisibility(View.GONE);
         }
 
-        // RSSI 暂不显示（读取数据时不返回 RSSI）
-        rssiView.setVisibility(View.GONE);
+        // RSSI：仅 R2000 模块显示（需要从 currentTag 获取）
+        if (configuration != null && configuration.moduleInfo != null
+                && configuration.moduleInfo.subtype.isR2000Style()
+                && currentTag != null) {
+            rssiView.setText(currentTag.rssi + " dBm");
+            rssiView.setVisibility(View.VISIBLE);
+        } else {
+            rssiView.setVisibility(View.GONE);
+        }
     }
 
     private void copyReadData() {
