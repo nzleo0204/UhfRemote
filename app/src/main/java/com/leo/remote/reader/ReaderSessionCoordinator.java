@@ -627,8 +627,7 @@ final class ReaderSessionCoordinator {
             } finally {
                 // 清除单标签掩码（如果应用了）
                 if (singleTagMask != null) {
-                    gateway.clearInventoryMask(currentProtocol, subtype,
-                            singleTagMask.getSelectedFlag());
+                    gateway.clearInventoryMask(currentProtocol, subtype, inventoryMaskRestoreValue());
                 }
 
                 // 恢复盘点掩码（如果之前有）
