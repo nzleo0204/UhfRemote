@@ -142,7 +142,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/rfid_divider"
+            android:background="@color/rfid_line"
             android:layout_marginVertical="@dimen/dp_8" />
 
         <TextView
@@ -192,7 +192,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/rfid_divider"
+            android:background="@color/rfid_line"
             android:layout_marginVertical="@dimen/dp_8" />
 
         <TextView
