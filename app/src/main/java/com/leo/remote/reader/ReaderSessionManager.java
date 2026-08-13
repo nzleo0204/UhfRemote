@@ -123,13 +123,13 @@ public final class ReaderSessionManager {
      * @param password 访问密码
      * @return 读取的数据
      */
-    public CompletableFuture<byte[]> readCurrentTag(TagProtocol protocol, int length,
+    public CompletableFuture<TagReadResult> readCurrentTag(TagProtocol protocol, int length,
             int address, int bank, byte[] password) {
         return coordinator.readCurrentTag(protocol, length, address, bank, password);
     }
 
     public CompletableFuture<ReaderTag> readSingleTag() { return coordinator.readSingleTag(); }
-    public CompletableFuture<byte[]> readCurrentTag(int length, int address, int bank,
+    public CompletableFuture<TagReadResult> readCurrentTag(int length, int address, int bank,
             byte[] password) {
         return coordinator.readCurrentTag(length, address, bank, password);
     }

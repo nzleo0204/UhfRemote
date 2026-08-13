@@ -87,7 +87,7 @@ public class ReaderHandshakeTest {
                 ReaderTag tag) { return 0; }
         @Override public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype,
                 int selected) { return 0; }
-        @Override public byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password, int timeoutMs) { return new byte[0]; }
+        @Override public TagReadResult readTag(TagProtocol protocol, int length, int address, int bank, byte[] password, int timeoutMs) { return new TagReadResult(null, null, 0); }
         @Override public int writeTag(TagProtocol protocol, int length, int address, int bank, byte[] password, byte[] data, int timeoutMs) { return 0; }
         @Override public int lockTag(byte[] password, int bank, int policy, int timeoutMs) { return 0; }
         @Override public int killTag(byte[] accessPassword, byte[] killPassword, int timeoutMs) { return 0; }

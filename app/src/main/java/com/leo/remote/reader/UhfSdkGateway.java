@@ -41,7 +41,7 @@ public interface UhfSdkGateway {
     int clearInventoryMask(TagProtocol protocol, ModuleSubtype subtype, int selected);
     int setTargetMask(TagProtocol protocol, ModuleSubtype subtype, ReaderTag tag);
     int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype, int selected);
-    byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password,
+    TagReadResult readTag(TagProtocol protocol, int length, int address, int bank, byte[] password,
             int timeoutMs) throws ReaderException;
     int writeTag(TagProtocol protocol, int length, int address, int bank, byte[] password,
             byte[] data, int timeoutMs);

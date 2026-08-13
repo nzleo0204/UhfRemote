@@ -393,14 +393,18 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
     }
 
     @Override
-    public byte[] readTag(TagProtocol protocol, int length, int address, int bank, byte[] password,
-            int timeoutMs) throws ReaderException {
+    public TagReadResult readTag(TagProtocol protocol, int length, int address, int bank,
+            byte[] password, int timeoutMs) throws ReaderException {
         RW_Params result = new RW_Params();
         check(linkage.Radio_readTagSync(length, address, bank, password, timeoutMs, result), "Radio_readTagSync");
         if (result.status != STATUS_OK) {
             throw new ReaderException("Radio_readTagSync result", result.status);
         }
-        return result.ReadData == null ? new byte[0] : Arrays.copyOf(result.ReadData, Math.min(result.DataLen, result.ReadData.length));
+        byte[] data = result.ReadData == null ? new byte[0]
+                : Arrays.copyOf(result.ReadData, Math.min(result.DataLen, result.ReadData.length));
+        byte[] epc = result.EPCData == null ? new byte[0]
+                : Arrays.copyOf(result.EPCData, Math.min(result.EPCLen, result.EPCData.length));
+        return new TagReadResult(data, epc, result.RSS);
     }
 
     @Override

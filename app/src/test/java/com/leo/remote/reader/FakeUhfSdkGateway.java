@@ -25,7 +25,7 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
     int lastMaskFlag;
     boolean magicQueryUsed;
     ReaderTag inventoryOnceResult;
-    byte[] readResult = new byte[0];
+    TagReadResult readResult = new TagReadResult(new byte[0], new byte[0], 0);
     int[] queryValues = new int[] {0, 0, 0};
 
     @Override public int initialize() { return 0; }
@@ -107,7 +107,7 @@ final class FakeUhfSdkGateway implements UhfSdkGateway {
             ReaderTag tag) { return 0; }
     @Override public int clearTargetMask(TagProtocol protocol, ModuleSubtype subtype,
             int selected) { return 0; }
-    @Override public byte[] readTag(TagProtocol protocol, int length, int address, int bank,
+    @Override public TagReadResult readTag(TagProtocol protocol, int length, int address, int bank,
             byte[] password, int timeoutMs) { return readResult; }
     @Override public int writeTag(TagProtocol protocol, int length, int address, int bank,
             byte[] password, byte[] data, int timeoutMs) { return writeStatus; }

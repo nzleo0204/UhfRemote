@@ -588,21 +588,24 @@ final class ReaderSessionCoordinator {
      *
      * <p>如果配置了单标签掩码，将应用掩码后读取；否则直接读取。
      */
-    public CompletableFuture<byte[]> readCurrentTag(TagProtocol protocol, int length,
+    public CompletableFuture<TagReadResult> readCurrentTag(TagProtocol protocol, int length,
             int address, int bank, byte[] password) {
         return submitConnected(() -> {
-            // 停止盘点
             int status = stopInventoryInternal();
             if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
 
             TagProtocol currentProtocol = currentState().getProtocol();
+            if (protocol != currentProtocol) {
+                throw new ReaderException("Reader protocol changed before read", -41);
+            }
             ModuleSubtype subtype = currentState().getModuleSubtype();
             InventoryMaskConfig singleTagMask = tagOperations.getSingleTagMask();
             InventoryMaskConfig inventoryMaskToRestore = inventoryController.getMask();
             boolean needRestoreInventoryMask = false;
+            int selectedBeforeSingleMask = 0;
+            boolean selectedBeforeSingleMaskCaptured = false;
 
             try {
-                // 如果有盘点掩码，先清除
                 if (inventoryMaskToRestore != null) {
                     status = monitorSdkStatus(gateway.clearInventoryMask(currentProtocol,
                             subtype, inventoryMaskRestoreValue()));
@@ -613,8 +616,11 @@ final class ReaderSessionCoordinator {
                     needRestoreInventoryMask = true;
                 }
 
-                // 如果配置了单标签掩码，应用它
                 if (singleTagMask != null) {
+                    selectedBeforeSingleMask = inventoryMaskToRestore == null
+                            ? readSelectedForTemporaryMask(subtype)
+                            : inventoryMaskRestoreValue();
+                    selectedBeforeSingleMaskCaptured = true;
                     status = monitorSdkStatus(gateway.applyInventoryMask(currentProtocol,
                             subtype, singleTagMask));
                     if (status != 0) {
@@ -622,21 +628,24 @@ final class ReaderSessionCoordinator {
                     }
                 }
 
-                // 执行读取
                 return tagOperations.read(protocol, length, address, bank, password);
             } finally {
-                // 清除单标签掩码（如果应用了）
-                if (singleTagMask != null) {
-                    gateway.clearInventoryMask(currentProtocol, subtype, inventoryMaskRestoreValue());
-                }
-
-                // 恢复盘点掩码（如果之前有）
                 if (needRestoreInventoryMask && inventoryMaskToRestore != null) {
-                    gateway.applyInventoryMask(currentProtocol, subtype, inventoryMaskToRestore);
-                    inventoryController.setMaskApplied(true);
+                    int restoreStatus = gateway.applyInventoryMask(currentProtocol, subtype,
+                            inventoryMaskToRestore);
+                    inventoryController.setMaskApplied(restoreStatus == 0);
+                    if (restoreStatus != 0) {
+                        throw new ReaderException("Unable to restore inventory mask", restoreStatus);
+                    }
+                } else if (singleTagMask != null && selectedBeforeSingleMaskCaptured) {
+                    int clearStatus = gateway.clearTargetMask(currentProtocol, subtype,
+                            selectedBeforeSingleMask);
+                    if (clearStatus != 0) {
+                        throw new ReaderException("Unable to clear single-tag mask", clearStatus);
+                    }
                 }
             }
-        });
+        }, false);
     }
 
     public CompletableFuture<ReaderTag> readSingleTag() {
@@ -647,7 +656,8 @@ final class ReaderSessionCoordinator {
         });
     }
 
-    public CompletableFuture<byte[]> readCurrentTag(int length, int address, int bank, byte[] password) {
+    public CompletableFuture<TagReadResult> readCurrentTag(int length, int address, int bank,
+            byte[] password) {
         TagProtocol protocol = currentState().getProtocol();
         return withTargetMask(() -> tagOperations.read(protocol, length, address, bank, password));
     }

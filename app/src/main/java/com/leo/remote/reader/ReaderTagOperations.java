@@ -50,9 +50,20 @@ public final class ReaderTagOperations {
         return tag;
     }
 
-    byte[] read(TagProtocol protocol, int length, int address, int bank, byte[] password)
+    TagReadResult read(TagProtocol protocol, int length, int address, int bank, byte[] password)
             throws ReaderException {
-        return gateway.readTag(protocol, length, address, bank, password, 2000);
+        TagReadResult result = gateway.readTag(protocol, length, address, bank, password, 2000);
+        byte[] epc = result.getEpc();
+        if (epc.length == 0 && protocol == TagProtocol.ISO_18000_6C && bank == 1) {
+            epc = result.getData();
+        }
+        if (epc.length > 0) {
+            ReaderTag tag = new ReaderTag(HexCodec.encode(epc, epc.length), "", result.getRssi(),
+                    0, 1);
+            currentTag = tag;
+            publisher.publishCurrentTag(tag);
+        }
+        return result;
     }
 
     int write(TagProtocol protocol, int length, int address, int bank, byte[] password,
