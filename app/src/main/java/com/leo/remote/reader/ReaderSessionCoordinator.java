@@ -590,7 +590,54 @@ final class ReaderSessionCoordinator {
      */
     public CompletableFuture<byte[]> readCurrentTag(TagProtocol protocol, int length,
             int address, int bank, byte[] password) {
-        return withTargetMask(() -> tagOperations.read(protocol, length, address, bank, password));
+        return submitConnected(() -> {
+            // 停止盘点
+            int status = stopInventoryInternal();
+            if (status != 0) { throw new ReaderException("Unable to stop inventory", status); }
+
+            TagProtocol currentProtocol = currentState().getProtocol();
+            ModuleSubtype subtype = currentState().getModuleSubtype();
+            InventoryMaskConfig singleTagMask = tagOperations.getSingleTagMask();
+            InventoryMaskConfig inventoryMaskToRestore = inventoryController.getMask();
+            boolean needRestoreInventoryMask = false;
+
+            try {
+                // 如果有盘点掩码，先清除
+                if (inventoryMaskToRestore != null) {
+                    status = monitorSdkStatus(gateway.clearInventoryMask(currentProtocol,
+                            subtype, inventoryMaskRestoreValue()));
+                    if (status != 0) {
+                        throw new ReaderException("Unable to clear inventory mask", status);
+                    }
+                    inventoryController.setMaskApplied(false);
+                    needRestoreInventoryMask = true;
+                }
+
+                // 如果配置了单标签掩码，应用它
+                if (singleTagMask != null) {
+                    status = monitorSdkStatus(gateway.applyInventoryMask(currentProtocol,
+                            subtype, singleTagMask));
+                    if (status != 0) {
+                        throw new ReaderException("Unable to apply single tag mask", status);
+                    }
+                }
+
+                // 执行读取
+                return tagOperations.read(protocol, length, address, bank, password);
+            } finally {
+                // 清除单标签掩码（如果应用了）
+                if (singleTagMask != null) {
+                    gateway.clearInventoryMask(currentProtocol, subtype,
+                            singleTagMask.getSelectedFlag());
+                }
+
+                // 恢复盘点掩码（如果之前有）
+                if (needRestoreInventoryMask && inventoryMaskToRestore != null) {
+                    gateway.applyInventoryMask(currentProtocol, subtype, inventoryMaskToRestore);
+                    inventoryController.setMaskApplied(true);
+                }
+            }
+        });
     }
 
     public CompletableFuture<ReaderTag> readSingleTag() {
