@@ -221,7 +221,7 @@
         android:layout_marginTop="@dimen/dp_16"
         android:text="@string/single_read_tag"
         android:textSize="@dimen/sp_15"
-        app:icon="@drawable/rfid_read_ic"
+        app:icon="@drawable/rfid_scan_ic"
         app:iconPadding="@dimen/dp_8"
         app:iconSize="@dimen/dp_20" />
 </LinearLayout>
