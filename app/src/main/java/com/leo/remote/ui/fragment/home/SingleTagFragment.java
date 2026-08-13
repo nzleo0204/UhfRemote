@@ -88,7 +88,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private TextView maskLengthHintView;
     private TextView maskStatusView;
     private ImageView maskExpandView;
-    private ImageView maskLockIcon;
     private ReaderTag currentTag;
     private ReaderState readerState = ReaderState.disconnected();
     private ReaderConfiguration configuration;
@@ -139,7 +138,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
         maskStatusView = findViewById(R.id.tv_inventory_mask_status);
         maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
-        maskLockIcon = findViewById(R.id.iv_single_mask_lock);
 
         // 初始化读取参数
         initReadParams();
@@ -355,7 +353,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     private void displayReadResult(byte[] data, int bankPosition, TagProtocol protocol) {
         // 显示十六进制数据
-        String hexData = HexCodec.encode(data);
+        String hexData = HexCodec.encode(data, data.length);
         readDataView.setText(hexData);
         readDataGroup.setVisibility(View.VISIBLE);
 
@@ -725,16 +723,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                     requireContext(), R.color.rfid_text_secondary));
             maskStatusView.setText(R.string.inventory_mask_inactive);
         }
-        updateMaskLockIcon(masked);
-    }
-
-    private void updateMaskLockIcon(boolean masked) {
-        maskLockIcon.setImageResource(masked
-                ? R.drawable.rfid_lock_closed_ic : R.drawable.rfid_lock_open_ic);
-        maskLockIcon.setImageTintList(ContextCompat.getColorStateList(requireContext(),
-                masked ? R.color.rfid_warning : R.color.rfid_text_muted));
-        maskLockIcon.setContentDescription(getString(masked
-                ? R.string.inventory_mask_lock_closed : R.string.inventory_mask_lock_open));
     }
 
     private boolean updateMaskLengthHint() {
@@ -836,18 +824,12 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     private void bindTag(ReaderTag tag) {
         if (tag == null) {
-            targetHintView.setText(R.string.single_no_target_hint);
-            targetHintView.setTextColor(ContextCompat.getColor(
-                    requireContext(), R.color.rfid_text_muted));
             epcView.setText(R.string.single_preview_epc);
             tidView.setText(R.string.single_preview_tid);
             chipView.setText(R.string.single_preview_chip);
             rssiView.setText(R.string.single_preview_rssi);
             return;
         }
-        targetHintView.setText(getString(R.string.single_target_locked, tag.id));
-        targetHintView.setTextColor(ContextCompat.getColor(
-                requireContext(), R.color.rfid_primary_soft));
         epcView.setText(tag.id.isEmpty() ? "-" : tag.id);
         tidView.setText(tag.data.isEmpty() ? "-" : tag.data);
         chipView.setText(chipLabel(tag.data));
