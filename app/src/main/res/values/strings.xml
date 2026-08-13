@@ -291,6 +291,23 @@
     <string name="single_block_length_hint">块长度（0-255）</string>
     <string name="single_start_address">起始地址</string>
     <string name="single_block_or_retry">块长度 / 重试次数</string>
+
+    <!-- 单标签页 - 读取参数 -->
+    <string name="single_read_params_title">读取参数</string>
+    <string name="single_read_bank">读取区域</string>
+    <string name="single_read_length">读取长度</string>
+    <string name="single_read_length_word">读取长度（Word）</string>
+    <string name="single_read_length_byte">读取长度（Byte）</string>
+    <string name="single_access_password">访问密码</string>
+    <string name="single_auxiliary_params">协议参数</string>
+    <string name="single_gb_sub_bank">用户子区</string>
+
+    <!-- 单标签页 - 读取结果 -->
+    <string name="single_read_result_title">读取结果</string>
+    <string name="single_read_data">数据</string>
+    <string name="single_read_success">读取成功</string>
+    <string name="single_no_data_to_copy">暂无数据</string>
+
     <string name="single_update_epc_operation">EPC 修改</string>
     <string name="single_write_operation">数据写入</string>
     <string name="single_lock_operation">标签锁定</string>

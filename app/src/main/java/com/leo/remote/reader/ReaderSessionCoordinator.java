@@ -583,6 +583,16 @@ final class ReaderSessionCoordinator {
         return tagOperations.getSingleTagMask();
     }
 
+    /**
+     * 读取当前目标标签的数据。
+     *
+     * <p>如果配置了单标签掩码，将应用掩码后读取；否则直接读取。
+     */
+    public CompletableFuture<byte[]> readCurrentTag(TagProtocol protocol, int length,
+            int address, int bank, byte[] password) {
+        return withTargetMask(() -> tagOperations.read(protocol, length, address, bank, password));
+    }
+
     public CompletableFuture<ReaderTag> readSingleTag() {
         return submitConnected(() -> {
             int status = stopInventoryInternal();

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RfidCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/dp_16"
+    android:layout_marginTop="@dimen/dp_16"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/RfidGroupTitle"
+        android:text="@string/single_read_result_title" />
+
+    <!-- EPC -->
+    <include layout="@layout/rfid_single_info_epc" />
+
+    <!-- TID -->
+    <include layout="@layout/rfid_single_info_tid" />
+
+    <!-- 芯片型号（仅TID时显示） -->
+    <include layout="@layout/rfid_single_info_chip" />
+
+    <!-- RSSI（仅R2000模块显示） -->
+    <include layout="@layout/rfid_single_info_rssi" />
+
+    <!-- 读取数据 -->
+    <LinearLayout
+        android:id="@+id/group_single_read_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_8"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/single_read_data"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:fontFamily="sans-serif-medium"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <TextView
+                android:id="@+id/tv_single_copy_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/common_copy"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_primary"
+                android:padding="@dimen/dp_8"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_single_read_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dp_12"
+            android:background="@drawable/rfid_field_bg"
+            android:textSize="@dimen/sp_15"
+            android:textColor="@color/rfid_primary"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true" />
+    </LinearLayout>
+</LinearLayout>

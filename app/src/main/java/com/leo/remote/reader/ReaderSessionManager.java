@@ -110,6 +110,24 @@ public final class ReaderSessionManager {
     }
     @Nullable
     public InventoryMaskConfig getSingleTagMask() { return coordinator.getSingleTagMask(); }
+
+    /**
+     * 读取当前目标标签的数据。
+     *
+     * <p>通过单标签掩码定位目标标签，然后读取指定存储区域的数据。
+     *
+     * @param protocol 射频协议
+     * @param length 读取长度
+     * @param address 起始地址
+     * @param bank 存储区域
+     * @param password 访问密码
+     * @return 读取的数据
+     */
+    public CompletableFuture<byte[]> readCurrentTag(TagProtocol protocol, int length,
+            int address, int bank, byte[] password) {
+        return coordinator.readCurrentTag(protocol, length, address, bank, password);
+    }
+
     public CompletableFuture<ReaderTag> readSingleTag() { return coordinator.readSingleTag(); }
     public CompletableFuture<byte[]> readCurrentTag(int length, int address, int bank,
             byte[] password) {

@@ -40,6 +40,8 @@ public final class ReaderTagOperations {
         }
     }
 
+    // Deprecated: This method calls inventoryOnce() which is for inventory, not reading data.
+    // Use read() method instead for actual tag data reading.
     @Nullable
     ReaderTag readSingleTag() throws ReaderException {
         ReaderTag tag = gateway.inventoryOnce(1500);

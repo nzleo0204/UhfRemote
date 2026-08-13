@@ -1,6 +1,8 @@
 package com.leo.remote.ui.fragment.home;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,6 +27,7 @@ import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
+import com.leo.remote.reader.ChipModelFormatter;
 import com.leo.remote.reader.HexCodec;
 import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.InventoryMaskConfig;
@@ -46,14 +49,31 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     // ========== Fields ==========
     private ReaderSessionManager session;
-    private TextView readButton;
+
+    // 读取参数控件
+    private Spinner readBankSpinner;
+    private Spinner gbSubBankSpinner;
+    private EditText readAddressView;
+    private EditText readLengthView;
+    private EditText readPasswordView;
+    private EditText auxiliaryView;
+    private View auxiliaryGroup;
+    private View gbSubBankGroup;
+    private TextView auxiliaryLabel;
+    private TextView readLengthLabel;
+    private MaterialButton readButton;
+
+    // 读取结果控件
+    private View readDataGroup;
+    private TextView readDataView;
+    private TextView copyDataButton;
     private TextView idLabelView;
     private TextView epcView;
     private TextView dataLabelView;
     private TextView tidView;
     private TextView chipView;
     private TextView rssiView;
-    private TextView targetHintView;
+
     private View writeAction;
     private View updateEpcAction;
     private View lockAction;
@@ -81,14 +101,30 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     @Override
     protected void initView() {
-        readButton = findViewById(R.id.tv_single_read);
+        // 读取参数控件
+        readBankSpinner = findViewById(R.id.sp_single_read_bank);
+        gbSubBankSpinner = findViewById(R.id.sp_single_gb_sub_bank);
+        readAddressView = findViewById(R.id.et_single_read_address);
+        readLengthView = findViewById(R.id.et_single_read_length);
+        readPasswordView = findViewById(R.id.et_single_read_password);
+        auxiliaryView = findViewById(R.id.et_single_auxiliary);
+        auxiliaryGroup = findViewById(R.id.group_single_auxiliary);
+        gbSubBankGroup = findViewById(R.id.group_single_gb_sub_bank);
+        auxiliaryLabel = findViewById(R.id.tv_single_auxiliary_label);
+        readLengthLabel = findViewById(R.id.tv_single_read_length_label);
+        readButton = findViewById(R.id.btn_single_read);
+
+        // 读取结果控件
+        readDataGroup = findViewById(R.id.group_single_read_data);
+        readDataView = findViewById(R.id.tv_single_read_data);
+        copyDataButton = findViewById(R.id.tv_single_copy_data);
         idLabelView = findViewById(R.id.tv_single_id_label);
         epcView = findViewById(R.id.tv_single_epc);
         dataLabelView = findViewById(R.id.tv_single_data_label);
         tidView = findViewById(R.id.tv_single_tid);
         chipView = findViewById(R.id.tv_single_chip);
         rssiView = findViewById(R.id.tv_single_rssi);
-        targetHintView = findViewById(R.id.tv_single_target_hint);
+
         writeAction = findViewById(R.id.ll_single_write);
         updateEpcAction = findViewById(R.id.ll_single_update_epc);
         lockAction = findViewById(R.id.ll_single_lock);
@@ -103,6 +139,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         maskStatusView = findViewById(R.id.tv_inventory_mask_status);
         maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
         maskLockIcon = findViewById(R.id.iv_single_mask_lock);
+
+        // 初始化读取参数
+        initReadParams();
 
         maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -131,6 +170,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateMaskBanks(readerState.getProtocol());
 
         readButton.setOnClickListener(view -> readTag());
+        copyDataButton.setOnClickListener(view -> copyReadData());
         writeAction.setOnClickListener(view -> showWriteDialog(false));
         updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
         lockAction.setOnClickListener(view -> showLockDialog());
@@ -165,6 +205,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         readerState = state;
         if (previousProtocol != state.getProtocol()) {
             updateMaskBanks(state.getProtocol());
+            updateReadBanks(state.getProtocol());
         }
         if (!state.isConnected()) {
             currentTag = null;
@@ -195,19 +236,162 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateMaskControls();
     }
 
+    private void initReadParams() {
+        TagProtocol protocol = readerState.getProtocol();
+
+        // 设置 Bank 选项
+        String[] banks = bankLabels(protocol);
+        readBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, banks));
+
+        // 设置国标子区选项
+        gbSubBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                getResources().getStringArray(R.array.single_gb_sub_bank_labels)));
+
+        // 设置默认值
+        readBankSpinner.setSelection(protocol == TagProtocol.ISO_18000_6C ? 1 : 0);
+        readAddressView.setText(protocol == TagProtocol.ISO_18000_6C ? "2" : "0");
+        readLengthView.setText(protocol == TagProtocol.ISO_18000_6B ? "8" : "4");
+        readPasswordView.setText("00000000");
+        auxiliaryView.setText(protocol == TagProtocol.ISO_18000_6B ? "3" : "4");
+
+        // 协议联动
+        updateReadParamsForProtocol(protocol);
+
+        // Bank 选择监听
+        readBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateGbSubBankVisibility(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void updateReadParamsForProtocol(TagProtocol protocol) {
+        // 更新长度标签
+        if (protocol == TagProtocol.ISO_18000_6B) {
+            readLengthLabel.setText(R.string.single_read_length_byte);
+        } else {
+            readLengthLabel.setText(R.string.single_read_length_word);
+        }
+
+        // 显示/隐藏辅助参数
+        if (protocol == TagProtocol.ISO_18000_6C) {
+            auxiliaryGroup.setVisibility(View.GONE);
+        } else {
+            auxiliaryGroup.setVisibility(View.VISIBLE);
+            if (protocol == TagProtocol.ISO_18000_6B) {
+                auxiliaryLabel.setText(R.string.single_retry_count_hint);
+            } else {
+                auxiliaryLabel.setText(R.string.single_block_length_hint);
+            }
+        }
+
+        // 更新国标子区可见性
+        updateGbSubBankVisibility(readBankSpinner.getSelectedItemPosition());
+    }
+
+    private void updateGbSubBankVisibility(int bankPosition) {
+        TagProtocol protocol = readerState.getProtocol();
+        boolean showGbSubBank = (protocol == TagProtocol.GB_T_29768) && (bankPosition == 3);
+        gbSubBankGroup.setVisibility(showGbSubBank ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateReadBanks(TagProtocol protocol) {
+        String[] banks = bankLabels(protocol);
+        readBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, banks));
+        readBankSpinner.setSelection(protocol == TagProtocol.ISO_18000_6C ? 1 : 0);
+        updateReadParamsForProtocol(protocol);
+    }
+
     @SingleClick
     private void readTag() {
         if (session == null || !session.getState().isConnected()) {
             requireReaderOnline();
             return;
         }
-        readButton.setEnabled(false);
-        readButton.setText(R.string.single_reading);
-        session.readSingleTag().whenComplete((tag, error) -> requireActivity().runOnUiThread(() -> {
-            readButton.setEnabled(true);
-            readButton.setText(R.string.single_read_tag);
-            if (error != null) { toast(getString(R.string.single_read_failed, rootMessage(error))); }
-        }));
+
+        try {
+            // 解析参数
+            TagProtocol protocol = readerState.getProtocol();
+            byte[] password = parsePassword(readPasswordView.getText().toString());
+            int bank = ProtocolEncoding.encodeBank(protocol,
+                    readBankSpinner.getSelectedItemPosition(),
+                    gbSubBankSpinner.getSelectedItemPosition());
+            int address = parseUnsigned(readAddressView, R.string.single_start_address);
+            int length = parseUnsigned(readLengthView, R.string.single_read_length);
+            int blockOrRetry = protocol == TagProtocol.ISO_18000_6C ? 0
+                    : parseUnsigned(auxiliaryView, R.string.single_block_or_retry);
+            int encodedAddress = ProtocolEncoding.encodeAddress(protocol, address, blockOrRetry);
+
+            int selectedBankPosition = readBankSpinner.getSelectedItemPosition();
+
+            // 执行读取
+            readButton.setEnabled(false);
+            readButton.setText(R.string.single_reading);
+
+            session.readCurrentTag(protocol, length, encodedAddress, bank, password)
+                    .whenComplete((data, error) -> requireActivity().runOnUiThread(() -> {
+                        readButton.setEnabled(true);
+                        readButton.setText(R.string.single_read_tag);
+
+                        if (error != null) {
+                            toast(getString(R.string.single_read_failed, rootMessage(error)));
+                            readDataGroup.setVisibility(View.GONE);
+                        } else {
+                            displayReadResult(data, selectedBankPosition, protocol);
+                            toast(R.string.single_read_success);
+                        }
+                    }));
+        } catch (IllegalArgumentException error) {
+            toast(error.getMessage());
+        }
+    }
+
+    private void displayReadResult(byte[] data, int bankPosition, TagProtocol protocol) {
+        // 显示十六进制数据
+        String hexData = HexCodec.encode(data);
+        readDataView.setText(hexData);
+        readDataGroup.setVisibility(View.VISIBLE);
+
+        // 更新 EPC 显示（如果是读取 EPC 区域）
+        if (protocol == TagProtocol.ISO_18000_6C && bankPosition == 1) {
+            epcView.setText(hexData);
+        }
+
+        // 更新 TID 显示（如果是读取 TID 区域）
+        if (protocol == TagProtocol.ISO_18000_6C && bankPosition == 2) {
+            tidView.setText(hexData);
+
+            // 显示芯片型号
+            String chipModel = ChipModelFormatter.formatFromTid(hexData);
+            if (!chipModel.isEmpty()) {
+                chipView.setText(chipModel);
+                chipView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            chipView.setVisibility(View.GONE);
+        }
+
+        // RSSI 暂不显示（读取数据时不返回 RSSI）
+        rssiView.setVisibility(View.GONE);
+    }
+
+    private void copyReadData() {
+        String data = readDataView.getText().toString();
+        if (data.isEmpty()) {
+            toast(R.string.single_no_data_to_copy);
+            return;
+        }
+
+        ClipboardManager clipboard = (ClipboardManager)
+                requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(ClipData.newPlainText("RFID Data", data));
+        toast(R.string.common_copied);
     }
 
     @SingleClick

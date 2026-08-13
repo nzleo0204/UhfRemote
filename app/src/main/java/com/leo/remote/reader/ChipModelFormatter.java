@@ -30,4 +30,28 @@ public final class ChipModelFormatter {
                 ? (chinese.isEmpty() ? english : chinese)
                 : (english.isEmpty() ? chinese : english);
     }
+
+    /**
+     * 从 TID 十六进制字符串中提取芯片型号。
+     *
+     * @param tidHex TID 的十六进制字符串
+     * @return 芯片型号，如果无法识别则返回空字符串
+     */
+    public static String formatFromTid(String tidHex) {
+        if (tidHex == null || tidHex.length() < 8) {
+            return "";
+        }
+
+        try {
+            // TID 前 4 字节（8 个十六进制字符）
+            String prefix = tidHex.substring(0, 8).toUpperCase(Locale.US);
+            int tidPrefix = (int) Long.parseLong(prefix, 16);
+
+            // 创建临时 ReaderTag 用于格式化
+            ReaderTag tempTag = new ReaderTag("", "", 0, 0, 0, "", tidPrefix);
+            return format(tempTag);
+        } catch (NumberFormatException e) {
+            return "";
+        }
+    }
 }

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RfidCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/dp_16"
+    android:layout_marginTop="@dimen/dp_16"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/RfidGroupTitle"
+        android:text="@string/single_read_params_title" />
+
+    <!-- 第一行：读取区域 + 起始地址 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/dp_8"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/single_read_bank"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <Spinner
+                android:id="@+id/sp_single_read_bank"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:background="@drawable/rfid_field_bg"
+                android:paddingHorizontal="@dimen/dp_12" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/single_start_address"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <EditText
+                android:id="@+id/et_single_read_address"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:background="@drawable/rfid_field_bg"
+                android:paddingHorizontal="@dimen/dp_12"
+                android:inputType="number"
+                android:textSize="@dimen/sp_15"
+                android:textColor="@color/rfid_text" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 第二行：读取长度 + 访问密码 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/dp_8"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_single_read_length_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/single_read_length"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <EditText
+                android:id="@+id/et_single_read_length"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:background="@drawable/rfid_field_bg"
+                android:paddingHorizontal="@dimen/dp_12"
+                android:inputType="number"
+                android:textSize="@dimen/sp_15"
+                android:textColor="@color/rfid_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/single_access_password"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <EditText
+                android:id="@+id/et_single_read_password"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:background="@drawable/rfid_field_bg"
+                android:paddingHorizontal="@dimen/dp_12"
+                android:inputType="textCapCharacters"
+                android:textSize="@dimen/sp_15"
+                android:textColor="@color/rfid_text"
+                android:fontFamily="monospace"
+                android:maxLength="8" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 6B/国标/国军标参数：块长度/重试次数 -->
+    <LinearLayout
+        android:id="@+id/group_single_auxiliary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/rfid_divider"
+            android:layout_marginVertical="@dimen/dp_8" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/single_auxiliary_params"
+            android:textSize="@dimen/sp_13"
+            android:textColor="@color/rfid_text_secondary"
+            android:fontFamily="sans-serif-medium"
+            android:paddingBottom="@dimen/dp_8" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_single_auxiliary_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/single_block_or_retry"
+                android:textSize="@dimen/sp_13"
+                android:textColor="@color/rfid_text_secondary"
+                android:paddingBottom="@dimen/dp_4" />
+
+            <EditText
+                android:id="@+id/et_single_auxiliary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:background="@drawable/rfid_field_bg"
+                android:paddingHorizontal="@dimen/dp_12"
+                android:inputType="number"
+                android:textSize="@dimen/sp_15"
+                android:textColor="@color/rfid_text" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 国标子区 -->
+    <LinearLayout
+        android:id="@+id/group_single_gb_sub_bank"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/rfid_divider"
+            android:layout_marginVertical="@dimen/dp_8" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/single_gb_sub_bank"
+            android:textSize="@dimen/sp_13"
+            android:textColor="@color/rfid_text_secondary"
+            android:fontFamily="sans-serif-medium"
+            android:paddingBottom="@dimen/dp_8" />
+
+        <Spinner
+            android:id="@+id/sp_single_gb_sub_bank"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_44"
+            android:background="@drawable/rfid_field_bg"
+            android:paddingHorizontal="@dimen/dp_12" />
+    </LinearLayout>
+
+    <!-- 读取按钮 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_single_read"
+        style="@style/RfidPrimaryButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginTop="@dimen/dp_16"
+        android:text="@string/single_read_tag"
+        android:textSize="@dimen/sp_15"
+        app:icon="@drawable/rfid_read_ic"
+        app:iconPadding="@dimen/dp_8"
+        app:iconSize="@dimen/dp_20" />
+</LinearLayout>
