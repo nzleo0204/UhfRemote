@@ -43,6 +43,7 @@ android {
 
     // 代码警告配置
     lint {
+        abortOnError true
         // HardcodedText：禁用文本硬编码警告
         // ContentDescription：禁用图片描述警告
         disable 'HardcodedText', 'ContentDescription'

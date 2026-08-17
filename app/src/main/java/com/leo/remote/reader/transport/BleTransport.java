@@ -26,6 +26,7 @@ import cn.wandersnail.ble.callback.NotificationChangeCallback;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public final class BleTransport implements EventObserver, ReaderBleTransport {
@@ -209,7 +210,8 @@ public final class BleTransport implements EventObserver, ReaderBleTransport {
             if (candidate == null) { continue; }
             if (isStandardGattService(service.getUuid())) {
                 hasStandardDataChannel = true;
-                hasHidDataChannel |= service.getUuid().toString().toLowerCase().startsWith("00001812-");
+                hasHidDataChannel |= service.getUuid().toString().toLowerCase(Locale.ROOT)
+                        .startsWith("00001812-");
             } else {
                 preferred = betterOf(preferred, candidate);
             }
@@ -280,7 +282,7 @@ public final class BleTransport implements EventObserver, ReaderBleTransport {
     }
 
     private static int serialUuidScore(UUID uuid) {
-        String value = uuid.toString().toLowerCase();
+        String value = uuid.toString().toLowerCase(Locale.ROOT);
         if (value.startsWith("0000ffe") || value.startsWith("0000fff")
                 || value.startsWith("0000ff0") || value.startsWith("6e4000")
                 || value.startsWith("49535343")) {
@@ -290,7 +292,7 @@ public final class BleTransport implements EventObserver, ReaderBleTransport {
     }
 
     private static boolean isStandardGattService(UUID uuid) {
-        String value = uuid.toString().toLowerCase();
+        String value = uuid.toString().toLowerCase(Locale.ROOT);
         if (!value.endsWith("-0000-1000-8000-00805f9b34fb") || !value.startsWith("0000")) {
             return false;
         }

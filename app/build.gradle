@@ -12,6 +12,10 @@ def rootConfig = rootProject.ext
 android {
     namespace = 'com.leo.remote'
 
+    lint {
+        baseline = file('lint-baseline.xml')
+    }
+
     buildFeatures {
         // 是否生成 BuildConfig 类
         buildConfig = true

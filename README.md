@@ -1,33 +1,16 @@
-# UhfRemote - RFID 远程控制 Android 应用
+# UhfRemote
 
-通过蓝牙和 WiFi 远程获取或修改 RFID 数据
+通过蓝牙或 Wi-Fi 连接 UHF RFID 读写器，支持设备配置、标签盘点、单标签读写与 CSV 导出。
 
-## 📋 项目状态
-
-- **代码质量**: 8.2/10 (优秀)
-- **代码规模**: 15,062 行 Java 代码
-- **主要功能**: WiFi/BLE 连接、RFID 标签盘点、数据导出
-
-## 🚀 当前任务
-
-正在执行项目整改计划，详见 [`CODEX_IMPLEMENTATION_PLAN.md`](CODEX_IMPLEMENTATION_PLAN.md)
-
-### 整改目标
-1. ✅ P1 修复完成（混淆、网络安全、部分命名）
-2. ✅ 统一命名规范
-3. ✅ 拆分 Reader 核心状态与操作模块
-4. ✅ 建立单元测试体系
-5. ✅ 完善架构文档
-
-## 📊 项目结构
+## 项目结构
 
 ```
 UhfRemote/
 ├── app/                        # 主应用模块
 │   ├── src/main/java/
 │   │   └── com/leo/remote/
-│   │       ├── reader/         # Reader 核心层
-│   │       ├── ui/             # UI 层
+│   │       ├── reader/         # Reader 模型、会话、SDK、传输和持久化
+│   │       ├── ui/reader/      # 配置、盘点和单标签页面
 │   │       ├── util/           # 工具类
 │   │       └── manager/        # 管理器
 │   └── src/main/res/           # 资源文件
@@ -35,18 +18,22 @@ UhfRemote/
 └── docs/                       # 文档
 ```
 
-## 🛠️ 开发环境
+## 开发环境
 
 - Android Studio Hedgehog+
 - JDK 21
 - Gradle 9.6.1
 - Android SDK 34
 
-## 📝 文档
+## 验证
 
-- [执行计划](CODEX_IMPLEMENTATION_PLAN.md) - Codex 执行的详细整改计划
-- [架构文档](docs/ARCHITECTURE.md) - Reader 核心、线程模型与数据流
+```bash
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
+  ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+```
 
-## 🤝 贡献
+Lint 使用 `app/lint-baseline.xml` 记录现有警告，并保持 `abortOnError` 开启。当前未使用模板资源暂时保留，新增警告不能进入基线。
 
-由 Codex 执行整改计划，人工审查和验证。
+## 文档
+
+- [架构文档](docs/ARCHITECTURE.md) - Reader 包依赖、线程模型、连接流程和测试边界

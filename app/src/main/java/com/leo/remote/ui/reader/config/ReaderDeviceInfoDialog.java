@@ -17,6 +17,7 @@ import com.leo.remote.reader.session.ReaderSessionManager;
 import com.leo.remote.reader.model.ReaderState;
 import com.leo.remote.reader.model.Rm610PowerLevels;
 import com.leo.remote.reader.model.TransportType;
+import java.util.Locale;
 
 public final class ReaderDeviceInfoDialog extends DialogFragment implements ReaderObserver {
     private ReaderSessionManager session;
@@ -90,7 +91,7 @@ public final class ReaderDeviceInfoDialog extends DialogFragment implements Read
                 // 其他模块：powerTenthsDbm 是十分之一 dBm
                 double powerDbm = config.powerTenthsDbm / 10.0;
                 set(view, R.id.tv_device_info_rf_power,
-                    String.format("%.1f dBm", powerDbm));
+                    String.format(Locale.getDefault(), "%.1f dBm", powerDbm));
             }
         } else {
             set(view, R.id.tv_device_info_rf_power, "--");
