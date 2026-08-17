@@ -15,11 +15,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
-import com.leo.remote.reader.HexCodec;
-import com.leo.remote.reader.InventoryMaskConfig;
-import com.leo.remote.reader.InventoryMaskFormParser;
-import com.leo.remote.reader.ProtocolEncoding;
-import com.leo.remote.reader.TagProtocol;
+import com.leo.remote.reader.model.HexCodec;
+import com.leo.remote.reader.model.InventoryMaskConfig;
+import com.leo.remote.reader.inventory.InventoryMaskFormParser;
+import com.leo.remote.reader.model.ProtocolEncoding;
+import com.leo.remote.reader.model.TagProtocol;
 import com.leo.remote.util.ViewUtils;
 
 /** Owns the shared mask-panel binding and presentation state used by both RFID pages. */

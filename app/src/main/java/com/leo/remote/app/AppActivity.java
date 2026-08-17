@@ -1,7 +1,6 @@
 package com.leo.remote.app;
 
 import android.graphics.Color;
-import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -15,22 +14,12 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
 import com.hjq.base.BaseActivity;
-import com.hjq.core.manager.ActivityManager;
-import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.action.ImmersionAction;
 import com.leo.remote.action.TitleBarAction;
 import com.leo.remote.action.ToastAction;
 import com.leo.remote.ui.dialog.common.WaitDialog;
-import com.leo.remote.ui.dialog.common.MessageDialog;
-import com.leo.remote.reader.DisconnectReason;
-import com.leo.remote.reader.ReaderConnectionStatus;
-import com.leo.remote.reader.ReaderObserver;
-import com.leo.remote.reader.ReaderSessionManager;
-import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
 import com.leo.remote.util.ThemeModeManager;
-import java.lang.ref.WeakReference;
 
 /**
  *    author : Android 轮子哥
@@ -39,9 +28,7 @@ import java.lang.ref.WeakReference;
  *    desc   : Activity 业务基类
  */
 public abstract class AppActivity extends BaseActivity
-    implements ToastAction, TitleBarAction, ImmersionAction, ReaderObserver {
-
-    private static WeakReference<AppActivity> sResumedActivity = new WeakReference<>(null);
+    implements ToastAction, TitleBarAction, ImmersionAction {
 
     /** 标题栏对象 */
     private TitleBar titleBar;
@@ -52,31 +39,6 @@ public abstract class AppActivity extends BaseActivity
     private WaitDialog.Builder dialog;
     /** 对话框数量 */
     private int dialogCount;
-    private ReaderSessionManager readerSession;
-    private MessageDialog.Builder disconnectDialog;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (!ActivityManager.isMainProcess(this)) { return; }
-        readerSession = ReaderSessionManager.getInstance(getApplication());
-        readerSession.addObserver(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        sResumedActivity = new WeakReference<>(this);
-        if (readerSession != null && readerSession.isPendingDisconnectAlert()) {
-            showDisconnectDialog(readerSession.getLastUnexpectedReason());
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        if (sResumedActivity.get() == this) { sResumedActivity.clear(); }
-        super.onPause();
-    }
 
     /**
      * 当前加载对话框是否在显示中
@@ -305,98 +267,8 @@ public abstract class AppActivity extends BaseActivity
         getOnBackPressedDispatcher().onBackPressed();
     }
 
-    // ========== Reader state ==========
-
-    @Override
-    public void onReaderUnexpectedDisconnect(DisconnectReason reason) {
-        if (sResumedActivity.get() == this) { showDisconnectDialog(reason); }
-    }
-
-    /** Blocks reader-dependent actions and repeats the strong disconnect prompt when offline. */
-    protected boolean requireReaderOnline() {
-        if (readerSession != null && readerSession.getState().isConnected()) { return true; }
-        showDisconnectDialog(readerSession == null
-                ? DisconnectReason.NONE : readerSession.getLastUnexpectedReason());
-        return false;
-    }
-
-    private void showDisconnectDialog(DisconnectReason reason) {
-        if (isFinishing() || isDestroyed()
-                || (disconnectDialog != null && disconnectDialog.isShowing())) {
-            return;
-        }
-        @StringRes int message = disconnectReasonText(reason);
-        MessageDialog.Builder builder = new MessageDialog.Builder(this)
-                .setTitle(R.string.reader_disconnected_title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setCanceledOnTouchOutside(false)
-                .setCancel(R.string.reader_goto_connect)
-                .setConfirm(R.string.reader_acknowledged)
-                .setListener(new MessageDialog.OnListener() {
-                    @Override
-                    public void onConfirm(@NonNull BaseDialog dialog) {
-                        acknowledgeDisconnectDialog();
-                    }
-
-                    @Override
-                    public void onCancel(@NonNull BaseDialog dialog) {
-                        acknowledgeDisconnectDialog();
-                        openReaderConfig();
-                    }
-                });
-        disconnectDialog = builder;
-        builder.show();
-    }
-
-    private void acknowledgeDisconnectDialog() {
-        if (readerSession != null) { readerSession.acknowledgeDisconnect(); }
-        disconnectDialog = null;
-    }
-
-    private void openReaderConfig() {
-        if (this instanceof HomeActivity homeActivity) {
-            homeActivity.showReaderConfig();
-        } else {
-            HomeActivity.start(this, ReaderConfigFragment.class);
-        }
-    }
-
-    @StringRes
-    public static int readerStatusText(ReaderConnectionStatus status) {
-        return switch (status) {
-            case CONNECTED -> R.string.config_status_connected;
-            case DISCONNECTED -> R.string.config_status_disconnected;
-            case FAILED -> R.string.config_status_failed;
-            case NOT_CONNECTED -> R.string.config_status_not_connected;
-        };
-    }
-
-    public static int readerStatusBackground(ReaderConnectionStatus status) {
-        return switch (status) {
-            case CONNECTED -> R.drawable.rfid_chip_green_bg;
-            case DISCONNECTED, FAILED -> R.drawable.rfid_chip_red_bg;
-            case NOT_CONNECTED -> R.drawable.rfid_chip_gray_bg;
-        };
-    }
-
-    @StringRes
-    public static int disconnectReasonText(DisconnectReason reason) {
-        return switch (reason) {
-            case LINK_LOST -> R.string.reader_disconnected_link_lost;
-            case BLUETOOTH_OFF -> R.string.reader_disconnected_bluetooth_off;
-            case WIFI_LOST -> R.string.reader_disconnected_wifi_lost;
-            case SDK_ERROR -> R.string.reader_disconnected_sdk_error;
-            default -> R.string.reader_offline_action_blocked;
-        };
-    }
-
     @Override
     protected void onDestroy() {
-        if (readerSession != null) { readerSession.removeObserver(this); }
-        if (sResumedActivity.get() == this) { sResumedActivity.clear(); }
-        if (disconnectDialog != null) { disconnectDialog.dismiss(); }
-        disconnectDialog = null;
         super.onDestroy();
         if (isShowDialog()) {
             hideLoadingDialog();

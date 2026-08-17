@@ -16,16 +16,16 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BasePagerAdapter;
 import com.hjq.core.tools.DoubleClickHelper;
 import com.leo.remote.R;
-import com.leo.remote.app.AppActivity;
+import com.leo.remote.app.ReaderAwareActivity;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.ui.adapter.common.NavigationAdapter;
 import com.leo.remote.ui.adapter.common.NavigationAdapter.NavigationItem;
-import com.leo.remote.ui.fragment.home.InventoryFragment;
+import com.leo.remote.ui.reader.inventory.InventoryFragment;
 import com.leo.remote.ui.fragment.home.MineFragment;
-import com.leo.remote.ui.fragment.home.ReaderConfigFragment;
-import com.leo.remote.ui.fragment.home.SingleTagFragment;
+import com.leo.remote.ui.reader.config.ReaderConfigFragment;
+import com.leo.remote.ui.reader.singletag.SingleTagFragment;
 import com.leo.remote.ui.fragment.home.StockFragment;
-import com.leo.remote.reader.ReaderSessionManager;
+import com.leo.remote.reader.session.ReaderSessionManager;
 
 /**
  * 应用主界面
@@ -44,7 +44,7 @@ import com.leo.remote.reader.ReaderSessionManager;
  * 修改时间: 2024
  * 修改说明: 基于原框架改造为 RFID 应用
  */
-public final class HomeActivity extends AppActivity
+public final class HomeActivity extends ReaderAwareActivity
         implements NavigationAdapter.OnNavigationListener {
 
     private static final String TAG = "UhfRemote/Home";

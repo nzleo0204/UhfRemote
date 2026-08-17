@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.leo.remote.R;
-import com.leo.remote.reader.TagProtocol;
+import com.leo.remote.reader.model.TagProtocol;
 
 public final class TagWriteDialog {
     public interface Listener { void onSubmit(AlertDialog dialog, Form form); }

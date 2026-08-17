@@ -1,0 +1,156 @@
+package com.leo.remote.reader.session;
+
+import com.leo.remote.reader.model.*;
+import com.leo.remote.reader.persistence.ReaderConfigurationStore;
+import com.leo.remote.reader.sdk.ReaderConfigurationGateway;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+/** Owns the current reader configuration and its persistent module-scoped cache. */
+public final class ReaderConfigurationManager {
+    private final ReaderConfigurationGateway gateway;
+    private final ReaderConfigurationStore cache;
+    private final ReaderStatePublisher publisher;
+
+    private volatile ReaderConfiguration configuration;
+    private volatile int inventoryMode = 1;
+
+    ReaderConfigurationManager(@NonNull ReaderConfigurationGateway gateway,
+            @NonNull ReaderConfigurationStore cache, @NonNull ReaderStatePublisher publisher) {
+        this.gateway = gateway;
+        this.cache = cache;
+        this.publisher = publisher;
+    }
+
+    @Nullable
+    public ReaderConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public int getInventoryMode() {
+        return inventoryMode;
+    }
+
+    void clear() {
+        configuration = null;
+    }
+
+    void restore(@NonNull ReaderConfiguration restored) {
+        configuration = restored;
+        inventoryMode = restored.inventoryMode;
+    }
+
+    void refresh(@NonNull ModuleSubtype subtype) {
+        restore(ReaderHandshake.readConfigurationStepwise(gateway, subtype, cache, ignored -> {}));
+        publishCurrent();
+    }
+
+    int setInventoryMode(@NonNull ModuleSubtype subtype, int requestedMode) {
+        if (requestedMode < 0 || requestedMode > 2) { return inventoryMode; }
+        inventoryMode = subtype.supportsInventoryModeSwitch() ? requestedMode : 1;
+        if (configuration != null) {
+            cache.saveConfiguration(subtype, snapshot());
+        }
+        publishCurrent();
+        return inventoryMode;
+    }
+
+    int setInventoryArea(@NonNull ModuleSubtype subtype, int area, int address, int wordLen) {
+        int effectiveAddress = area == 0 ? 0 : address;
+        int effectiveLength = area == 0 ? 0 : wordLen;
+        int status = gateway.setInventoryArea(area, effectiveAddress, effectiveLength);
+        ReaderConfiguration current = configuration;
+        if (current == null) { return status; }
+        return update(subtype, status, copy(current, current.powerTenthsDbm,
+                current.blfProfile, current.session, current.target, current.dynamicQ,
+                current.qValue, current.qMinValue, current.qMaxValue, current.qRetryCount,
+                current.qThresholdMultiplier, area, effectiveAddress, effectiveLength));
+    }
+
+    int setPower(@NonNull ModuleSubtype subtype, int powerTenthsDbm) {
+        ReaderConfiguration current = requireConfiguration();
+        return update(subtype, gateway.setPowerTenthsDbm(powerTenthsDbm),
+                copy(current, powerTenthsDbm, current.blfProfile, current.session,
+                        current.target, current.dynamicQ, current.qValue, current.qMinValue,
+                        current.qMaxValue, current.qRetryCount, current.qThresholdMultiplier,
+                        current.inventoryArea, current.inventoryAddress,
+                        current.inventoryWordLen));
+    }
+
+    int setBlf(@NonNull ModuleSubtype subtype, int profile) {
+        ReaderConfiguration current = requireConfiguration();
+        return update(subtype, gateway.setBlfProfile(profile),
+                copy(current, current.powerTenthsDbm, profile, current.session, current.target,
+                        current.dynamicQ, current.qValue, current.qMinValue, current.qMaxValue,
+                        current.qRetryCount, current.qThresholdMultiplier, current.inventoryArea,
+                        current.inventoryAddress, current.inventoryWordLen));
+    }
+
+    int applySession(@NonNull ModuleSubtype subtype, int session, int selected) {
+        ReaderConfiguration current = requireConfiguration();
+        return gateway.setSession(subtype, session, current.target, selected);
+    }
+
+    void commitSession(@NonNull ModuleSubtype subtype, int session) {
+        ReaderConfiguration current = requireConfiguration();
+        update(subtype, 0, copy(current, current.powerTenthsDbm,
+                current.blfProfile, session, current.target, current.dynamicQ, current.qValue,
+                current.qMinValue, current.qMaxValue, current.qRetryCount,
+                current.qThresholdMultiplier, current.inventoryArea, current.inventoryAddress,
+                current.inventoryWordLen));
+    }
+
+    void updateProtocolArea(@NonNull ModuleSubtype subtype, int area, int address, int wordLen) {
+        ReaderConfiguration current = configuration;
+        if (current == null) { return; }
+        configuration = copy(current, current.powerTenthsDbm, current.blfProfile,
+                current.session, current.target, current.dynamicQ, current.qValue,
+                current.qMinValue, current.qMaxValue, current.qRetryCount,
+                current.qThresholdMultiplier, area, address, wordLen);
+        cache.saveConfiguration(subtype, configuration);
+    }
+
+    void publishCurrent() {
+        if (configuration == null) { return; }
+        configuration = snapshot();
+        publisher.publishConfiguration(configuration);
+    }
+
+    private int update(ModuleSubtype subtype, int status, ReaderConfiguration updated) {
+        if (status == 0) {
+            configuration = updated;
+            cache.saveConfiguration(subtype, updated);
+            publishCurrent();
+        }
+        return status;
+    }
+
+    private ReaderConfiguration snapshot() {
+        ReaderConfiguration current = requireConfiguration();
+        return new ReaderConfiguration(current.powerTenthsDbm, inventoryMode,
+                current.blfProfile, current.session, current.target, current.dynamicQ,
+                current.qValue, current.qMinValue, current.qMaxValue, current.qRetryCount,
+                current.qThresholdMultiplier, current.qToggleTarget,
+                current.qRepeatUntilNoTags, current.inventoryArea, current.inventoryAddress,
+                current.inventoryWordLen);
+    }
+
+    private ReaderConfiguration requireConfiguration() {
+        ReaderConfiguration current = configuration;
+        if (current == null) {
+            throw new IllegalStateException("Reader configuration is unavailable");
+        }
+        return current;
+    }
+
+    private ReaderConfiguration copy(ReaderConfiguration current, int powerTenthsDbm,
+            int blfProfile, int session, int target, boolean dynamicQ, int qValue,
+            int qMinValue, int qMaxValue, int qRetryCount, int qThresholdMultiplier,
+            int inventoryArea, int inventoryAddress, int inventoryWordLen) {
+        return new ReaderConfiguration(powerTenthsDbm, inventoryMode, blfProfile, session,
+                target, dynamicQ, qValue, qMinValue, qMaxValue, qRetryCount,
+                qThresholdMultiplier, current.qToggleTarget, current.qRepeatUntilNoTags,
+                inventoryArea, inventoryAddress, inventoryWordLen);
+    }
+}

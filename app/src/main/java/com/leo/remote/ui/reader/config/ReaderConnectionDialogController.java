@@ -2,10 +2,10 @@ package com.leo.remote.ui.reader.config;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import com.leo.remote.reader.ConnectionPhase;
-import com.leo.remote.reader.ReaderSessionManager;
-import com.leo.remote.reader.ReaderState;
-import com.leo.remote.ui.dialog.ReaderConnectionDialog;
+import com.leo.remote.reader.model.ConnectionPhase;
+import com.leo.remote.reader.session.ReaderSessionManager;
+import com.leo.remote.reader.model.ReaderState;
+import com.leo.remote.ui.reader.common.ReaderConnectionDialog;
 import com.leo.remote.ui.dialog.common.WaitDialog;
 
 /** Owns the connection and parameter-initialization progress dialogs. */

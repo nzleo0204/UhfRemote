@@ -67,7 +67,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".reader.ReaderConnectionService"
+            android:name=".reader.android.ReaderConnectionService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />

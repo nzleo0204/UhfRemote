@@ -1,0 +1,18 @@
+package com.leo.remote.reader.sdk;
+
+import com.leo.remote.reader.model.*;
+
+
+public interface ReaderTransportGateway {
+    interface OutboundDataListener { void onOutboundData(byte[] data); }
+
+    int initialize();
+    void deinitialize();
+    void useRm70xx();
+    void setTransport(TransportType transport);
+    int connectNetwork(String address, int port);
+    int closeNetwork();
+    void setOutboundDataListener(OutboundDataListener listener);
+    void pushRemoteData(byte[] data);
+    ReaderModuleInfo readModuleInfo() throws ReaderException;
+}

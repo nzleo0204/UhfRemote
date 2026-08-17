@@ -2,7 +2,7 @@ package com.leo.remote.ui.reader.inventory;
 
 import static org.junit.Assert.assertEquals;
 
-import com.leo.remote.reader.InventoryItem;
+import com.leo.remote.reader.model.InventoryItem;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
