@@ -3,27 +3,20 @@ package com.leo.remote.ui.fragment.home;
 import android.annotation.SuppressLint;
 import android.graphics.Rect;
 import android.os.Build;
-import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.text.TextUtils;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hjq.permissions.XXPermissions;
@@ -31,7 +24,6 @@ import com.hjq.permissions.permission.PermissionLists;
 import com.leo.remote.R;
 import com.leo.remote.app.AppActivity;
 import com.leo.remote.app.AppFragment;
-import com.leo.remote.reader.ConnectionPhase;
 import com.leo.remote.reader.DisconnectReason;
 import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.Rm610PowerLevels;
@@ -46,12 +38,14 @@ import com.leo.remote.reader.TagProtocol;
 import com.leo.remote.reader.TransportType;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.dialog.BleDeviceSheet;
-import com.leo.remote.ui.dialog.ReaderConnectionDialog;
 import com.leo.remote.ui.dialog.ReaderDeviceInfoDialog;
 import com.leo.remote.ui.dialog.common.MessageDialog;
 import com.leo.remote.ui.dialog.common.InventoryRangeDialog;
-import com.leo.remote.ui.dialog.common.WaitDialog;
+import com.leo.remote.ui.reader.config.ReaderConnectionDialogController;
+import com.leo.remote.ui.reader.config.ReaderSettingDialogController;
 import com.leo.remote.ui.view.IpAddressInputView;
+import com.leo.remote.util.ThrowableUtils;
+import com.leo.remote.util.ViewUtils;
 import com.hjq.base.BaseDialog;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +56,6 @@ import java.util.function.Supplier;
 @SuppressLint({"LogNotTimber", "ClickableViewAccessibility"})
 public final class ReaderConfigFragment extends AppFragment<HomeActivity> implements ReaderObserver {
     private static final String TAG = "UhfReader/Config";
-    private static final String CONNECTION_DIALOG_TAG = "reader_connection";
     private static final String DEVICE_INFO_DIALOG_TAG = "reader_device_info";
 
     private ReaderSessionManager session;
@@ -73,7 +66,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private TextView workModeView;
     private TextView sessionView;
     private TextView blfView;
-    // Q值相关已移除
     private TextView inventoryAreaView;
     private TextView bleDeviceView;
     private View deviceInfoButton;
@@ -99,8 +91,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
-    private WaitDialog.Builder settingWaitDialog;
-    private WaitDialog.Builder parameterUpdateDialog;
+    private ReaderConnectionDialogController connectionDialogs;
+    private ReaderSettingDialogController settingDialogs;
     private int powerProgressBeforeDrag;
     private int imeInsetBottom;
     private int configScrollBaseBottomPadding;
@@ -112,6 +104,9 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     @Override
     protected void initView() {
+        connectionDialogs = new ReaderConnectionDialogController(this);
+        settingDialogs = new ReaderSettingDialogController(this, this::runOnViewThread,
+                message -> toast(message));
         statusView = findViewById(R.id.tv_config_status);
         disconnectReasonView = findViewById(R.id.tv_config_disconnect_reason);
         powerValueView = findViewById(R.id.tv_config_power_value);
@@ -119,7 +114,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         workModeView = findViewById(R.id.tv_config_work_mode);
         sessionView = findViewById(R.id.tv_config_session);
         blfView = findViewById(R.id.tv_config_blf);
-        // Q值相关已移除
         inventoryAreaView = findViewById(R.id.tv_config_inventory_area);
         bleDeviceView = findViewById(R.id.tv_config_ble_device);
         deviceInfoButton = findViewById(R.id.ibtn_config_device_info);
@@ -213,7 +207,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         workModeRow.setOnClickListener(view -> showWorkModeDialog());
         findViewById(R.id.row_config_session).setOnClickListener(view -> showSessionDialog());
         blfRow.setOnClickListener(view -> showBlfDialog());
-        // Q值相关已移除
         findViewById(R.id.btn_config_refresh).setOnClickListener(view -> refreshParameters());
         powerValueView.setOnClickListener(view -> {
             if (readerState.getModuleSubtype() == ModuleSubtype.RM610
@@ -277,11 +270,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     @Override
     public void onDestroyView() {
-        dismissSettingWaitDialog();
-        dismissParameterUpdateDialog();
-        dismissConnectionDialog();
-        dismissFragmentDialog(DEVICE_INFO_DIALOG_TAG);
-        dismissFragmentDialog("ble_devices");
+        settingDialogs.dismiss();
+        connectionDialogs.dismissAll();
         if (session != null) { session.removeObserver(this); }
         super.onDestroyView();
     }
@@ -317,26 +307,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             wifiSwitch.setChecked(true);
             bindingUi = false;
         }
-        boolean parameterUpdating = state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS;
         bindTransportRows(bleSwitch.isChecked(), state.hasTransportLink());
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
             bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
         }
 
-        if (isConnectingPhase(state.getPhase())) {
-            showOrUpdateConnectionDialog(state);
-        } else if (parameterUpdating) {
-            dismissConnectionDialog();
-            showOrUpdateParameterUpdateDialog(state);
-        } else if (state.getPhase() == ConnectionPhase.FAILED
-                && !session.isConnectionFailureAcknowledged(state)) {
-            dismissParameterUpdateDialog();
-            showOrUpdateConnectionDialog(state);
-        } else {
-            dismissConnectionDialog();
-            dismissParameterUpdateDialog();
-        }
+        connectionDialogs.render(state, session);
         applyModuleUi(state.getModuleSubtype());
         // The connection dialog ends before the parameter initialization dialog starts.
     }
@@ -362,7 +339,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         blfView.setText(blfLabel(value.blfProfile));
         sessionView.setText(getString(R.string.config_session_value, value.session));
-        // Q值相关已移除
         updateInventoryAreaView(value);
         workModeView.setText(readerState.getModuleSubtype().supportsInventoryModeSwitch()
                 ? workModeLabel(value.inventoryMode) : workModeLabel(1));
@@ -515,16 +491,12 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     private void refreshParameters() {
         if (!requireReaderOnline()) { return; }
-        dismissSettingWaitDialog();
-        settingWaitDialog = new WaitDialog.Builder(requireActivity())
-                .setMessage(R.string.config_refreshing);
-        settingWaitDialog.show();
+        settingDialogs.showWait(R.string.config_refreshing);
         session.refreshConfiguration().whenComplete((status, error) ->
                 runOnViewThread(() -> {
-                    dismissSettingWaitDialog();
+                    settingDialogs.dismiss();
                     if (error != null) {
-                        Throwable cause = error;
-                        while (cause.getCause() != null) { cause = cause.getCause(); }
+                        Throwable cause = ThrowableUtils.rootCause(error);
                         toast(cause.getMessage() == null
                                 ? getString(R.string.config_refresh_params) : cause.getMessage());
                     } else if (status != null && status != 0) {
@@ -606,9 +578,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void applyInventoryArea(InventoryArea target, int address, int length) {
-        settingWaitDialog = new WaitDialog.Builder(requireActivity())
-                .setMessage(R.string.config_setting_wait);
-        settingWaitDialog.show();
+        settingDialogs.showWait(R.string.config_setting_wait);
         session.setInventoryArea(target.getValue(), address, length)
                 .thenApply(status -> {
                     if (status == 0) { session.clearInventory(); }
@@ -616,13 +586,10 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 })
                 .whenComplete((status, error) -> {
                     runOnViewThread(() -> {
-                        dismissSettingWaitDialog();
+                        settingDialogs.dismiss();
                         if (error != null || status == null || status != 0) {
                             int errorCode = status == null ? -1 : status;
-                            Throwable cause = error;
-                            while (cause != null && cause.getCause() != null) {
-                                cause = cause.getCause();
-                            }
+                            Throwable cause = error == null ? null : ThrowableUtils.rootCause(error);
                             if (cause instanceof ReaderException) {
                                 errorCode = ((ReaderException) cause).getErrorCode();
                             }
@@ -716,7 +683,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 }).setNegativeButton(R.string.common_cancel, null).show();
     }
 
-    // Q值设置相关方法已移除 (showQDialog 完整删除)
 
     private void showRm610PowerDialog() {
         if (!requireReaderOnline()) { return; }
@@ -747,7 +713,6 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         return titleView;
     }
 
-    // Q值参数输入方法已移除 (qParameterInput)
 
     // ========== Module-aware UI ==========
 
@@ -782,24 +747,15 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void setHardwareEnabled(boolean enabled) {
-        setEnabledRecursive(hardwareSection, enabled);
+        ViewUtils.setEnabledRecursively(hardwareSection, enabled);
         protocolSection.setEnabled(enabled);
-        setEnabledRecursive(findViewById(R.id.row_config_protocol), enabled);
-        setEnabledRecursive(findViewById(R.id.row_config_session), enabled);
-        setEnabledRecursive(rateSection, enabled);
+        ViewUtils.setEnabledRecursively(findViewById(R.id.row_config_protocol), enabled);
+        ViewUtils.setEnabledRecursively(findViewById(R.id.row_config_session), enabled);
+        ViewUtils.setEnabledRecursively(rateSection, enabled);
         float alpha = enabled ? 1f : 0.45f;
         hardwareSection.setAlpha(alpha);
         protocolSection.setAlpha(alpha);
         rateSection.setAlpha(alpha);
-    }
-
-    private static void setEnabledRecursive(View view, boolean enabled) {
-        view.setEnabled(enabled);
-        if (view instanceof ViewGroup group) {
-            for (int i = 0; i < group.getChildCount(); i++) {
-                setEnabledRecursive(group.getChildAt(i), enabled);
-            }
-        }
     }
 
     private void restorePowerProgress(int progress) {
@@ -812,136 +768,11 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
 
     // ========== Setting confirmation flow ==========
 
-    /** Keeps every device setting behind the same confirm, loading, and rollback flow. */
     private void confirmAndApply(@StringRes int settingName, CharSequence newValueLabel,
             Supplier<CompletableFuture<Integer>> action, @StringRes int failureMessage,
             Runnable rollback) {
-        boolean power = settingName == R.string.config_transmit_power;
-
-        // 构建带红色高亮的确认消息
-        String settingText = getString(settingName);
-        String template = power
-                ? getString(R.string.config_power_confirm_message, "%s")
-                : getString(R.string.config_setting_confirm_message, settingText, "%s");
-
-        // 创建带颜色的消息
-        android.text.SpannableString message = new android.text.SpannableString(
-                template.replace("%s", newValueLabel));
-        int start = message.toString().indexOf(newValueLabel.toString());
-        if (start >= 0) {
-            message.setSpan(new android.text.style.ForegroundColorSpan(
-                    ContextCompat.getColor(requireContext(), R.color.rfid_danger)),
-                    start, start + newValueLabel.length(),
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        new MessageDialog.Builder(requireActivity())
-                .setTitle(power ? R.string.config_power_confirm_title
-                        : settingName)  // 使用具体的设置名称作为标题
-                .setMessage(message)
-                .setCancel(R.string.common_cancel)
-                .setConfirm(R.string.common_confirm)
-                .setListener(new MessageDialog.OnListener() {
-                    @Override
-                    public void onConfirm(@NonNull BaseDialog dialog) {
-                        settingWaitDialog = new WaitDialog.Builder(requireActivity())
-                                .setMessage(power ? R.string.config_power_set_wait
-                                        : R.string.config_setting_wait);
-                        settingWaitDialog.show();
-                        action.get().whenComplete((status, error) -> {
-                            runOnViewThread(() -> {
-                                dismissSettingWaitDialog();
-                                if (error != null || status == null || status != 0) {
-                                    rollback.run();
-                                    int errorCode = status == null ? -1 : status;
-                                    Throwable cause = error;
-                                    while (cause != null && cause.getCause() != null) {
-                                        cause = cause.getCause();
-                                    }
-                                    if (cause instanceof ReaderException) {
-                                        errorCode = ((ReaderException) cause).getErrorCode();
-                                    }
-                                    String message = getString(R.string.config_error_code,
-                                            getString(failureMessage), errorCode);
-                                    new MessageDialog.Builder(requireActivity())
-                                            .setTitle(failureMessage)
-                                            .setMessage(message)
-                                            .setCancel((CharSequence) null)
-                                            .setConfirm(R.string.common_confirm)
-                                            .show();
-                                    return;
-                                }
-                                if (power) {
-                                    toast(getString(R.string.config_power_set_success, newValueLabel));
-                                } else {
-                                    toast(getString(R.string.config_setting_success,
-                                            getString(settingName), newValueLabel));
-                                }
-                            });
-                        });
-                    }
-
-                    @Override
-                    public void onCancel(@NonNull BaseDialog dialog) {
-                        rollback.run();
-                    }
-                })
-                .show();
-    }
-
-    private void dismissSettingWaitDialog() {
-        if (settingWaitDialog != null && settingWaitDialog.isShowing()) {
-            settingWaitDialog.dismiss();
-        }
-        settingWaitDialog = null;
-    }
-
-    private void showOrUpdateParameterUpdateDialog(ReaderState state) {
-        if (parameterUpdateDialog == null || !parameterUpdateDialog.isShowing()) {
-            parameterUpdateDialog = new WaitDialog.Builder(requireActivity())
-                    .setMessage(state.getMessage());
-            parameterUpdateDialog.show();
-        } else {
-            parameterUpdateDialog.setMessage(state.getMessage());
-        }
-    }
-
-    private void dismissParameterUpdateDialog() {
-        if (parameterUpdateDialog != null && parameterUpdateDialog.isShowing()) {
-            parameterUpdateDialog.dismiss();
-        }
-        parameterUpdateDialog = null;
-    }
-
-    private void showOrUpdateConnectionDialog(ReaderState state) {
-        ReaderConnectionDialog dialog = (ReaderConnectionDialog) getParentFragmentManager()
-                .findFragmentByTag(CONNECTION_DIALOG_TAG);
-        if (dialog == null) {
-            dialog = new ReaderConnectionDialog();
-            dialog.show(getParentFragmentManager(), CONNECTION_DIALOG_TAG);
-        }
-        dialog.setOnFailureDismissed(() -> session.acknowledgeConnectionFailure(state));
-        dialog.update(state.getPhase(), state.getMessage(), state.getConnectionFailure());
-    }
-
-    private void dismissConnectionDialog() {
-        ReaderConnectionDialog dialog = (ReaderConnectionDialog) getParentFragmentManager()
-                .findFragmentByTag(CONNECTION_DIALOG_TAG);
-        if (dialog != null) { dialog.dismissAllowingStateLoss(); }
-    }
-
-    private void dismissFragmentDialog(String tag) {
-        Fragment fragment = getParentFragmentManager().findFragmentByTag(tag);
-        if (fragment instanceof DialogFragment dialog) {
-            dialog.dismissAllowingStateLoss();
-        }
-    }
-
-    private static boolean isConnectingPhase(ConnectionPhase phase) {
-        return phase == ConnectionPhase.CONNECTING || phase == ConnectionPhase.DISCOVERING_SERVICES
-                || phase == ConnectionPhase.ENABLING_NOTIFICATIONS
-                || phase == ConnectionPhase.CONNECTING_DATA_CHANNEL
-                || phase == ConnectionPhase.VERIFYING_MODULE;
+        settingDialogs.confirmAndApply(settingName, newValueLabel, action, failureMessage,
+                rollback);
     }
 
     private String blfLabel(int profile) {

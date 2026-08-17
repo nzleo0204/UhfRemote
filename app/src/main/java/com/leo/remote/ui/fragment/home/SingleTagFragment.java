@@ -1,33 +1,26 @@
 package com.leo.remote.ui.fragment.home;
 
 import android.annotation.SuppressLint;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputLayout;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
-import com.leo.remote.reader.ChipModelFormatter;
 import com.leo.remote.reader.HexCodec;
 import com.leo.remote.reader.InventoryMaskConfig;
+import com.leo.remote.reader.InventoryMaskFormParser;
 import com.leo.remote.reader.ProtocolEncoding;
 import com.leo.remote.reader.ReaderConfiguration;
 import com.leo.remote.reader.ReaderObserver;
@@ -36,8 +29,14 @@ import com.leo.remote.reader.ReaderState;
 import com.leo.remote.reader.ReaderTag;
 import com.leo.remote.reader.TagReadResult;
 import com.leo.remote.reader.TagProtocol;
+import com.leo.remote.reader.SingleTagReadFormatter;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.ui.reader.common.InventoryMaskPanelController;
+import com.leo.remote.ui.reader.singletag.TagKillDialog;
+import com.leo.remote.ui.reader.singletag.TagLockDialog;
+import com.leo.remote.ui.reader.singletag.TagWriteDialog;
+import com.leo.remote.util.ThrowableUtils;
 import java.util.concurrent.CompletableFuture;
 
 /** Single-target RFID operations. */
@@ -77,19 +76,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private View updateEpcAction;
     private View lockAction;
     private View destroyAction;
-    private View maskPanelContent;
-    private Spinner maskBankSpinner;
-    private EditText maskOffsetView;
-    private EditText maskLengthView;
-    private EditText maskHexView;
-    private MaterialButton maskToggleButton;
-    private TextView maskLengthHintView;
-    private TextView maskStatusView;
-    private ImageView maskExpandView;
+    private InventoryMaskPanelController maskPanel;
     private ReaderTag currentTag;
     private ReaderState readerState = ReaderState.disconnected();
-    private InventoryMaskConfig activeMask;
-    private boolean maskExpanded;
 
     private int lastReadBankPosition = -1;
     private AlertDialog activeDialog;
@@ -131,44 +120,16 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateEpcAction = findViewById(R.id.ll_single_update_epc);
         lockAction = findViewById(R.id.ll_single_lock);
         destroyAction = findViewById(R.id.ll_single_destroy);
-        maskPanelContent = findViewById(R.id.ll_inventory_mask_content);
-        maskBankSpinner = findViewById(R.id.sp_inventory_mask_bank);
-        maskOffsetView = findViewById(R.id.et_inventory_mask_offset);
-        maskLengthView = findViewById(R.id.et_inventory_mask_length);
-        maskHexView = findViewById(R.id.et_inventory_mask_hex);
-        maskToggleButton = findViewById(R.id.btn_inventory_mask_toggle);
-        maskLengthHintView = findViewById(R.id.tv_inventory_mask_length_hint);
-        maskStatusView = findViewById(R.id.tv_inventory_mask_status);
-        maskExpandView = findViewById(R.id.iv_inventory_mask_expand);
+        maskPanel = new InventoryMaskPanelController(this,
+                findViewById(R.id.single_tag_root),
+                InventoryMaskPanelController.Appearance.SINGLE_TAG,
+                new InventoryMaskPanelController.Listener() {
+                    @Override public void onApplyMask() { applyMask(); }
+                    @Override public void onClearMask() { clearMask(); }
+                });
 
         // 初始化读取参数
         initReadParams();
-
-        maskBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(
-                        readerState.getProtocol(), position)));
-            }
-
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        TextWatcher maskFormWatcher = new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence text, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable editable) { updateMaskControls(); }
-        };
-        maskHexView.addTextChangedListener(maskFormWatcher);
-        maskLengthView.addTextChangedListener(maskFormWatcher);
-        maskHexView.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) { return; }
-            int bitLength = maskHexView.getText().toString().trim().length() * 4;
-            if (readerState.getProtocol() == TagProtocol.ISO_18000_6B) {
-                bitLength -= bitLength % 8;
-            }
-            maskLengthView.setText(bitLength == 0 ? "" : String.valueOf(bitLength));
-        });
-        updateMaskBanks(readerState.getProtocol());
 
         readButton.setOnClickListener(view -> readTag());
         fillDataMaskButton.setOnClickListener(view -> fillMaskFromReadData());
@@ -176,15 +137,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
         lockAction.setOnClickListener(view -> showLockDialog());
         destroyAction.setOnClickListener(view -> showKillDialog());
-        findViewById(R.id.row_inventory_mask_toggle).setOnClickListener(view -> {
-            dismissMaskKeyboard();
-            maskExpanded = !maskExpanded;
-            updateMaskControls();
-        });
-        maskToggleButton.setOnClickListener(view -> toggleMask());
         findViewById(R.id.single_tag_root).setOnClickListener(view -> dismissMaskKeyboard());
         refreshOperations();
-        updateMaskControls();
+        maskPanel.setConnected(false);
     }
 
     @Override
@@ -210,7 +165,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         readerState = state;
         if (!isViewReady()) { return; }
         if (previousProtocol != state.getProtocol()) {
-            updateMaskBanks(state.getProtocol());
+            maskPanel.updateProtocol(state.getProtocol());
             updateReadBanks(state.getProtocol());
         }
         if (!state.isConnected()) {
@@ -218,7 +173,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             readResultPanel.setVisibility(View.GONE);
         }
         refreshOperations();
-        updateMaskControls();
+        maskPanel.setConnected(state.isConnected());
     }
 
     @Override
@@ -234,10 +189,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onSingleTagMaskChanged(@Nullable InventoryMaskConfig config) {
-        activeMask = config;
         if (!isViewReady()) { return; }
-        if (config != null) { bindMaskForm(config); }
-        updateMaskControls();
+        maskPanel.setActiveMask(config);
     }
 
     private void initReadParams() {
@@ -371,7 +324,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                         readButton.setText(R.string.single_read_tag);
 
                         if (error != null) {
-                            toast(getString(R.string.single_read_failed, rootMessage(error)));
+                            toast(getString(R.string.single_read_failed,
+                                    ThrowableUtils.rootMessage(error)));
                             readResultPanel.setVisibility(View.GONE);
                             readDataGroup.setVisibility(View.GONE);
                         } else {
@@ -389,45 +343,23 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             int requestedLength) {
         lastReadBankPosition = bankPosition;
         readResultPanel.setVisibility(View.VISIBLE);
-
-        byte[] data = result.getData();
-        byte[] epcBytes = result.getEpc();
-        String hexData = HexCodec.encode(data, data.length);
-        String hexEpc = HexCodec.encode(epcBytes, epcBytes.length);
-
-        boolean is6C = (protocol == TagProtocol.ISO_18000_6C);
-        boolean isEpcBank = (is6C && bankPosition == 1);
-        boolean isTidBank = (is6C && bankPosition == 2);
-        String displayData = limitReadHex(hexData, requestedLength, protocol);
-        if (displayData.isEmpty() && isEpcBank) {
-            displayData = limitReadHex(hexEpc, requestedLength, protocol);
-        }
-
-        String bankLabel = getBankLabel(bankPosition, protocol);
-        dataLabelView.setText(bankLabel);
-        readDataView.setText(displayData);
+        SingleTagReadFormatter.Presentation presentation = SingleTagReadFormatter.format(
+                result, protocol, bankPosition, requestedLength);
+        dataLabelView.setText(presentation.bankLabel);
+        readDataView.setText(presentation.dataHex);
         readDataGroup.setVisibility(View.VISIBLE);
-        fillDataMaskButton.setVisibility(displayData.isEmpty() ? View.GONE : View.VISIBLE);
+        fillDataMaskButton.setVisibility(
+                presentation.dataHex.isEmpty() ? View.GONE : View.VISIBLE);
 
-        // ===== 芯片型号（仅 TID Bank）=====
-        if (isTidBank) {
-            String chipModel = result.getChipModel();
-            if (chipModel.isEmpty()) {
-                chipModel = ChipModelFormatter.formatFromTid(displayData);
-            }
-            chipGroup.setVisibility(chipModel.isEmpty() ? View.GONE : View.VISIBLE);
-            chipView.setText(chipModel);
-        } else {
-            chipGroup.setVisibility(View.GONE);
-        }
+        chipGroup.setVisibility(presentation.chipModel.isEmpty() ? View.GONE : View.VISIBLE);
+        chipView.setText(presentation.chipModel);
 
-        // ===== RSSI（次要信息）=====
-        rssiGroup.setVisibility(result.getRssi() == 0 ? View.GONE : View.VISIBLE);
-        rssiView.setText(result.getRssi() == 0 ? "-" : result.getRssi() + " dBm");
-        if (hexEpc.isEmpty()) {
+        rssiGroup.setVisibility(presentation.rssi == 0 ? View.GONE : View.VISIBLE);
+        rssiView.setText(presentation.rssi == 0 ? "-" : presentation.rssi + " dBm");
+        if (presentation.fullEpcHex.isEmpty()) {
             epcView.setVisibility(View.GONE);
         } else {
-            epcView.setText("标签epc全值：" + hexEpc);
+            epcView.setText("标签epc全值：" + presentation.fullEpcHex);
             epcView.setVisibility(View.VISIBLE);
         }
     }
@@ -442,33 +374,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     }
 
     private int defaultReadLength(TagProtocol protocol, int bankPosition) {
-        if (protocol == TagProtocol.ISO_18000_6C) {
-            switch (bankPosition) {
-                case 0: return 2;
-                case 1:
-                case 2: return 6;
-                case 3: return 8;
-            }
-        }
-        return protocol == TagProtocol.ISO_18000_6B ? 8 : 4;
-    }
-
-    private String limitReadHex(String hex, int length, TagProtocol protocol) {
-        int maxBytes = protocol == TagProtocol.ISO_18000_6B ? length : length * 2;
-        int maxCharacters = Math.max(0, maxBytes * 2);
-        return hex.length() <= maxCharacters ? hex : hex.substring(0, maxCharacters);
-    }
-
-    private String getBankLabel(int bankPosition, TagProtocol protocol) {
-        if (protocol == TagProtocol.ISO_18000_6C) {
-            switch (bankPosition) {
-                case 0: return "Reserved";
-                case 1: return "EPC";
-                case 2: return "TID";
-                case 3: return "USER";
-            }
-        }
-        return "数据";
+        return SingleTagReadFormatter.defaultLength(protocol, bankPosition);
     }
 
     private void fillMaskFromReadData() {
@@ -476,7 +382,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     }
 
     private void fillMask(int bankPosition, String hex) {
-        if (activeMask != null) {
+        if (maskPanel.getActiveMask() != null) {
             toast(R.string.single_mask_active_warning);
             return;
         }
@@ -484,75 +390,27 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             toast(R.string.single_mask_empty_warning);
             return;
         }
-        maskExpanded = true;
-        maskBankSpinner.setSelection(bankPosition);
-        maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(
-                readerState.getProtocol(), bankPosition)));
-        maskHexView.setText(hex);
-        maskLengthView.setText(String.valueOf(hex.length() * 4));
-        updateMaskControls();
+        maskPanel.fill(bankPosition, hex);
     }
 
     @SingleClick
     private void showWriteDialog(boolean updateEpc) {
         if (!ensureTarget()) { return; }
-        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_write_dialog, null, false);
-        Spinner bankSpinner = content.findViewById(R.id.sp_tag_bank);
-        Spinner gbSubBankSpinner = content.findViewById(R.id.sp_tag_gb_sub_bank);
-        View gbSubBankGroup = content.findViewById(R.id.group_tag_gb_sub_bank);
-        TextInputLayout auxiliaryInput = content.findViewById(R.id.til_tag_length);
-        EditText addressView = content.findViewById(R.id.et_tag_address);
-        EditText lengthView = content.findViewById(R.id.et_tag_length);
-        EditText dataView = content.findViewById(R.id.et_tag_data);
-        EditText passwordView = content.findViewById(R.id.et_tag_password);
-        String[] banks = bankLabels(readerState.getProtocol());
-        bankSpinner.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, banks));
-        gbSubBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                getResources().getStringArray(R.array.single_gb_sub_bank_labels)));
-        addressView.setText(updateEpc ? "1" : "0");
         TagProtocol protocol = readerState.getProtocol();
-        auxiliaryInput.setHint(protocol == TagProtocol.ISO_18000_6B
-                ? getString(R.string.single_retry_count_hint)
-                : getString(R.string.single_block_length_hint));
-        auxiliaryInput.setVisibility(protocol == TagProtocol.ISO_18000_6C || updateEpc
-                ? View.GONE : View.VISIBLE);
-        lengthView.setText(protocol == TagProtocol.ISO_18000_6B ? "3" : "1");
-        passwordView.setText("00000000");
-        bankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                gbSubBankGroup.setVisibility(protocol == TagProtocol.GB_T_29768 && position == 3
-                        ? View.VISIBLE : View.GONE);
-            }
-
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        if (updateEpc) {
-            bankSpinner.setSelection(Math.min(1, banks.length - 1));
-            bankSpinner.setEnabled(false);
-            dataView.setText(currentTag.id);
-        }
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(updateEpc ? R.string.single_update_epc_title : R.string.single_write_title)
-                .setView(content)
-                .setNegativeButton(R.string.common_cancel, null)
-                .setPositiveButton(R.string.single_execute, null)
-                .create();
-        trackDialog(dialog);
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
+        AlertDialog dialog = TagWriteDialog.create(this, protocol, updateEpc, currentTag.id,
+                (formDialog, form) -> {
                     try {
-                        byte[] password = parsePassword(passwordView.getText().toString());
-                        byte[] inputData = HexCodec.decode(dataView.getText().toString());
+                        byte[] password = parsePassword(form.password);
+                        byte[] inputData = HexCodec.decode(form.data);
                         int bank = updateEpc ? 1 : ProtocolEncoding.encodeBank(protocol,
-                                bankSpinner.getSelectedItemPosition(), gbSubBankSpinner.getSelectedItemPosition());
-                        int address = parseUnsigned(addressView, R.string.single_start_address);
+                                form.bankPosition, form.gbSubBankPosition);
+                        int address = parseUnsigned(form.address, R.string.single_start_address);
                         int blockOrRetry = protocol == TagProtocol.ISO_18000_6C || updateEpc
-                                ? 0 : parseUnsigned(lengthView, R.string.single_block_or_retry);
+                                ? 0 : parseUnsigned(form.auxiliary,
+                                        R.string.single_block_or_retry);
                         byte[] writeData = inputData;
                         int writeLength;
-                        if (updateEpc && readerState.getProtocol() == TagProtocol.ISO_18000_6C) {
+                        if (updateEpc && protocol == TagProtocol.ISO_18000_6C) {
                             writeData = withEpcPcWord(inputData);
                             address = 1;
                             writeLength = writeData.length / 2;
@@ -560,81 +418,58 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                             address = ProtocolEncoding.encodeAddress(protocol, address, blockOrRetry);
                             writeLength = ProtocolEncoding.writeLength(protocol, inputData);
                         }
-                        int finalWriteLength = writeLength;
                         int finalAddress = address;
+                        int finalWriteLength = writeLength;
                         byte[] finalWriteData = writeData;
                         confirmSingleTagMask(() -> executeStatus(session.writeCurrentTag(
                                         finalWriteLength, finalAddress, bank, password, finalWriteData),
                                 updateEpc ? R.string.single_update_epc_operation
-                                        : R.string.single_write_operation, dialog));
+                                        : R.string.single_write_operation, formDialog));
                     } catch (IllegalArgumentException error) {
                         toast(error.getMessage());
                     }
-                }));
+                });
+        trackDialog(dialog);
         dialog.show();
     }
 
     @SingleClick
     private void showLockDialog() {
         if (!ensureTarget()) { return; }
-        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_lock_dialog, null, false);
-        Spinner bank = content.findViewById(R.id.sp_tag_lock_bank);
-        Spinner policy = content.findViewById(R.id.sp_tag_lock_policy);
-        EditText password = content.findViewById(R.id.et_tag_lock_password);
-        bank.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                getResources().getStringArray(R.array.single_lock_bank_labels)));
-        policy.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                getResources().getStringArray(R.array.single_lock_policy_labels)));
-        password.setText("00000000");
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_lock_title)
-                .setView(content).setNegativeButton(R.string.common_cancel, null)
-                .setPositiveButton(R.string.single_execute, null).create();
+        AlertDialog dialog = TagLockDialog.create(this, (formDialog, bank, policy, password) -> {
+            try {
+                byte[] parsedPassword = parsePassword(password);
+                confirmSingleTagMask(() -> executeStatus(session.lockCurrentTag(parsedPassword,
+                                bank, policy), R.string.single_lock_operation, formDialog));
+            } catch (IllegalArgumentException error) { toast(error.getMessage()); }
+        });
         trackDialog(dialog);
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
-                    try {
-                        byte[] parsedPassword = parsePassword(password.getText().toString());
-                        int selectedBank = bank.getSelectedItemPosition();
-                        int selectedPolicy = policy.getSelectedItemPosition();
-                        confirmSingleTagMask(() -> executeStatus(session.lockCurrentTag(parsedPassword,
-                                        selectedBank, selectedPolicy),
-                                R.string.single_lock_operation, dialog));
-                    } catch (IllegalArgumentException error) { toast(error.getMessage()); }
-                }));
         dialog.show();
     }
 
     @SingleClick
     private void showKillDialog() {
         if (!ensureTarget()) { return; }
-        View content = LayoutInflater.from(requireContext()).inflate(R.layout.tag_kill_dialog, null, false);
-        EditText accessPassword = content.findViewById(R.id.et_tag_kill_access_password);
-        EditText killPassword = content.findViewById(R.id.et_tag_kill_password);
-        accessPassword.setText("00000000");
-        AlertDialog form = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_kill_title)
-                .setView(content).setNegativeButton(R.string.common_cancel, null)
-                .setPositiveButton(R.string.single_next_step, null).create();
+        AlertDialog form = TagKillDialog.create(this, (formDialog, accessValue, killValue) -> {
+            try {
+                byte[] access = parsePassword(accessValue);
+                byte[] kill = parsePassword(killValue);
+                AlertDialog confirmation = new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.single_kill_confirm_title)
+                        .setMessage(R.string.single_kill_confirm_message)
+                        .setNegativeButton(R.string.common_cancel, null)
+                        .setPositiveButton(R.string.single_kill_confirm, (dialog, which) -> {
+                            confirmSingleTagMask(() -> {
+                                formDialog.dismiss();
+                                executeStatus(session.killCurrentTag(access, kill),
+                                        R.string.single_kill_operation, null);
+                            });
+                        }).create();
+                trackDialog(confirmation);
+                confirmation.show();
+            } catch (IllegalArgumentException error) { toast(error.getMessage()); }
+        });
         trackDialog(form);
-        form.setOnShowListener(ignored -> form.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
-                    try {
-                        byte[] access = parsePassword(accessPassword.getText().toString());
-                        byte[] kill = parsePassword(killPassword.getText().toString());
-                        AlertDialog confirmation = new MaterialAlertDialogBuilder(requireContext())
-                                .setTitle(R.string.single_kill_confirm_title)
-                                .setMessage(R.string.single_kill_confirm_message)
-                                .setNegativeButton(R.string.common_cancel, null)
-                                .setPositiveButton(R.string.single_kill_confirm, (dialog, which) -> {
-                                    confirmSingleTagMask(() -> {
-                                        form.dismiss();
-                                        executeStatus(session.killCurrentTag(access, kill),
-                                                R.string.single_kill_operation, null);
-                                    });
-                                }).create();
-                        trackDialog(confirmation);
-                        confirmation.show();
-                    } catch (IllegalArgumentException error) { toast(error.getMessage()); }
-                }));
         form.show();
     }
 
@@ -659,225 +494,29 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     // ========== Mask management ==========
 
-    @SingleClick
-    private void toggleMask() {
-        if (activeMask != null) {
-            clearMask();
-        } else {
-            applyMask();
-        }
-    }
-
     private void applyMask() {
         if (!readerState.isConnected()) {
             requireReaderOnline();
             return;
         }
-        try {
-            InventoryMaskConfig config = parseMaskForm();
-            session.setSingleTagMask(config);
-            Log.i(TAG, "single-tag mask set bank=" + config.bank + " offsetBits="
-                    + config.offsetBits + " lengthBits=" + config.lengthBits);
-            toast(R.string.inventory_mask_applied);
-        } catch (IllegalArgumentException error) {
-            maskExpanded = true;
-            focusInvalidMaskField();
-            toast(error.getMessage());
+        InventoryMaskFormParser.Result parsed = maskPanel.parse();
+        if (!parsed.isSuccess()) {
+            maskPanel.setExpanded(true);
+            maskPanel.focus(parsed.getError());
+            toast(maskErrorMessage(parsed.getError()));
+            return;
         }
-        updateMaskControls();
+        InventoryMaskConfig config = parsed.getConfig();
+        session.setSingleTagMask(config);
+        Log.i(TAG, "single-tag mask set bank=" + config.bank + " offsetBits="
+                + config.offsetBits + " lengthBits=" + config.lengthBits);
+        toast(R.string.inventory_mask_applied);
     }
 
     private void clearMask() {
         session.setSingleTagMask(null);
         Log.i(TAG, "single-tag mask cleared");
         toast(R.string.inventory_mask_cleared);
-        updateMaskControls();
-    }
-
-    private void focusInvalidMaskField() {
-        EditText target = maskHexView;
-        String hex = maskHexView.getText().toString().trim();
-        if (hex.matches("[0-9A-Fa-f]+") && (hex.length() & 1) == 0) {
-            target = maskLengthView;
-            try {
-                if (Integer.parseInt(maskLengthView.getText().toString()) > 0) {
-                    target = maskOffsetView;
-                }
-            } catch (NumberFormatException ignored) {
-                target = maskLengthView;
-            }
-        }
-        target.requestFocus();
-    }
-
-    private InventoryMaskConfig parseMaskForm() {
-        TagProtocol protocol = readerState.getProtocol();
-        int offset = parseMaskInteger(maskOffsetView, R.string.inventory_mask_offset);
-        int length = parseMaskInteger(maskLengthView, R.string.inventory_mask_length);
-        if (length == 0) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_length_positive));
-        }
-        String hex = maskHexView.getText().toString().trim();
-        if (hex.isEmpty()) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_hex_required));
-        }
-        if ((hex.length() & 1) != 0 || !hex.matches("[0-9A-Fa-f]+")) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_hex_invalid));
-        }
-        byte[] mask = HexCodec.decode(hex);
-        if (mask.length > 64) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_too_long));
-        }
-        if (length > mask.length * 8) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_length_exceeds_data));
-        }
-        if (protocol == TagProtocol.ISO_18000_6B && (length & 7) != 0) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_6b_byte_aligned));
-        }
-        if ((protocol == TagProtocol.GJB_7377_1 || protocol == TagProtocol.GB_T_29768)
-                && offset > 0xFF) {
-            throw new IllegalArgumentException(getString(R.string.inventory_mask_offset_range));
-        }
-        return new InventoryMaskConfig(maskBank(protocol), offset, length, mask);
-    }
-
-    private int parseMaskInteger(EditText view, @StringRes int label) {
-        try {
-            int value = Integer.parseInt(view.getText().toString());
-            if (value < 0) { throw new NumberFormatException(); }
-            return value;
-        } catch (NumberFormatException error) {
-            throw new IllegalArgumentException(getString(
-                    R.string.inventory_mask_number_invalid, getString(label)));
-        }
-    }
-
-    private int maskBank(TagProtocol protocol) {
-        return switch (protocol) {
-            case ISO_18000_6C, GB_T_29768 -> maskBankSpinner.getSelectedItemPosition();
-            case ISO_18000_6B -> 0;
-            case GJB_7377_1 -> 1;
-        };
-    }
-
-    /** Rebuilds bank choices because each RFID protocol exposes different memory areas. */
-    private void updateMaskBanks(TagProtocol protocol) {
-        int labels = switch (protocol) {
-            case ISO_18000_6C -> R.array.single_bank_labels_6c;
-            case ISO_18000_6B -> R.array.inventory_mask_bank_uid;
-            case GJB_7377_1 -> R.array.inventory_mask_bank_epc;
-            case GB_T_29768 -> R.array.single_bank_labels_gb;
-        };
-        ArrayAdapter<CharSequence> bankAdapter = ArrayAdapter.createFromResource(requireContext(),
-                labels, android.R.layout.simple_spinner_item);
-        bankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        maskBankSpinner.setAdapter(bankAdapter);
-        maskBankSpinner.setSelection(protocol == TagProtocol.ISO_18000_6C
-                || protocol == TagProtocol.GB_T_29768 ? 1 : 0);
-        maskOffsetView.setText(String.valueOf(ProtocolEncoding.defaultMaskOffsetBits(protocol,
-                maskBankSpinner.getSelectedItemPosition())));
-        updateMaskControls();
-        Log.d(TAG, "single-tag mask banks updated protocol=" + protocol);
-    }
-
-    private void bindMaskForm(InventoryMaskConfig config) {
-        TagProtocol protocol = readerState.getProtocol();
-        int position = switch (protocol) {
-            case ISO_18000_6C, GB_T_29768 -> config.bank;
-            case ISO_18000_6B, GJB_7377_1 -> 0;
-        };
-        if (position >= 0 && position < maskBankSpinner.getCount()) {
-            maskBankSpinner.setSelection(position);
-        }
-        maskOffsetView.setText(String.valueOf(config.offsetBits));
-        maskLengthView.setText(String.valueOf(config.lengthBits));
-        maskHexView.setText(HexCodec.encode(config.getMask(), config.getMaskByteLength()));
-    }
-
-    private void updateMaskControls() {
-        if (maskPanelContent == null) { return; }
-        boolean connected = readerState.isConnected();
-        boolean formValid = updateMaskLengthHint();
-        maskPanelContent.setVisibility(maskExpanded ? View.VISIBLE : View.GONE);
-        maskPanelContent.setAlpha(connected ? 1f : 0.48f);
-        maskExpandView.setImageResource(maskExpanded
-                ? R.drawable.arrows_top_ic : R.drawable.arrows_bottom_ic);
-        setEnabledRecursively(maskPanelContent, connected);
-        maskOffsetView.setEnabled(connected
-                && readerState.getProtocol() != TagProtocol.ISO_18000_6B);
-        boolean masked = activeMask != null;
-        maskToggleButton.setText(masked
-                ? R.string.inventory_mask_cancel : R.string.inventory_mask_apply);
-        maskToggleButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(),
-                masked ? R.color.rfid_danger_button_background
-                        : R.color.rfid_primary_button_background));
-        maskToggleButton.setTextColor(ContextCompat.getColorStateList(requireContext(),
-                R.color.rfid_primary_button_text));
-        maskToggleButton.setEnabled(connected && (masked || formValid));
-        maskStatusView.setVisibility(View.VISIBLE);
-        if (masked) {
-            Object bank = maskBankSpinner.getSelectedItem();
-            String bankLabel = bank == null ? "" : bank.toString();
-            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_green_bg);
-            maskStatusView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-            maskStatusView.setText(getString(R.string.inventory_mask_active, bankLabel,
-                    activeMask.offsetBits, activeMask.lengthBits));
-        } else {
-            maskStatusView.setBackgroundResource(R.drawable.rfid_chip_gray_bg);
-            maskStatusView.setTextColor(ContextCompat.getColor(
-                    requireContext(), R.color.rfid_text_secondary));
-            maskStatusView.setText(R.string.inventory_mask_inactive);
-        }
-    }
-
-    private boolean updateMaskLengthHint() {
-        String hex = maskHexView.getText().toString().trim();
-        if (hex.isEmpty()) {
-            setMaskLengthHint(R.string.inventory_mask_length_hint_empty, false);
-            return false;
-        }
-        if ((hex.length() & 1) != 0 || !hex.matches("[0-9A-Fa-f]+")) {
-            setMaskLengthHint(R.string.inventory_mask_length_hint_odd, true, hex.length());
-            return false;
-        }
-        int dataBits = hex.length() * 4;
-        int length;
-        try {
-            length = Integer.parseInt(maskLengthView.getText().toString());
-        } catch (NumberFormatException error) {
-            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
-            return false;
-        }
-        if (length <= 0) {
-            setMaskLengthHint(R.string.inventory_mask_length_positive, true);
-            return false;
-        }
-        if (length > dataBits) {
-            setMaskLengthHint(R.string.inventory_mask_length_hint_short, true, length, dataBits);
-            return false;
-        }
-        if (readerState.getProtocol() == TagProtocol.ISO_18000_6B && (length & 7) != 0) {
-            setMaskLengthHint(R.string.inventory_mask_6b_byte_aligned, true);
-            return false;
-        }
-        setMaskLengthHint(R.string.inventory_mask_length_hint_ok, false,
-                hex.length() / 2, dataBits, length);
-        return true;
-    }
-
-    private void setMaskLengthHint(@StringRes int message, boolean warning, Object... arguments) {
-        maskLengthHintView.setText(arguments.length == 0
-                ? getString(message) : getString(message, arguments));
-        maskLengthHintView.setTextColor(ContextCompat.getColor(requireContext(),
-                warning ? R.color.rfid_warning : R.color.rfid_text_muted));
-    }
-
-    private void setEnabledRecursively(View view, boolean enabled) {
-        view.setEnabled(enabled);
-        if (!(view instanceof ViewGroup group)) { return; }
-        for (int i = 0; i < group.getChildCount(); i++) {
-            setEnabledRecursively(group.getChildAt(i), enabled);
-        }
     }
 
     private void dismissMaskKeyboard() {
@@ -896,7 +535,8 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             hideLoadingDialog();
             String operation = getString(operationRes);
             if (error != null) {
-                toast(getString(R.string.single_operation_failed, operation, rootMessage(error)));
+                toast(getString(R.string.single_operation_failed, operation,
+                        ThrowableUtils.rootMessage(error)));
             } else if (status != 0) {
                 toast(getString(R.string.single_operation_error_code, operation, status));
             } else {
@@ -950,8 +590,12 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     }
 
     private int parseUnsigned(EditText view, @StringRes int nameRes) {
+        return parseUnsigned(view.getText().toString(), nameRes);
+    }
+
+    private int parseUnsigned(String text, @StringRes int nameRes) {
         try {
-            int value = Integer.parseInt(view.getText().toString());
+            int value = Integer.parseInt(text);
             if (value < 0) { throw new NumberFormatException(); }
             return value;
         } catch (NumberFormatException error) {
@@ -981,13 +625,22 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         return getResources().getStringArray(labelsRes);
     }
 
-    private static String chipLabel(String tid) {
-        return tid != null && (tid.startsWith("E28011") || tid.startsWith("E28012"))
-                ? "Impinj Monza" : "-";
-    }
-
-    private static String rootMessage(Throwable error) {
-        Throwable cause = error.getCause();
-        return cause == null ? error.getMessage() : cause.getMessage();
+    private String maskErrorMessage(InventoryMaskFormParser.Error error) {
+        if (error == InventoryMaskFormParser.Error.OFFSET_INVALID
+                || error == InventoryMaskFormParser.Error.LENGTH_INVALID) {
+            int label = error == InventoryMaskFormParser.Error.OFFSET_INVALID
+                    ? R.string.inventory_mask_offset : R.string.inventory_mask_length;
+            return getString(R.string.inventory_mask_number_invalid, getString(label));
+        }
+        return getString(switch (error) {
+            case LENGTH_NOT_POSITIVE -> R.string.inventory_mask_length_positive;
+            case HEX_REQUIRED -> R.string.inventory_mask_hex_required;
+            case HEX_INVALID -> R.string.inventory_mask_hex_invalid;
+            case DATA_TOO_LONG -> R.string.inventory_mask_too_long;
+            case LENGTH_EXCEEDS_DATA -> R.string.inventory_mask_length_exceeds_data;
+            case SIX_B_LENGTH_NOT_BYTE_ALIGNED -> R.string.inventory_mask_6b_byte_aligned;
+            case OFFSET_OUT_OF_RANGE -> R.string.inventory_mask_offset_range;
+            default -> R.string.inventory_mask_hex_invalid;
+        });
     }
 }
