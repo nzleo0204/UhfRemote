@@ -47,6 +47,21 @@ public final class ReaderConnectionManagerTest {
     }
 
     @Test
+    public void staleAttempt_cannotPublishProgressOrFailure() {
+        long stale = manager.beginAttempt();
+        long current = manager.beginAttempt();
+        ReaderState staleFailure = new ReaderState.Builder()
+                .phase(ConnectionPhase.FAILED).build();
+        ReaderState currentProgress = new ReaderState.Builder()
+                .phase(ConnectionPhase.VERIFYING_MODULE).build();
+
+        assertFalse(manager.publishIfCurrent(stale, staleFailure));
+        assertTrue(manager.publishIfCurrent(current, currentProgress));
+        assertSame(currentProgress, manager.getState());
+        assertEquals(1, consumedStates.size());
+    }
+
+    @Test
     public void unexpectedDisconnect_setsAlertUntilAcknowledged() {
         ReaderState disconnected = new ReaderState.Builder()
                 .phase(ConnectionPhase.DISCONNECTED)

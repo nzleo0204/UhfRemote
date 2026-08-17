@@ -22,6 +22,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hjq.permissions.XXPermissions;
@@ -274,16 +276,20 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroyView() {
         dismissSettingWaitDialog();
         dismissParameterUpdateDialog();
+        dismissConnectionDialog();
+        dismissFragmentDialog(DEVICE_INFO_DIALOG_TAG);
+        dismissFragmentDialog("ble_devices");
         if (session != null) { session.removeObserver(this); }
-        super.onDestroy();
+        super.onDestroyView();
     }
 
     @Override
     public void onReaderStateChanged(ReaderState state) {
         readerState = state;
+        if (!isViewReady()) { return; }
         boolean connected = state.isConnected();
         ReaderConnectionStatus connectionStatus = state.getConnectionStatus();
         statusView.setText(AppActivity.readerStatusText(connectionStatus));
@@ -312,7 +318,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             bindingUi = false;
         }
         boolean parameterUpdating = state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS;
-        bindTransportRows(bleSwitch.isChecked(), connected || parameterUpdating);
+        bindTransportRows(bleSwitch.isChecked(), state.hasTransportLink());
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
             bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
@@ -338,6 +344,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     @Override
     public void onReaderConfigurationChanged(ReaderConfiguration value) {
         configuration = value;
+        if (!isViewReady()) { return; }
         bindingUi = true;
         ModuleSubtype subtype = readerState.getModuleSubtype();
         boolean rm610Cmt = subtype == ModuleSubtype.RM610
@@ -419,6 +426,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         }
         XXPermissions.with(this).permission(PermissionLists.getPostNotificationsPermission())
                 .request((grantedList, deniedList) -> {
+                    if (!isViewReady()) { return; }
                     if (!deniedList.isEmpty()) {
                         Log.w(TAG, "POST_NOTIFICATIONS denied; foreground notification may be hidden");
                         toast(R.string.reader_notification_permission_denied);
@@ -435,12 +443,12 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     }
 
     private void showWifiInputGuard() {
-        wifiAddressView.postDelayed(() -> {
+        wifiAddressView.postDelayed(() -> runOnViewThread(() -> {
             Rect inputBounds = new Rect();
             wifiAddressView.getDrawingRect(inputBounds);
             wifiAddressView.requestRectangleOnScreen(inputBounds, false);
             keepWifiInputAboveKeyboard();
-        }, 120);
+        }), 120);
     }
 
     private void keepWifiInputAboveKeyboard() {
@@ -512,7 +520,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                 .setMessage(R.string.config_refreshing);
         settingWaitDialog.show();
         session.refreshConfiguration().whenComplete((status, error) ->
-                requireActivity().runOnUiThread(() -> {
+                runOnViewThread(() -> {
                     dismissSettingWaitDialog();
                     if (error != null) {
                         Throwable cause = error;
@@ -607,9 +615,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                     return status;
                 })
                 .whenComplete((status, error) -> {
-                    HomeActivity activity = getAttachActivity();
-                    if (activity == null) { return; }
-                    activity.runOnUiThread(() -> {
+                    runOnViewThread(() -> {
                         dismissSettingWaitDialog();
                         if (error != null || status == null || status != 0) {
                             int errorCode = status == null ? -1 : status;
@@ -620,7 +626,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                             if (cause instanceof ReaderException) {
                                 errorCode = ((ReaderException) cause).getErrorCode();
                             }
-                            new MessageDialog.Builder(activity)
+                            new MessageDialog.Builder(requireActivity())
                                     .setTitle(R.string.config_inventory_area_set_failed)
                                     .setMessage(getString(R.string.config_error_code,
                                             getString(R.string.config_inventory_area_set_failed),
@@ -843,9 +849,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                                         : R.string.config_setting_wait);
                         settingWaitDialog.show();
                         action.get().whenComplete((status, error) -> {
-                            HomeActivity activity = getAttachActivity();
-                            if (activity == null) { return; }
-                            activity.runOnUiThread(() -> {
+                            runOnViewThread(() -> {
                                 dismissSettingWaitDialog();
                                 if (error != null || status == null || status != 0) {
                                     rollback.run();
@@ -859,7 +863,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
                                     }
                                     String message = getString(R.string.config_error_code,
                                             getString(failureMessage), errorCode);
-                                    new MessageDialog.Builder(activity)
+                                    new MessageDialog.Builder(requireActivity())
                                             .setTitle(failureMessage)
                                             .setMessage(message)
                                             .setCancel((CharSequence) null)
@@ -924,6 +928,13 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         ReaderConnectionDialog dialog = (ReaderConnectionDialog) getParentFragmentManager()
                 .findFragmentByTag(CONNECTION_DIALOG_TAG);
         if (dialog != null) { dialog.dismissAllowingStateLoss(); }
+    }
+
+    private void dismissFragmentDialog(String tag) {
+        Fragment fragment = getParentFragmentManager().findFragmentByTag(tag);
+        if (fragment instanceof DialogFragment dialog) {
+            dialog.dismissAllowingStateLoss();
+        }
     }
 
     private static boolean isConnectingPhase(ConnectionPhase phase) {

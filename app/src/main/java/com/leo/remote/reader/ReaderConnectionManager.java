@@ -45,6 +45,12 @@ public final class ReaderConnectionManager {
         publisher.publishState(updated);
     }
 
+    boolean publishIfCurrent(long attemptGeneration, @NonNull ReaderState updated) {
+        if (!isCurrent(attemptGeneration)) { return false; }
+        publish(updated);
+        return true;
+    }
+
     boolean isPendingDisconnectAlert() {
         return pendingDisconnectAlert;
     }

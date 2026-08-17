@@ -87,6 +87,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private boolean maskExpanded;
     private boolean maskOperationInFlight;
     private List<InventoryItem> exportItems = List.of();
+    private InventoryDetailSheet detailSheet;
 
     private final ActivityResultLauncher<String> createCsv = registerForActivityResult(
             new ActivityResultContracts.CreateDocument("text/csv"), this::writeCsv);
@@ -191,7 +192,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroyView() {
         Log.d(TAG, "销毁盘点页面，清理资源");
         if (session != null) {
             if (session.getState().isInventoryRunning()) {
@@ -200,14 +201,18 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
             }
             session.removeObserver(this);
         }
-        super.onDestroy();
+        if (detailSheet != null) {
+            detailSheet.dismiss();
+            detailSheet = null;
+        }
+        super.onDestroyView();
     }
 
     @Override
     public void onReaderStateChanged(ReaderState state) {
         TagProtocol previousProtocol = readerState.getProtocol();
         readerState = state;
-        if (!isViewAlive()) { return; }
+        if (!isViewReady()) { return; }
         if (previousProtocol != state.getProtocol()) {
             updateMaskBanks(state.getProtocol());
         }
@@ -222,7 +227,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onInventoryChanged(List<InventoryItem> items, long totalReads) {
-        if (!isViewAlive()) { return; }
+        if (!isViewReady()) { return; }
         Log.d(TAG, "盘点数据更新: " + items.size() + " 个标签, 总读取次数: " + totalReads);
         adapter.submitList(items);
         totalView.setText(getString(R.string.inventory_total, items.size()));
@@ -232,7 +237,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onReaderConfigurationChanged(ReaderConfiguration value) {
         configuration = value;
-        if (!isViewAlive()) { return; }
+        if (!isViewReady()) { return; }
         applyColumnVisibility();
     }
 
@@ -258,7 +263,9 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     private void showItemDetail(InventoryItem item) {
         InventoryArea area = InventoryArea.of(readerState.getProtocol(),
                 configuration == null ? 0 : configuration.inventoryArea);
-        new InventoryDetailSheet(requireContext(), item, area, this::fillMaskFromItem).show();
+        detailSheet = new InventoryDetailSheet(requireContext(), item, area, this::fillMaskFromItem);
+        detailSheet.setOnDismissListener(dialog -> detailSheet = null);
+        detailSheet.show();
     }
 
     private void fillMaskFromItem(int bank, String hexValue) {
@@ -308,7 +315,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
     }
 
     private void showResult(Integer status, Throwable error, @StringRes int message) {
-        requireActivity().runOnUiThread(() -> {
+        runOnViewThread(() -> {
             if (error != null) { toast(rootMessage(error)); }
             else if (status != null && status != 0) {
                 toast(getString(R.string.config_error_code, getString(message), status));
@@ -320,7 +327,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     @Override
     public void onInventoryMaskChanged(@Nullable InventoryMaskConfig config) {
-        if (!isViewAlive()) { return; }
+        if (!isViewReady()) { return; }
         activeMask = config;
         if (config != null) { bindMaskForm(config); }
         if (adapter != null) { adapter.setMaskConfig(config); }
@@ -371,9 +378,7 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
 
     private void showMaskResult(Integer status, Throwable error, @StringRes int successMessage,
             @StringRes int failureMessage) {
-        if (!isViewAlive()) { return; }
-        requireActivity().runOnUiThread(() -> {
-            if (!isViewAlive()) { return; }
+        runOnViewThread(() -> {
             maskOperationInFlight = false;
             if (error != null) {
                 Log.e(TAG, getString(failureMessage), error);
@@ -564,10 +569,6 @@ public final class InventoryFragment extends AppFragment<HomeActivity> implement
                 ? getString(message) : getString(message, arguments));
         maskLengthHintView.setTextColor(ContextCompat.getColor(requireContext(),
                 warning ? R.color.rfid_warning : R.color.rfid_text_muted));
-    }
-
-    private boolean isViewAlive() {
-        return getView() != null && isAdded();
     }
 
     private void syncMaskFromSession() {

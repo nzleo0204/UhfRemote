@@ -53,6 +53,20 @@ public final class ReaderState {
         return phase == ConnectionPhase.CONNECTED;
     }
 
+    /** Returns whether the underlying BLE or Wi-Fi transport is already available. */
+    public boolean hasTransportLink() {
+        return switch (phase) {
+            case CONNECTING_DATA_CHANNEL, VERIFYING_MODULE, UPDATING_PARAMETERS, CONNECTED -> true;
+            default -> false;
+        };
+    }
+
+    /** Returns whether the transport is linked but the reader is not operation-ready yet. */
+    public boolean isInitializing() {
+        return phase == ConnectionPhase.VERIFYING_MODULE
+                || phase == ConnectionPhase.UPDATING_PARAMETERS;
+    }
+
     public TransportType getTransport() { return transport; }
     public ConnectionPhase getPhase() { return phase; }
     public ModuleSubtype getModuleSubtype() { return moduleSubtype; }

@@ -3,23 +3,20 @@ package com.leo.remote.reader;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.annotation.Nullable;
 import cn.wandersnail.ble.Device;
 import com.leo.remote.R;
-import com.tencent.mmkv.MMKV;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * RFID Reader 会话编排器，协调连接、配置、盘点和标签操作。
@@ -32,20 +29,19 @@ import java.util.concurrent.TimeUnit;
 final class ReaderSessionCoordinator {
     private static final String TAG = "UhfReader";
     public static final int WIFI_PORT = 1200;
-    private static final String MMKV_ID = "reader_connection";
-    private static final String KEY_WIFI_ADDRESS = "wifi_address";
     private static volatile ReaderSessionCoordinator instance;
 
     private final UhfSdkGateway gateway;
     private final Application application;
+    private final Supplier<ExecutorService> sdkExecutorFactory;
     private volatile ExecutorService sdkExecutor;
-    private final Handler mainHandler;
+    private final ReaderMainThreadDispatcher mainThread;
     private final ReaderStatePublisher statePublisher;
     private final CopyOnWriteArraySet<CompletableFuture<?>> pendingOperations = new CopyOnWriteArraySet<>();
-    private final BleTransport bleTransport;
-    private final WifiNetworkMonitor wifiMonitor;
-    private final MMKV storage;
-    private final ReaderConfigCache configCache;
+    private final ReaderBleTransport bleTransport;
+    private final ReaderWifiMonitor wifiMonitor;
+    private final ReaderConnectionStore connectionStore;
+    private final ReaderConfigurationStore configStore;
     private final ReaderConfigurationManager configurationManager;
     private final ReaderTagOperations tagOperations;
     private final ReaderInventoryController inventoryController;
@@ -56,14 +52,6 @@ final class ReaderSessionCoordinator {
     private volatile boolean shuttingDown;
     private final Object serviceLock = new Object();
     private volatile ReaderConnectionService connectionService;
-
-    private static ExecutorService createSdkExecutor() {
-        return Executors.newSingleThreadExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "uhf-sdk");
-            thread.setDaemon(true);
-            return thread;
-        });
-    }
 
     public static void initialize(@NonNull Application application) {
         ReaderSessionCoordinator manager = getInstance(application);
@@ -82,25 +70,32 @@ final class ReaderSessionCoordinator {
     }
 
     static ReaderSessionCoordinator createForTest(Application application, UhfSdkGateway gateway) {
-        return new ReaderSessionCoordinator(application, gateway);
+        return new ReaderSessionCoordinator(application, gateway,
+                ReaderSessionDependencies.production(application));
     }
 
     private ReaderSessionCoordinator(Application application, UhfSdkGateway gateway) {
+        this(application, gateway, ReaderSessionDependencies.production(application));
+    }
+
+    ReaderSessionCoordinator(Application application, UhfSdkGateway gateway,
+            ReaderSessionDependencies dependencies) {
         this.application = application;
         this.gateway = gateway;
-        sdkExecutor = createSdkExecutor();
-        mainHandler = new Handler(Looper.getMainLooper());
+        sdkExecutorFactory = dependencies.sdkExecutorFactory;
+        sdkExecutor = sdkExecutorFactory.get();
+        mainThread = dependencies.mainThread;
         statePublisher = new ReaderStatePublisher();
         connectionManager = new ReaderConnectionManager(statePublisher,
                 this::updateConnectionService);
-        storage = MMKV.mmkvWithID(MMKV_ID);
-        configCache = new ReaderConfigCache();
-        configurationManager = new ReaderConfigurationManager(gateway, configCache,
+        connectionStore = dependencies.connectionStore;
+        configStore = dependencies.configurationStore;
+        configurationManager = new ReaderConfigurationManager(gateway, configStore,
                 statePublisher);
         tagOperations = new ReaderTagOperations(gateway, statePublisher);
-        inventoryController = new ReaderInventoryController(gateway, configCache, statePublisher,
-                (callback, delayMillis) -> mainHandler.postDelayed(callback, delayMillis));
-        bleTransport = new BleTransport(new BleTransport.Listener() {
+        inventoryController = new ReaderInventoryController(gateway, configStore, statePublisher,
+                mainThread::postDelayed);
+        bleTransport = dependencies.bleTransportFactory.apply(new ReaderBleTransport.Listener() {
             @Override
             public void onPhase(long attemptId, ConnectionPhase phase, String message) {
                 if (isCurrentConnection(attemptId)) {
@@ -114,7 +109,7 @@ final class ReaderSessionCoordinator {
                 Log.i(TAG, "BLE data channel ready, starting handshake");
                 publish(currentState().buildUpon().phase(ConnectionPhase.CONNECTING_DATA_CHANNEL)
                         .message("BLE 数据通道已建立").build());
-                sdkExecutor.execute(() -> performHandshake(attemptId));
+                sdkExecutor.execute(() -> performHandshake(attemptId, TransportType.BLE));
             }
 
             @Override
@@ -132,7 +127,7 @@ final class ReaderSessionCoordinator {
                 }
             }
         });
-        wifiMonitor = new WifiNetworkMonitor(application,
+        wifiMonitor = dependencies.wifiMonitorFactory.apply(
                 () -> {
                     if (currentState().getTransport() == TransportType.WIFI && currentState().isConnected()) {
                         handleConnectionLost("Wi-Fi network lost", -20, DisconnectReason.WIFI_LOST);
@@ -187,8 +182,7 @@ final class ReaderSessionCoordinator {
     }
 
     public String getSavedWifiAddress() {
-        String value = storage == null ? null : storage.decodeString(KEY_WIFI_ADDRESS, "");
-        return value == null ? "" : value;
+        return connectionStore.getWifiAddress();
     }
 
     public static boolean isValidIpv4(@Nullable String value) {
@@ -245,10 +239,10 @@ final class ReaderSessionCoordinator {
                     gateway.closeNetwork();
                     return;
                 }
-                if (storage != null) { storage.encode(KEY_WIFI_ADDRESS, normalized); }
-                performHandshake(generation);
+                connectionStore.saveWifiAddress(normalized);
+                performHandshake(generation, TransportType.WIFI);
             } catch (ReaderException error) {
-                disconnectTransportInternal();
+                disconnectTransportInternal(TransportType.WIFI, false);
                 if (isCurrentConnection(generation)) {
                     publishFailure(TransportType.WIFI, error.getMessage(), error.getErrorCode(),
                             DisconnectReason.SDK_ERROR);
@@ -275,7 +269,7 @@ final class ReaderSessionCoordinator {
                 gateway.setTransport(TransportType.BLE);
                 gateway.useRm70xx();
                 gateway.setOutboundDataListener(bleTransport::write);
-                mainHandler.post(() -> {
+                mainThread.post(() -> {
                     if (isCurrentConnection(generation)) { bleTransport.connect(device, generation); }
                 });
             } catch (ReaderException error) {
@@ -346,7 +340,7 @@ final class ReaderSessionCoordinator {
             catch (Exception ignored) { Log.w(TAG, "Timed out releasing UHF SDK", ignored); }
         }
         executor.shutdownNow();
-        sdkExecutor = createSdkExecutor();
+        sdkExecutor = sdkExecutorFactory.get();
         stopConnectionService();
     }
 
@@ -438,7 +432,7 @@ final class ReaderSessionCoordinator {
             ModuleSubtype subtype = currentState().getModuleSubtype();
             ReaderConfiguration configuration = configurationManager.getConfiguration();
             int target = configuration.target;
-            int selected = configCache.loadSelected(subtype);
+            int selected = configStore.loadSelected(subtype);
             int status = monitorSdkStatus(configurationManager.applySession(
                     subtype, session, selected));
             Log.i(TAG, "setSession S" + session + " target=" + target
@@ -542,7 +536,7 @@ final class ReaderSessionCoordinator {
                     currentState().getModuleSubtype(), inventoryMaskRestoreValue()));
             Log.i(TAG, "clearInventoryMask status=" + status);
             if (status == 0) {
-                configCache.saveSelected(currentState().getModuleSubtype(), inventoryMaskRestoreValue());
+                configStore.saveSelected(currentState().getModuleSubtype(), inventoryMaskRestoreValue());
                 inventoryController.discardMask();
             }
             if (wasRunning) {
@@ -746,23 +740,39 @@ final class ReaderSessionCoordinator {
         });
     }
 
-    private void performHandshake(long generation) {
-        if (!isCurrentConnection(generation)) { return; }
+    private void performHandshake(long generation, TransportType attemptTransport) {
+        if (!isCurrentConnection(generation)) {
+            disconnectTransportInternal(attemptTransport, false);
+            return;
+        }
         Log.i(TAG, "RM70XX handshake started generation=" + generation
-                + " transport=" + currentState().getTransport() + " address=" + currentState().getAddress());
-        publish(currentState().buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
-                .message(application.getString(R.string.reader_verifying_detail)).build());
+                + " transport=" + attemptTransport + " address=" + currentState().getAddress());
+        if (!connectionManager.publishIfCurrent(generation, currentState().buildUpon()
+                .phase(ConnectionPhase.VERIFYING_MODULE)
+                .message(application.getString(R.string.reader_verifying_detail)).build())) {
+            disconnectTransportInternal(attemptTransport, false);
+            return;
+        }
         try {
-            ReaderHandshake.Result result = ReaderHandshake.perform(gateway, configCache, resourceId -> {
+            ReaderHandshake.Result result = ReaderHandshake.perform(gateway, configStore, resourceId -> {
+                if (!isCurrentConnection(generation)) { return; }
                 ConnectionPhase phase = resourceId == R.string.handshake_updating_params
                         || currentState().getPhase() == ConnectionPhase.UPDATING_PARAMETERS
                         ? ConnectionPhase.UPDATING_PARAMETERS : ConnectionPhase.VERIFYING_MODULE;
-                publish(currentState().buildUpon().phase(phase)
-                        .message(application.getString(resourceId)).build());
+                connectionManager.publishIfCurrent(generation, currentState().buildUpon()
+                        .phase(phase).message(application.getString(resourceId)).build());
             });
-            if (!isCurrentConnection(generation)) { return; }
+            if (!isCurrentConnection(generation)) {
+                disconnectTransportInternal(attemptTransport, false);
+                return;
+            }
             ReaderModuleInfo info = result.moduleInfo;
             configurationManager.restore(result.configuration);
+            if (!isCurrentConnection(generation)) {
+                configurationManager.clear();
+                disconnectTransportInternal(attemptTransport, false);
+                return;
+            }
             if (inventoryController.getMask() != null
                     && inventoryController.getMaskProtocol() != TagProtocol.ISO_18000_6C) {
                 inventoryController.discardMask();
@@ -772,20 +782,31 @@ final class ReaderSessionCoordinator {
                     + " rawSubtype=" + info.rawSubtype + " boardSerial=" + info.boardSerial
                     + " boardVersion=" + info.boardVersion + " moduleSerial=" + info.moduleSerial
                     + " moduleVersion=" + info.moduleVersion);
-            publish(currentState().buildUpon().phase(ConnectionPhase.CONNECTED)
+            if (!isCurrentConnection(generation)) {
+                configurationManager.clear();
+                disconnectTransportInternal(attemptTransport, false);
+                return;
+            }
+            boolean connectedPublished = connectionManager.publishIfCurrent(generation,
+                    currentState().buildUpon().phase(ConnectionPhase.CONNECTED)
                     .moduleSubtype(info.subtype, info.rawSubtype)
                     .protocol(TagProtocol.ISO_18000_6C)
                     .versions(info.boardSerial, info.boardVersion, info.moduleSerial, info.moduleVersion)
                     .message("").errorCode(0).inventoryRunning(false).build());
+            if (!connectedPublished) {
+                configurationManager.clear();
+                disconnectTransportInternal(attemptTransport, false);
+                return;
+            }
             connectionManager.clearUnexpectedDisconnect();
             configurationManager.publishCurrent();
-            if (currentState().getTransport() == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
+            if (attemptTransport == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
         } catch (ReaderException error) {
             Log.e(TAG, "RM70XX handshake failed code=" + error.getErrorCode()
                     + " message=" + error.getMessage(), error);
-            disconnectTransportInternal();
+            disconnectTransportInternal(attemptTransport, false);
             if (isCurrentConnection(generation)) {
-                publishFailure(currentState().getTransport(), error.getMessage(), error.getErrorCode(),
+                publishFailure(attemptTransport, error.getMessage(), error.getErrorCode(),
                         DisconnectReason.SDK_ERROR);
             }
         }
@@ -794,7 +815,7 @@ final class ReaderSessionCoordinator {
     private void ensureSdkInitialized() throws ReaderException {
         synchronized (serviceLock) {
             if (sdkInitialized) { return; }
-            if (sdkExecutor.isShutdown()) { sdkExecutor = createSdkExecutor(); }
+            if (sdkExecutor.isShutdown()) { sdkExecutor = sdkExecutorFactory.get(); }
             int status = gateway.initialize();
             Log.i(TAG, "UHF SDK lazy initialize status=" + status + " source=session");
             if (status != 0) {
@@ -855,7 +876,7 @@ final class ReaderSessionCoordinator {
 
     /** 模块自行结束盘点时同步会话状态，避免单次模式按钮停在“停止”。 */
     private void handleInventoryStopped(int status) {
-        mainHandler.post(() -> {
+        mainThread.post(() -> {
             if (currentState().isInventoryRunning()) {
                 Log.i(TAG, "inventory stopped by reader status=" + status);
                 publish(currentState().buildUpon().inventoryRunning(false).build());
@@ -868,7 +889,7 @@ final class ReaderSessionCoordinator {
     }
 
     private void disconnectTransportInternal(TransportType transport, boolean inventoryRunning) {
-        mainHandler.removeCallbacks(wifiHeartbeat);
+        mainThread.removeCallbacks(wifiHeartbeat);
         if (inventoryRunning) { gateway.stopInventory(); }
         if (transport == TransportType.WIFI) { gateway.closeNetwork(); }
         if (transport == TransportType.BLE) {
@@ -878,12 +899,12 @@ final class ReaderSessionCoordinator {
     }
 
     private void disconnectBleTransportAndWait() {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (mainThread.isMainThread()) {
             bleTransport.disconnect();
             return;
         }
         CountDownLatch latch = new CountDownLatch(1);
-        mainHandler.post(() -> {
+        mainThread.post(() -> {
             try { bleTransport.disconnect(); }
             finally { latch.countDown(); }
         });
@@ -920,7 +941,7 @@ final class ReaderSessionCoordinator {
             @NonNull DisconnectReason reason) {
         if (!reason.isUnexpected()) { return; }
         connectionManager.beginAttempt();
-        mainHandler.removeCallbacks(wifiHeartbeat);
+        mainThread.removeCallbacks(wifiHeartbeat);
         ReaderException failure = new ReaderException(message, errorCode);
         for (CompletableFuture<?> pending : pendingOperations) {
             pending.completeExceptionally(failure);
@@ -995,8 +1016,8 @@ final class ReaderSessionCoordinator {
 
     private void scheduleWifiHeartbeat(long generation) {
         if (!isCurrentConnection(generation)) { return; }
-        mainHandler.removeCallbacks(wifiHeartbeat);
-        mainHandler.postDelayed(wifiHeartbeat, 8_000);
+        mainThread.removeCallbacks(wifiHeartbeat);
+        mainThread.postDelayed(wifiHeartbeat, 8_000);
     }
 
     private void runWifiHeartbeat() {

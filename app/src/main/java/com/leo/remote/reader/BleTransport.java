@@ -25,18 +25,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-final class BleTransport implements EventObserver {
+final class BleTransport implements EventObserver, ReaderBleTransport {
     private static final String TAG = "UhfBle";
     private static final String REQUEST_TAG_PREFIX = "uhf-ble-";
-    interface Listener {
-        void onPhase(long attemptId, ConnectionPhase phase, String message);
-        void onReady(long attemptId);
-        void onInboundData(long attemptId, byte[] data);
-        void onDisconnected(long attemptId, String message, int errorCode, DisconnectReason reason);
-    }
-
     private final EasyBLE easyBle;
-    private final Listener listener;
+    private final ReaderBleTransport.Listener listener;
     private volatile Connection connection;
     private volatile Device device;
     private volatile UUID serviceUuid;
@@ -47,13 +40,13 @@ final class BleTransport implements EventObserver {
     private volatile boolean disconnecting;
     private volatile long attemptId;
 
-    BleTransport(Listener listener) {
+    BleTransport(ReaderBleTransport.Listener listener) {
         this.listener = listener;
         easyBle = EasyBLE.getInstance();
         easyBle.registerObserver(this);
     }
 
-    void connect(Device target, long newAttemptId) {
+    public void connect(Device target, long newAttemptId) {
         disconnecting = false;
         attemptId = newAttemptId;
         device = target;
@@ -75,7 +68,7 @@ final class BleTransport implements EventObserver {
         }
     }
 
-    void disconnect() {
+    public void disconnect() {
         disconnecting = true;
         Connection currentConnection = connection;
         Device currentDevice = device;
@@ -90,7 +83,7 @@ final class BleTransport implements EventObserver {
         easyBle.unregisterObserver(this);
     }
 
-    void write(byte[] data) {
+    public void write(byte[] data) {
         Connection currentConnection = connection;
         UUID currentService = serviceUuid;
         UUID currentWrite = writeUuid;

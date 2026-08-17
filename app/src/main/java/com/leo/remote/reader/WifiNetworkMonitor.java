@@ -7,14 +7,13 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import androidx.annotation.NonNull;
 
-final class WifiNetworkMonitor {
-    interface Listener { void onWifiLost(); }
+final class WifiNetworkMonitor implements ReaderWifiMonitor {
 
     private final ConnectivityManager connectivityManager;
     private final ConnectivityManager.NetworkCallback callback;
     private boolean registered;
 
-    WifiNetworkMonitor(Application application, Listener listener) {
+    WifiNetworkMonitor(Application application, ReaderWifiMonitor.Listener listener) {
         connectivityManager = application.getSystemService(ConnectivityManager.class);
         callback = new ConnectivityManager.NetworkCallback() {
             @Override
@@ -42,7 +41,7 @@ final class WifiNetworkMonitor {
         };
     }
 
-    void start() {
+    public void start() {
         if (registered || connectivityManager == null) {
             return;
         }
@@ -61,7 +60,7 @@ final class WifiNetworkMonitor {
         registered = false;
     }
 
-    boolean hasWifiNetwork() {
+    public boolean hasWifiNetwork() {
         if (connectivityManager == null) {
             return false;
         }

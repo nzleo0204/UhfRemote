@@ -319,6 +319,29 @@ public class ReaderDomainTest {
                 .phase(ConnectionPhase.UPDATING_PARAMETERS).build();
 
         assertFalse(updating.isConnected());
+        assertTrue(updating.hasTransportLink());
+        assertTrue(updating.isInitializing());
         assertEquals(ReaderConnectionStatus.CONNECTED, updating.getConnectionStatus());
+    }
+
+    @Test
+    public void transportLinkAndOperationReadinessHaveDistinctSemantics() {
+        ReaderState dataChannel = new ReaderState.Builder()
+                .phase(ConnectionPhase.CONNECTING_DATA_CHANNEL).build();
+        ReaderState verifying = new ReaderState.Builder()
+                .phase(ConnectionPhase.VERIFYING_MODULE).build();
+        ReaderState connected = new ReaderState.Builder()
+                .phase(ConnectionPhase.CONNECTED).build();
+
+        assertTrue(dataChannel.hasTransportLink());
+        assertFalse(dataChannel.isInitializing());
+        assertFalse(dataChannel.isConnected());
+        assertTrue(verifying.hasTransportLink());
+        assertTrue(verifying.isInitializing());
+        assertFalse(verifying.isConnected());
+        assertTrue(connected.hasTransportLink());
+        assertFalse(connected.isInitializing());
+        assertTrue(connected.isConnected());
+        assertFalse(ReaderState.disconnected().hasTransportLink());
     }
 }

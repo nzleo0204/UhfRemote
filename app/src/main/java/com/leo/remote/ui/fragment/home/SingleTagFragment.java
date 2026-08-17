@@ -92,7 +92,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private boolean maskExpanded;
 
     private int lastReadBankPosition = -1;
-    private boolean viewDestroyed;
+    private AlertDialog activeDialog;
 
     public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
@@ -189,15 +189,17 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
     @Override
     protected void initData() {
-        viewDestroyed = false;
         session = ReaderSessionManager.getInstance(requireActivity().getApplication());
         session.addObserver(this);
     }
 
     @Override
     public void onDestroyView() {
-        viewDestroyed = true;
         if (session != null) { session.removeObserver(this); }
+        if (activeDialog != null) {
+            activeDialog.dismiss();
+            activeDialog = null;
+        }
         hideLoadingDialog();
         super.onDestroyView();
     }
@@ -206,6 +208,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     public void onReaderStateChanged(ReaderState state) {
         TagProtocol previousProtocol = readerState.getProtocol();
         readerState = state;
+        if (!isViewReady()) { return; }
         if (previousProtocol != state.getProtocol()) {
             updateMaskBanks(state.getProtocol());
             updateReadBanks(state.getProtocol());
@@ -225,12 +228,14 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     @Override
     public void onCurrentTagChanged(ReaderTag tag) {
         currentTag = tag;
+        if (!isViewReady()) { return; }
         refreshOperations();
     }
 
     @Override
     public void onSingleTagMaskChanged(@Nullable InventoryMaskConfig config) {
         activeMask = config;
+        if (!isViewReady()) { return; }
         if (config != null) { bindMaskForm(config); }
         updateMaskControls();
     }
@@ -361,10 +366,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
             session.readCurrentTag(protocol, length, encodedAddress, bank, password)
                     .whenComplete((result, error) -> {
-                        HomeActivity activity = getAttachActivity();
-                        if (activity == null || viewDestroyed) { return; }
-                        activity.runOnUiThread(() -> {
-                        if (viewDestroyed || getAttachActivity() == null) { return; }
+                        runOnViewThread(() -> {
                         readButton.setEnabled(true);
                         readButton.setText(R.string.single_read_tag);
 
@@ -537,6 +539,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                 .setNegativeButton(R.string.common_cancel, null)
                 .setPositiveButton(R.string.single_execute, null)
                 .create();
+        trackDialog(dialog);
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
@@ -586,6 +589,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_lock_title)
                 .setView(content).setNegativeButton(R.string.common_cancel, null)
                 .setPositiveButton(R.string.single_execute, null).create();
+        trackDialog(dialog);
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
@@ -610,12 +614,13 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         AlertDialog form = new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.single_kill_title)
                 .setView(content).setNegativeButton(R.string.common_cancel, null)
                 .setPositiveButton(R.string.single_next_step, null).create();
+        trackDialog(form);
         form.setOnShowListener(ignored -> form.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
                     try {
                         byte[] access = parsePassword(accessPassword.getText().toString());
                         byte[] kill = parsePassword(killPassword.getText().toString());
-                        new MaterialAlertDialogBuilder(requireContext())
+                        AlertDialog confirmation = new MaterialAlertDialogBuilder(requireContext())
                                 .setTitle(R.string.single_kill_confirm_title)
                                 .setMessage(R.string.single_kill_confirm_message)
                                 .setNegativeButton(R.string.common_cancel, null)
@@ -625,7 +630,9 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                                         executeStatus(session.killCurrentTag(access, kill),
                                                 R.string.single_kill_operation, null);
                                     });
-                                }).show();
+                                }).create();
+                        trackDialog(confirmation);
+                        confirmation.show();
                     } catch (IllegalArgumentException error) { toast(error.getMessage()); }
                 }));
         form.show();
@@ -885,10 +892,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             AlertDialog dialog) {
         showLoadingDialog();
         future.whenComplete((status, error) -> {
-            HomeActivity activity = getAttachActivity();
-            if (activity == null || viewDestroyed) { return; }
-            activity.runOnUiThread(() -> {
-            if (viewDestroyed || getAttachActivity() == null) { return; }
+            runOnViewThread(() -> {
             hideLoadingDialog();
             String operation = getString(operationRes);
             if (error != null) {
@@ -900,6 +904,16 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
                 if (dialog != null) { dialog.dismiss(); }
             }
             });
+        });
+    }
+
+    private void trackDialog(AlertDialog dialog) {
+        if (activeDialog != null && activeDialog.isShowing()) {
+            activeDialog.dismiss();
+        }
+        activeDialog = dialog;
+        dialog.setOnDismissListener(ignored -> {
+            if (activeDialog == dialog) { activeDialog = null; }
         });
     }
 
