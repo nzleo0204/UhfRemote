@@ -49,8 +49,7 @@ public final class ReaderConnectionService extends Service {
         session = ReaderSessionManager.getInstance(getApplication());
         WifiManager wifiManager = getSystemService(WifiManager.class);
         if (wifiManager != null) {
-            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
-                    "UhfRemote:reader-connection");
+            wifiLock = createWifiLock(wifiManager);
             wifiLock.setReferenceCounted(false);
         }
         createNotificationChannel();
@@ -149,6 +148,13 @@ public final class ReaderConnectionService extends Service {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                 : PendingIntent.FLAG_UPDATE_CURRENT;
+    }
+
+    @SuppressWarnings("deprecation")
+    private static WifiManager.WifiLock createWifiLock(WifiManager wifiManager) {
+        // Keep the API 26 background Wi-Fi behavior; newer Android versions remap this mode.
+        return wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                "UhfRemote:reader-connection");
     }
 
     private void createNotificationChannel() {

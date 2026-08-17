@@ -10,7 +10,10 @@ import com.leo.remote.reader.inventory.ReaderInventoryController;
 import com.leo.remote.reader.model.*;
 import com.leo.remote.reader.persistence.ReaderConfigurationStore;
 import com.leo.remote.reader.persistence.ReaderConnectionStore;
-import com.leo.remote.reader.sdk.UhfSdkGateway;
+import com.leo.remote.reader.sdk.ReaderConfigurationGateway;
+import com.leo.remote.reader.sdk.ReaderInventoryGateway;
+import com.leo.remote.reader.sdk.ReaderTagGateway;
+import com.leo.remote.reader.sdk.ReaderTransportGateway;
 import com.leo.remote.reader.tag.ReaderTagOperations;
 import com.leo.remote.reader.transport.ReaderBleTransport;
 import com.leo.remote.reader.transport.ReaderWifiMonitor;
@@ -229,7 +232,8 @@ public class ReaderConnectionOrchestratorTest {
         @Override public void saveWifiAddress(String address) { wifiAddress = address; }
     }
 
-    private static final class TestGateway implements UhfSdkGateway {
+    private static final class TestGateway implements ReaderTransportGateway,
+            ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {
         private final AtomicInteger closeNetworkCalls = new AtomicInteger();
         private final AtomicInteger failModuleReads = new AtomicInteger();
         private final CountDownLatch moduleReadStarted = new CountDownLatch(1);

@@ -2,7 +2,8 @@ package com.leo.remote.reader.sdk;
 
 import com.leo.remote.reader.model.*;
 
-public final class FakeUhfSdkGateway implements UhfSdkGateway {
+public final class FakeUhfSdkGateway implements ReaderTransportGateway,
+        ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {
     public int powerStatus;
     public int blfStatus;
     public int sessionStatus;

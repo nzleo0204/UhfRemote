@@ -577,17 +577,6 @@
     </issue>
 
     <issue
-        id="LogNotTimber"
-        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
-        errorLine1="            Log.w(TAG, message);"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/leo/remote/reader/model/Rm8011PowerLevels.java"
-            line="79"
-            column="13"/>
-    </issue>
-
-    <issue
         id="PluralsCandidate"
         message="Formatting %d followed by words (&quot;bit&quot;): This should probably be a plural rather than a string"
         errorLine1="    &lt;string name=&quot;inventory_mask_length_hint_ok&quot;>数据 %1$d 字节（%2$d bit）· 长度 %3$d bit 有效&lt;/string>"

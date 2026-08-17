@@ -23,7 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @SuppressLint("LogNotTimber")
-public final class NativeUhfSdkGateway implements UhfSdkGateway {
+public final class NativeUhfSdkGateway implements ReaderTransportGateway,
+        ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {
     private static final String TAG = "UhfReader";
     private static final int STATUS_OK = 0;
     private final Linkage linkage = new Linkage();

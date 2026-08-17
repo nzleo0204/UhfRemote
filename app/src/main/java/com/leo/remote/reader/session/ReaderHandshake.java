@@ -24,10 +24,6 @@ final class ReaderHandshake {
 
     private ReaderHandshake() {}
 
-    static Result perform(UhfSdkGateway gateway) throws ReaderException {
-        return perform(gateway, gateway, gateway);
-    }
-
     static Result perform(ReaderTransportGateway transport,
             ReaderConfigurationGateway configuration, ReaderInventoryGateway inventory)
             throws ReaderException {
@@ -48,11 +44,6 @@ final class ReaderHandshake {
             throw new ReaderException("Unable to configure inventory", status);
         }
         return new Result(info, configuration.readConfiguration(info.subtype));
-    }
-
-    static Result perform(UhfSdkGateway gateway, ReaderConfigurationStore cache,
-            IntConsumer progress) throws ReaderException {
-        return perform(gateway, gateway, gateway, cache, progress);
     }
 
     static Result perform(ReaderTransportGateway transport,

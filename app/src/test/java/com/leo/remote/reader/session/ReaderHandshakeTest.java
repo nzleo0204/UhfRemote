@@ -18,7 +18,7 @@ public class ReaderHandshakeTest {
     @Test
     public void completesOnlyAfterModuleProtocolInventoryAndConfiguration() throws Exception {
         FakeGateway gateway = new FakeGateway();
-        ReaderHandshake.Result result = ReaderHandshake.perform(gateway);
+        ReaderHandshake.Result result = ReaderHandshake.perform(gateway, gateway, gateway);
         assertEquals(ModuleSubtype.R2000_PLUS, result.moduleInfo.subtype);
         assertEquals(270, result.configuration.powerTenthsDbm);
         assertTrue(gateway.protocolSelected);
@@ -29,7 +29,7 @@ public class ReaderHandshakeTest {
     public void stopsInventoryBeforeReadingModuleInformation() throws Exception {
         FakeGateway gateway = new FakeGateway();
 
-        ReaderHandshake.perform(gateway);
+        ReaderHandshake.perform(gateway, gateway, gateway);
 
         assertTrue(gateway.stopInventoryCalled);
         assertFalse(gateway.moduleInfoReadBeforeInventoryStopped);
@@ -39,7 +39,7 @@ public class ReaderHandshakeTest {
     public void failsWhenProtocolSelectionFails() throws Exception {
         FakeGateway gateway = new FakeGateway();
         gateway.protocolStatus = 9;
-        ReaderHandshake.perform(gateway);
+        ReaderHandshake.perform(gateway, gateway, gateway);
     }
 
     @Test(expected = ReaderException.class)
@@ -47,7 +47,7 @@ public class ReaderHandshakeTest {
         FakeGateway gateway = new FakeGateway();
         gateway.moduleInfo = new ReaderModuleInfo(ModuleSubtype.R2000, 0,
                 "board", "1.0", "", "2.0");
-        ReaderHandshake.perform(gateway);
+        ReaderHandshake.perform(gateway, gateway, gateway);
     }
 
     @Test
@@ -71,7 +71,8 @@ public class ReaderHandshakeTest {
     public void updatingParametersStartsAfterModuleInfoIsRead() throws Exception {
         FakeGateway gateway = new FakeGateway();
 
-        ReaderHandshake.perform(gateway, new InMemoryConfigurationStore(), resourceId ->
+        ReaderHandshake.perform(gateway, gateway, gateway,
+                new InMemoryConfigurationStore(), resourceId ->
                 gateway.eventLog.add("progress:" + resourceId));
 
         assertTrue(gateway.eventLog.indexOf("moduleInfo") >= 0);
@@ -95,7 +96,8 @@ public class ReaderHandshakeTest {
         @Override public int loadSelected(ModuleSubtype subtype) { return selected; }
     }
 
-    private static final class FakeGateway implements UhfSdkGateway {
+    private static final class FakeGateway implements ReaderTransportGateway,
+            ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {
         boolean protocolSelected;
         boolean inventoryConfigured;
         boolean stopInventoryCalled;

@@ -36,9 +36,10 @@ public final class ReaderSessionManager {
                 if (instance == null) {
                     ReaderConnectionServiceController services =
                             new ReaderConnectionServiceController(application);
+                    NativeUhfSdkGateway gateway = new NativeUhfSdkGateway();
                     instance = new ReaderSessionManager(new ReaderSessionCoordinator(
-                            new NativeUhfSdkGateway(), ReaderSessionDependencies.production(application),
-                            services), services);
+                            gateway, gateway, gateway, gateway,
+                            ReaderSessionDependencies.production(application), services), services);
                 }
             }
         }

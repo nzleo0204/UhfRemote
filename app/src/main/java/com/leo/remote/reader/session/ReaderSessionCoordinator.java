@@ -37,10 +37,13 @@ final class ReaderSessionCoordinator {
     private final ReaderInventoryController inventoryController;
     private final ReaderConnectionOrchestrator connectionOrchestrator;
 
-    ReaderSessionCoordinator(UhfSdkGateway gateway, ReaderSessionDependencies dependencies,
+    ReaderSessionCoordinator(ReaderTransportGateway transportGateway,
+            ReaderConfigurationGateway configurationGateway,
+            ReaderInventoryGateway inventoryGateway, ReaderTagGateway tagGateway,
+            ReaderSessionDependencies dependencies,
             ReaderConnectionServiceHost connectionServiceHost) {
-        configurationGateway = gateway;
-        inventoryGateway = gateway;
+        this.configurationGateway = configurationGateway;
+        this.inventoryGateway = inventoryGateway;
         mainThread = dependencies.mainThread;
         statePublisher = new ReaderStatePublisher();
         ReaderConnectionManager connectionManager = new ReaderConnectionManager(statePublisher,
@@ -51,11 +54,11 @@ final class ReaderSessionCoordinator {
         configStore = dependencies.configurationStore;
         configurationManager = new ReaderConfigurationManager(configurationGateway, configStore,
                 statePublisher);
-        tagOperations = new ReaderTagOperations(gateway, statePublisher);
+        tagOperations = new ReaderTagOperations(tagGateway, statePublisher);
         inventoryController = new ReaderInventoryController(inventoryGateway,
                 configurationGateway, configStore, statePublisher,
                 mainThread::postDelayed);
-        connectionOrchestrator = new ReaderConnectionOrchestrator(gateway,
+        connectionOrchestrator = new ReaderConnectionOrchestrator(transportGateway,
                 configurationGateway, inventoryGateway, configStore,
                 dependencies.connectionStore, configurationManager, tagOperations,
                 inventoryController, connectionManager, commandExecutor, dependencies,
