@@ -59,7 +59,7 @@ public final class ReaderTagOperations {
         }
         if (epc.length > 0) {
             ReaderTag tag = new ReaderTag(HexCodec.encode(epc, epc.length), "", result.getRssi(),
-                    0, 1);
+                    0, 1, result.getChipModel(), result.getTidPrefix());
             currentTag = tag;
             publisher.publishCurrentTag(tag);
         }

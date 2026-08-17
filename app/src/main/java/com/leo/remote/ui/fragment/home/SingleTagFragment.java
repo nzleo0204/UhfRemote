@@ -1,9 +1,6 @@
 package com.leo.remote.ui.fragment.home;
 
 import android.annotation.SuppressLint;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,7 +27,6 @@ import com.leo.remote.aop.SingleClick;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.reader.ChipModelFormatter;
 import com.leo.remote.reader.HexCodec;
-import com.leo.remote.reader.InventoryArea;
 import com.leo.remote.reader.InventoryMaskConfig;
 import com.leo.remote.reader.ProtocolEncoding;
 import com.leo.remote.reader.ReaderConfiguration;
@@ -66,19 +62,14 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private MaterialButton readButton;
 
     // 读取结果控件
+    private View readResultPanel;
     private View readDataGroup;
     private TextView readDataView;
-    private TextView copyDataButton;
-    private TextView fillEpcMaskButton;
     private TextView fillDataMaskButton;
-    private View epcGroup;
-    private View tidGroup;
     private View chipGroup;
     private View rssiGroup;
-    private TextView idLabelView;
     private TextView epcView;
     private TextView dataLabelView;
-    private TextView tidView;
     private TextView chipView;
     private TextView rssiView;
 
@@ -97,7 +88,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
     private ImageView maskExpandView;
     private ReaderTag currentTag;
     private ReaderState readerState = ReaderState.disconnected();
-    private ReaderConfiguration configuration;
     private InventoryMaskConfig activeMask;
     private boolean maskExpanded;
 
@@ -125,21 +115,17 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         readButton = findViewById(R.id.btn_single_read);
 
         // 读取结果控件
+        readResultPanel = findViewById(R.id.group_single_read_result);
         readDataGroup = findViewById(R.id.group_single_read_data);
         readDataView = findViewById(R.id.tv_single_read_data);
-        copyDataButton = findViewById(R.id.tv_single_copy_data);
-        fillEpcMaskButton = findViewById(R.id.btn_single_fill_epc_mask);
         fillDataMaskButton = findViewById(R.id.btn_single_fill_read_data_mask);
-        epcGroup = findViewById(R.id.group_single_epc);
-        tidGroup = findViewById(R.id.group_single_tid);
-        idLabelView = findViewById(R.id.tv_single_id_label);
         epcView = findViewById(R.id.tv_single_epc);
         dataLabelView = findViewById(R.id.tv_single_data_label);
-        tidView = findViewById(R.id.tv_single_tid);
         chipView = findViewById(R.id.tv_single_chip);
         rssiView = findViewById(R.id.tv_single_rssi);
         chipGroup = (View) chipView.getParent();
         rssiGroup = (View) rssiView.getParent();
+        readResultPanel.setVisibility(View.GONE);
 
         writeAction = findViewById(R.id.ll_single_write);
         updateEpcAction = findViewById(R.id.ll_single_update_epc);
@@ -185,8 +171,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         updateMaskBanks(readerState.getProtocol());
 
         readButton.setOnClickListener(view -> readTag());
-        copyDataButton.setOnClickListener(view -> copyReadData());
-        fillEpcMaskButton.setOnClickListener(view -> fillMaskFromEpc());
         fillDataMaskButton.setOnClickListener(view -> fillMaskFromReadData());
         writeAction.setOnClickListener(view -> showWriteDialog(false));
         updateEpcAction.setOnClickListener(view -> showWriteDialog(true));
@@ -199,7 +183,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         });
         maskToggleButton.setOnClickListener(view -> toggleMask());
         findViewById(R.id.single_tag_root).setOnClickListener(view -> dismissMaskKeyboard());
-        bindTag(null);
         refreshOperations();
         updateMaskControls();
     }
@@ -229,23 +212,19 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         }
         if (!state.isConnected()) {
             currentTag = null;
-            bindTag(null);
+            readResultPanel.setVisibility(View.GONE);
         }
-        updateTagDisplay();
         refreshOperations();
         updateMaskControls();
     }
 
     @Override
     public void onReaderConfigurationChanged(ReaderConfiguration value) {
-        configuration = value;
-        updateTagDisplay();
     }
 
     @Override
     public void onCurrentTagChanged(ReaderTag tag) {
         currentTag = tag;
-        updateTagDisplay();
         refreshOperations();
     }
 
@@ -284,6 +263,7 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 updateGbSubBankVisibility(position);
+                updateReadDefaults(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -320,6 +300,32 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         gbSubBankGroup.setVisibility(showGbSubBank ? View.VISIBLE : View.GONE);
     }
 
+    private void updateReadDefaults(int bankPosition) {
+        TagProtocol protocol = readerState.getProtocol();
+        if (protocol != TagProtocol.ISO_18000_6C) {
+            return;
+        }
+
+        switch (bankPosition) {
+            case 0:  // Reserved
+                readAddressView.setText("0");
+                readLengthView.setText("2");
+                break;
+            case 1:  // EPC
+                readAddressView.setText("2");
+                readLengthView.setText("6");
+                break;
+            case 2:  // TID
+                readAddressView.setText("0");
+                readLengthView.setText("6");
+                break;
+            case 3:  // USER
+                readAddressView.setText("0");
+                readLengthView.setText("8");
+                break;
+        }
+    }
+
     private void updateReadBanks(TagProtocol protocol) {
         String[] banks = bankLabels(protocol);
         readBankSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
@@ -338,17 +344,16 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         try {
             // 解析参数
             TagProtocol protocol = readerState.getProtocol();
+            int selectedBankPosition = readBankSpinner.getSelectedItemPosition();
             byte[] password = parsePassword(readPasswordView.getText().toString());
             int bank = ProtocolEncoding.encodeBank(protocol,
-                    readBankSpinner.getSelectedItemPosition(),
+                    selectedBankPosition,
                     gbSubBankSpinner.getSelectedItemPosition());
             int address = parseUnsigned(readAddressView, R.string.single_start_address);
-            int length = parseUnsigned(readLengthView, R.string.single_read_length);
+            int length = parseReadLength(readLengthView, protocol, selectedBankPosition);
             int blockOrRetry = protocol == TagProtocol.ISO_18000_6C ? 0
                     : parseUnsigned(auxiliaryView, R.string.single_block_or_retry);
             int encodedAddress = ProtocolEncoding.encodeAddress(protocol, address, blockOrRetry);
-
-            int selectedBankPosition = readBankSpinner.getSelectedItemPosition();
 
             // 执行读取
             readButton.setEnabled(false);
@@ -365,9 +370,10 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
 
                         if (error != null) {
                             toast(getString(R.string.single_read_failed, rootMessage(error)));
+                            readResultPanel.setVisibility(View.GONE);
                             readDataGroup.setVisibility(View.GONE);
                         } else {
-                            displayReadResult(result, selectedBankPosition, protocol);
+                            displayReadResult(result, selectedBankPosition, protocol, length);
                             toast(R.string.single_read_success);
                         }
                         });
@@ -377,55 +383,90 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
         }
     }
 
-    private void displayReadResult(TagReadResult result, int bankPosition, TagProtocol protocol) {
+    private void displayReadResult(TagReadResult result, int bankPosition, TagProtocol protocol,
+            int requestedLength) {
         lastReadBankPosition = bankPosition;
+        readResultPanel.setVisibility(View.VISIBLE);
+
         byte[] data = result.getData();
         byte[] epcBytes = result.getEpc();
         String hexData = HexCodec.encode(data, data.length);
         String hexEpc = HexCodec.encode(epcBytes, epcBytes.length);
-        readDataView.setText(hexData);
+
+        boolean is6C = (protocol == TagProtocol.ISO_18000_6C);
+        boolean isEpcBank = (is6C && bankPosition == 1);
+        boolean isTidBank = (is6C && bankPosition == 2);
+        String displayData = limitReadHex(hexData, requestedLength, protocol);
+        if (displayData.isEmpty() && isEpcBank) {
+            displayData = limitReadHex(hexEpc, requestedLength, protocol);
+        }
+
+        String bankLabel = getBankLabel(bankPosition, protocol);
+        dataLabelView.setText(bankLabel);
+        readDataView.setText(displayData);
         readDataGroup.setVisibility(View.VISIBLE);
+        fillDataMaskButton.setVisibility(displayData.isEmpty() ? View.GONE : View.VISIBLE);
 
-        boolean isEpcBank = (protocol == TagProtocol.ISO_18000_6C && bankPosition == 1);
-        boolean isTidBank = (protocol == TagProtocol.ISO_18000_6C && bankPosition == 2);
-        String epc = hexEpc.isEmpty() && isEpcBank ? hexData : hexEpc;
-        epcGroup.setVisibility(epc.isEmpty() ? View.GONE : View.VISIBLE);
-        epcView.setText(epc);
-        fillEpcMaskButton.setVisibility(protocol == TagProtocol.ISO_18000_6C
-                && !epc.isEmpty() ? View.VISIBLE : View.GONE);
-
-        tidGroup.setVisibility(isTidBank ? View.VISIBLE : View.GONE);
+        // ===== 芯片型号（仅 TID Bank）=====
         if (isTidBank) {
-            tidView.setText(hexData);
-            String chipModel = ChipModelFormatter.formatFromTid(hexData);
+            String chipModel = result.getChipModel();
+            if (chipModel.isEmpty()) {
+                chipModel = ChipModelFormatter.formatFromTid(displayData);
+            }
             chipGroup.setVisibility(chipModel.isEmpty() ? View.GONE : View.VISIBLE);
             chipView.setText(chipModel);
         } else {
             chipGroup.setVisibility(View.GONE);
         }
+
+        // ===== RSSI（次要信息）=====
         rssiGroup.setVisibility(result.getRssi() == 0 ? View.GONE : View.VISIBLE);
         rssiView.setText(result.getRssi() == 0 ? "-" : result.getRssi() + " dBm");
+        if (hexEpc.isEmpty()) {
+            epcView.setVisibility(View.GONE);
+        } else {
+            epcView.setText("标签epc全值：" + hexEpc);
+            epcView.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void copyReadData() {
-        String data = readDataView.getText().toString();
-        if (data.isEmpty()) {
-            toast(R.string.single_no_data_to_copy);
-            return;
+    private int parseReadLength(EditText view, TagProtocol protocol, int bankPosition) {
+        if (view.getText().toString().trim().isEmpty()) {
+            int defaultLength = defaultReadLength(protocol, bankPosition);
+            view.setText(String.valueOf(defaultLength));
+            return defaultLength;
         }
-
-        ClipboardManager clipboard = (ClipboardManager)
-                requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        clipboard.setPrimaryClip(ClipData.newPlainText("RFID Data", data));
-        toast(R.string.common_copied);
+        return parseUnsigned(view, R.string.single_read_length);
     }
 
-    private void fillMaskFromEpc() {
-        if (readerState.getProtocol() != TagProtocol.ISO_18000_6C) {
-            toast(R.string.single_mask_empty_warning);
-            return;
+    private int defaultReadLength(TagProtocol protocol, int bankPosition) {
+        if (protocol == TagProtocol.ISO_18000_6C) {
+            switch (bankPosition) {
+                case 0: return 2;
+                case 1:
+                case 2: return 6;
+                case 3: return 8;
+            }
         }
-        fillMask(1, epcView.getText().toString());
+        return protocol == TagProtocol.ISO_18000_6B ? 8 : 4;
+    }
+
+    private String limitReadHex(String hex, int length, TagProtocol protocol) {
+        int maxBytes = protocol == TagProtocol.ISO_18000_6B ? length : length * 2;
+        int maxCharacters = Math.max(0, maxBytes * 2);
+        return hex.length() <= maxCharacters ? hex : hex.substring(0, maxCharacters);
+    }
+
+    private String getBankLabel(int bankPosition, TagProtocol protocol) {
+        if (protocol == TagProtocol.ISO_18000_6C) {
+            switch (bankPosition) {
+                case 0: return "Reserved";
+                case 1: return "EPC";
+                case 2: return "TID";
+                case 3: return "USER";
+            }
+        }
+        return "数据";
     }
 
     private void fillMaskFromReadData() {
@@ -872,32 +913,6 @@ public final class SingleTagFragment extends AppFragment<HomeActivity> implement
             return false;
         }
         return true;
-    }
-
-    private void updateTagDisplay() {
-        InventoryArea area = InventoryArea.of(readerState.getProtocol(),
-                configuration == null ? 0 : configuration.inventoryArea);
-        String[] headers = area.getColumnHeader().split("/", 2);
-        idLabelView.setText(headers[0]);
-        dataLabelView.setText(headers.length == 2 ? headers[1]
-                : getString(R.string.single_data_label));
-        bindTag(currentTag);
-        fillEpcMaskButton.setVisibility(readerState.getProtocol() == TagProtocol.ISO_18000_6C
-                && epcGroup.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
-    }
-
-    private void bindTag(ReaderTag tag) {
-        if (tag == null) {
-            epcView.setText(R.string.single_preview_epc);
-            tidView.setText(R.string.single_preview_tid);
-            chipView.setText(R.string.single_preview_chip);
-            rssiView.setText(R.string.single_preview_rssi);
-            return;
-        }
-        epcView.setText(tag.id.isEmpty() ? "-" : tag.id);
-        tidView.setText(tag.data.isEmpty() ? "-" : tag.data);
-        chipView.setText(chipLabel(tag.data));
-        rssiView.setText(tag.rssi + " dBm");
     }
 
     private void refreshOperations() {

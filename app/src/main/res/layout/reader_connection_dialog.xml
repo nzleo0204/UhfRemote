@@ -6,13 +6,13 @@
     android:background="@drawable/rfid_card_bg"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="@dimen/dialog_padding">
+    android:paddingHorizontal="@dimen/dialog_padding"
+    android:paddingVertical="12dp">
 
     <!-- 动画/图标区域 -->
     <FrameLayout
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp">
+        android:layout_width="72dp"
+        android:layout_height="72dp">
 
         <!-- Loading 动画 -->
         <com.airbnb.lottie.LottieAnimationView
@@ -26,8 +26,8 @@
         <!-- 结果图标（成功/失败） -->
         <ImageView
             android:id="@+id/iv_reader_connect_result"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_gravity="center"
             android:contentDescription="@null"
             android:visibility="gone" />
@@ -38,7 +38,7 @@
         android:id="@+id/tv_reader_connect_phase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="正在连接"
         android:textColor="@color/rfid_text"
@@ -49,10 +49,10 @@
         android:id="@+id/tv_reader_connect_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:minHeight="70dp"
+        android:layout_marginTop="4dp"
+        android:minHeight="36dp"
         android:gravity="center"
-        android:maxLines="4"
+        android:maxLines="2"
         android:lineSpacingExtra="2dp"
         android:textColor="@color/rfid_text_muted"
         android:textSize="14sp" />
@@ -61,14 +61,14 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dialog_button_margin_top">
+        android:layout_marginTop="12dp">
 
         <!-- 取消按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reader_connect_cancel"
             style="@style/RfidTextButton"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/dialog_button_height"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:minWidth="110dp"
             android:text="取消"
@@ -79,7 +79,7 @@
             android:id="@+id/btn_reader_connect_close"
             style="@style/RfidPrimaryButton"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/dialog_button_height"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:minWidth="110dp"
             android:text="关闭"

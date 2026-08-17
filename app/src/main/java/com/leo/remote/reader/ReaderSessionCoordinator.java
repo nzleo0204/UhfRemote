@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.annotation.Nullable;
 import cn.wandersnail.ble.Device;
+import com.leo.remote.R;
 import com.tencent.mmkv.MMKV;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -156,6 +157,12 @@ final class ReaderSessionCoordinator {
         return connectionManager.getLastUnexpectedReason();
     }
     public void acknowledgeDisconnect() { connectionManager.acknowledgeDisconnect(); }
+    public boolean isConnectionFailureAcknowledged(@NonNull ReaderState failure) {
+        return connectionManager.isConnectionFailureAcknowledged(failure);
+    }
+    public void acknowledgeConnectionFailure(@NonNull ReaderState failure) {
+        connectionManager.acknowledgeConnectionFailure(failure);
+    }
 
     private ReaderState currentState() {
         return connectionManager.getState();
@@ -208,7 +215,8 @@ final class ReaderSessionCoordinator {
             clearCurrentTag();
             publish(new ReaderState.Builder().transport(TransportType.WIFI).phase(ConnectionPhase.FAILED)
                     .device("Wi-Fi reader", normalized).message("Invalid reader IP address")
-                    .errorCode(-21).disconnectReason(DisconnectReason.SDK_ERROR).build());
+                    .errorCode(-21).connectionFailure(ReaderConnectionFailure.READER)
+                    .disconnectReason(DisconnectReason.SDK_ERROR).build());
             sdkExecutor.execute(() -> disconnectTransportInternal(previousState.getTransport(),
                     previousState.isInventoryRunning()));
             return;
@@ -218,7 +226,7 @@ final class ReaderSessionCoordinator {
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.WIFI)
                 .phase(ConnectionPhase.CONNECTING).device("Wi-Fi reader", normalized)
-                .message("Connecting to reader").build());
+                .message("正在连接读写器").build());
         sdkExecutor.execute(() -> {
             try {
                 disconnectTransportInternal(previousState.getTransport(), previousState.isInventoryRunning());
@@ -257,7 +265,7 @@ final class ReaderSessionCoordinator {
         clearCurrentTag();
         publish(new ReaderState.Builder().transport(TransportType.BLE)
                 .phase(ConnectionPhase.CONNECTING).device(device.getName(), device.getAddress())
-                .message("Connecting to BLE device").build());
+                .message("正在连接蓝牙设备").build());
         startConnectionService();
         sdkExecutor.execute(() -> {
             try {
@@ -298,7 +306,7 @@ final class ReaderSessionCoordinator {
         }
         long generation = connectionManager.beginAttempt();
         publish(currentState().buildUpon().phase(ConnectionPhase.DISCONNECTING)
-                .inventoryRunning(false).message("Disconnecting").build());
+                .inventoryRunning(false).message("正在断开连接").build());
         sdkExecutor.execute(() -> {
             disconnectTransportInternal();
             configurationManager.clear();
@@ -743,11 +751,15 @@ final class ReaderSessionCoordinator {
         Log.i(TAG, "RM70XX handshake started generation=" + generation
                 + " transport=" + currentState().getTransport() + " address=" + currentState().getAddress());
         publish(currentState().buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
-                .message("Verifying RM70XX module").build());
+                .message(application.getString(R.string.reader_verifying_detail)).build());
         try {
-            ReaderHandshake.Result result = ReaderHandshake.perform(gateway, configCache, resourceId ->
-                    publish(currentState().buildUpon().phase(ConnectionPhase.VERIFYING_MODULE)
-                            .message(application.getString(resourceId)).build()));
+            ReaderHandshake.Result result = ReaderHandshake.perform(gateway, configCache, resourceId -> {
+                ConnectionPhase phase = resourceId == R.string.handshake_updating_params
+                        || currentState().getPhase() == ConnectionPhase.UPDATING_PARAMETERS
+                        ? ConnectionPhase.UPDATING_PARAMETERS : ConnectionPhase.VERIFYING_MODULE;
+                publish(currentState().buildUpon().phase(phase)
+                        .message(application.getString(resourceId)).build());
+            });
             if (!isCurrentConnection(generation)) { return; }
             ReaderModuleInfo info = result.moduleInfo;
             configurationManager.restore(result.configuration);
@@ -883,8 +895,7 @@ final class ReaderSessionCoordinator {
         if (shuttingDown) { return; }
         ReaderState lostState = currentState();
         TransportType transport = lostState.getTransport();
-        if (reason.isUnexpected() && lostState.getPhase() != ConnectionPhase.DISCONNECTED
-                && lostState.getPhase() != ConnectionPhase.FAILED) {
+        if (reason.isUnexpected() && lostState.isConnected()) {
             handleUnexpectedDisconnect(message, errorCode, reason);
             sdkExecutor.execute(() -> disconnectTransportInternal(transport, false));
             return;
@@ -966,8 +977,11 @@ final class ReaderSessionCoordinator {
             DisconnectReason reason) {
         Log.e(TAG, "connection failed transport=" + transport + " code=" + errorCode
                 + " address=" + currentState().getAddress() + " message=" + message);
-        publish(currentState().buildUpon().transport(transport).phase(ConnectionPhase.FAILED)
-                .message(message).errorCode(errorCode).disconnectReason(reason)
+        ReaderState previous = currentState();
+        publish(previous.buildUpon().transport(transport).phase(ConnectionPhase.FAILED)
+                .message(message).errorCode(errorCode)
+                .connectionFailure(ReaderConnectionFailure.from(transport, previous.getPhase()))
+                .disconnectReason(reason)
                 .inventoryRunning(false).build());
         stopConnectionService();
     }

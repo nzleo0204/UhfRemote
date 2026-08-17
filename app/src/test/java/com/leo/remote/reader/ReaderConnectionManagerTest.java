@@ -62,6 +62,36 @@ public final class ReaderConnectionManagerTest {
         assertFalse(manager.isPendingDisconnectAlert());
     }
 
+    @Test
+    public void acknowledgedConnectionFailure_isNotReplayedForTheSameState() {
+        manager.beginAttempt();
+        ReaderState failure = new ReaderState.Builder()
+                .phase(ConnectionPhase.FAILED).build();
+        manager.publish(failure);
+
+        assertFalse(manager.isConnectionFailureAcknowledged(failure));
+
+        manager.acknowledgeConnectionFailure(failure);
+
+        assertTrue(manager.isConnectionFailureAcknowledged(failure));
+    }
+
+    @Test
+    public void newConnectionFailure_isNotAcknowledgedByAnOlderDismissal() {
+        manager.beginAttempt();
+        ReaderState firstFailure = new ReaderState.Builder()
+                .phase(ConnectionPhase.FAILED).build();
+        manager.publish(firstFailure);
+        manager.acknowledgeConnectionFailure(firstFailure);
+
+        manager.beginAttempt();
+        ReaderState secondFailure = new ReaderState.Builder()
+                .phase(ConnectionPhase.FAILED).build();
+        manager.publish(secondFailure);
+
+        assertFalse(manager.isConnectionFailureAcknowledged(secondFailure));
+    }
+
     private static final class RecordingObserver implements ReaderObserver {
         private ReaderState state;
         private DisconnectReason reason;

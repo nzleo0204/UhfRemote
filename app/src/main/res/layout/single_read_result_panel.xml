@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/group_single_read_result"
     style="@style/RfidCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,125 +8,98 @@
     android:layout_marginTop="@dimen/dp_16"
     android:orientation="vertical">
 
-    <TextView
-        style="@style/RfidGroupTitle"
-        android:text="@string/single_read_result_title" />
-
-    <LinearLayout
-        android:id="@+id/group_single_epc"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
-        <TextView
-            android:id="@+id/tv_single_id_label"
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="wrap_content"
-            android:text="EPC"
-            android:textColor="@color/rfid_text_muted"
-            android:textSize="@dimen/sp_14" />
-        <TextView
-            android:id="@+id/tv_single_epc"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="middle"
-            android:gravity="end"
-            android:maxLines="1"
-            android:text="-"
-            android:textColor="@color/rfid_primary_soft"
-            android:textSize="@dimen/sp_14" />
-        <TextView
-            android:id="@+id/btn_single_fill_epc_mask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:paddingHorizontal="@dimen/dp_8"
-            android:text="@string/single_fill_mask"
-            android:textColor="@color/rfid_primary"
-            android:textSize="@dimen/sp_12" />
-    </LinearLayout>
+        android:layout_height="@dimen/dp_32"
+        android:layout_marginBottom="@dimen/dp_10">
 
-    <LinearLayout
-        android:id="@+id/group_single_tid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_single_data_label"
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="wrap_content"
-            android:text="TID"
-            android:textColor="@color/rfid_text_muted"
-            android:textSize="@dimen/sp_14" />
-        <TextView
-            android:id="@+id/tv_single_tid"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="middle"
-            android:gravity="end"
-            android:maxLines="1"
-            android:text="-"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="EPC"
             android:textColor="@color/rfid_text"
-            android:textSize="@dimen/sp_13" />
-    </LinearLayout>
+            android:textSize="@dimen/sp_16" />
 
-    <include layout="@layout/rfid_single_info_chip" />
-    <include layout="@layout/rfid_single_info_rssi" />
+        <TextView
+            android:id="@+id/btn_single_fill_read_data_mask"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:text="@string/single_fill_mask"
+            android:textColor="@color/rfid_danger"
+            android:textSize="@dimen/sp_13" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/group_single_read_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_8"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/single_read_data"
-                android:textSize="@dimen/sp_13"
-                android:textColor="@color/rfid_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:paddingBottom="@dimen/dp_4" />
-
-            <TextView
-                android:id="@+id/btn_single_fill_read_data_mask"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="@dimen/dp_8"
-                android:text="@string/single_fill_mask"
-                android:textColor="@color/rfid_primary"
-                android:textSize="@dimen/sp_13" />
-
-            <TextView
-                android:id="@+id/tv_single_copy_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/common_copy"
-                android:textSize="@dimen/sp_13"
-                android:textColor="@color/rfid_primary"
-                android:padding="@dimen/dp_8"
-                android:background="?attr/selectableItemBackgroundBorderless" />
-        </LinearLayout>
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_single_read_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/dp_12"
             android:background="@drawable/rfid_field_bg"
-            android:textSize="@dimen/sp_15"
-            android:textColor="@color/rfid_primary"
             android:fontFamily="monospace"
-            android:textIsSelectable="true" />
+            android:gravity="start|center_vertical"
+            android:minHeight="@dimen/dp_44"
+            android:padding="@dimen/dp_12"
+            android:textColor="@color/rfid_primary"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textIsSelectable="false"
+            android:textSize="@dimen/sp_15" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_single_chip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_8"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="wrap_content"
+            android:text="芯片型号"
+            android:textColor="@color/rfid_text_muted"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:id="@+id/tv_single_chip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="-"
+            android:textColor="@color/rfid_text"
+            android:textSize="@dimen/sp_14" />
+    </LinearLayout>
+
+    <include layout="@layout/rfid_single_info_rssi" />
+
+    <TextView
+        android:id="@+id/tv_single_epc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_8"
+        android:background="@drawable/rfid_field_bg"
+        android:clickable="false"
+        android:focusable="false"
+        android:fontFamily="monospace"
+        android:longClickable="false"
+        android:minHeight="@dimen/dp_40"
+        android:padding="@dimen/dp_10"
+        android:textColor="@color/rfid_text_secondary"
+        android:textIsSelectable="false"
+        android:textSize="@dimen/sp_14" />
 </LinearLayout>

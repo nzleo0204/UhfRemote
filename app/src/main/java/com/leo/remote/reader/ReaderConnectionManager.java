@@ -11,6 +11,7 @@ public final class ReaderConnectionManager {
     private final AtomicLong generation = new AtomicLong();
 
     private volatile ReaderState state = ReaderState.disconnected();
+    private volatile ReaderState acknowledgedConnectionFailure;
     private volatile boolean pendingDisconnectAlert;
     private volatile DisconnectReason lastUnexpectedReason = DisconnectReason.NONE;
 
@@ -26,6 +27,7 @@ public final class ReaderConnectionManager {
     }
 
     long beginAttempt() {
+        acknowledgedConnectionFailure = null;
         return generation.incrementAndGet();
     }
 
@@ -54,6 +56,17 @@ public final class ReaderConnectionManager {
 
     void acknowledgeDisconnect() {
         pendingDisconnectAlert = false;
+    }
+
+    boolean isConnectionFailureAcknowledged(@NonNull ReaderState failure) {
+        return failure.getPhase() == ConnectionPhase.FAILED
+                && acknowledgedConnectionFailure == failure;
+    }
+
+    void acknowledgeConnectionFailure(@NonNull ReaderState failure) {
+        if (state == failure && failure.getPhase() == ConnectionPhase.FAILED) {
+            acknowledgedConnectionFailure = failure;
+        }
     }
 
     void clearUnexpectedDisconnect() {

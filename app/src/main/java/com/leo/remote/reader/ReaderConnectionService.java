@@ -100,7 +100,8 @@ public final class ReaderConnectionService extends Service {
                 || state.getPhase() == ConnectionPhase.DISCOVERING_SERVICES
                 || state.getPhase() == ConnectionPhase.ENABLING_NOTIFICATIONS
                 || state.getPhase() == ConnectionPhase.CONNECTING_DATA_CHANNEL
-                || state.getPhase() == ConnectionPhase.VERIFYING_MODULE) {
+                || state.getPhase() == ConnectionPhase.VERIFYING_MODULE
+                || state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS) {
             content = getString(R.string.reader_service_connecting);
         } else {
             content = getString(R.string.reader_service_disconnected);

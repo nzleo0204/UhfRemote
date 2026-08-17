@@ -18,6 +18,7 @@ public final class ReaderState {
     private final String moduleVersion;
     private final String message;
     private final int errorCode;
+    private final ReaderConnectionFailure connectionFailure;
     private final DisconnectReason disconnectReason;
     private final boolean inventoryRunning;
 
@@ -35,6 +36,7 @@ public final class ReaderState {
         moduleVersion = builder.moduleVersion;
         message = builder.message;
         errorCode = builder.errorCode;
+        connectionFailure = builder.connectionFailure;
         disconnectReason = builder.disconnectReason;
         inventoryRunning = builder.inventoryRunning;
     }
@@ -64,6 +66,7 @@ public final class ReaderState {
     public String getModuleVersion() { return moduleVersion; }
     public String getMessage() { return message; }
     public int getErrorCode() { return errorCode; }
+    public ReaderConnectionFailure getConnectionFailure() { return connectionFailure; }
     public DisconnectReason getDisconnectReason() { return disconnectReason; }
     public ReaderConnectionStatus getConnectionStatus() { return ReaderConnectionStatus.from(this); }
     public boolean isInventoryRunning() { return inventoryRunning; }
@@ -82,6 +85,7 @@ public final class ReaderState {
         private String moduleVersion = "";
         private String message = "";
         private int errorCode;
+        private ReaderConnectionFailure connectionFailure = ReaderConnectionFailure.NONE;
         private DisconnectReason disconnectReason = DisconnectReason.NONE;
         private boolean inventoryRunning;
 
@@ -101,6 +105,7 @@ public final class ReaderState {
             moduleVersion = state.moduleVersion;
             message = state.message;
             errorCode = state.errorCode;
+            connectionFailure = state.connectionFailure;
             disconnectReason = state.disconnectReason;
             inventoryRunning = state.inventoryRunning;
         }
@@ -120,6 +125,10 @@ public final class ReaderState {
         }
         public Builder message(@Nullable String value) { message = safe(value); return this; }
         public Builder errorCode(int value) { errorCode = value; return this; }
+        public Builder connectionFailure(@NonNull ReaderConnectionFailure value) {
+            connectionFailure = value;
+            return this;
+        }
         public Builder disconnectReason(@NonNull DisconnectReason value) { disconnectReason = value; return this; }
         public Builder inventoryRunning(boolean value) { inventoryRunning = value; return this; }
 

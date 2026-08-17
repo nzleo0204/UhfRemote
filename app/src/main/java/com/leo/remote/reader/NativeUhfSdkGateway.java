@@ -2,6 +2,7 @@ package com.leo.remote.reader;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
+
 import com.uhf.linkage.Linkage;
 import com.uhf.structures.AntennaPorts;
 import com.uhf.structures.DynamicQParams;
@@ -404,7 +405,9 @@ public final class NativeUhfSdkGateway implements UhfSdkGateway {
                 : Arrays.copyOf(result.ReadData, Math.min(result.DataLen, result.ReadData.length));
         byte[] epc = result.EPCData == null ? new byte[0]
                 : Arrays.copyOf(result.EPCData, Math.min(result.EPCLen, result.EPCData.length));
-        return new TagReadResult(data, epc, result.RSS);
+        String chipModel = result.chipModel != null ? result.chipModel : "";
+        int tidPrefix = result.tidPrefix;
+        return new TagReadResult(data, epc, result.RSS, chipModel, tidPrefix);
     }
 
     @Override

@@ -1,8 +1,13 @@
 package com.leo.remote.reader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.leo.remote.R;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 
 public class ReaderHandshakeTest {
@@ -14,6 +19,16 @@ public class ReaderHandshakeTest {
         assertEquals(270, result.configuration.powerTenthsDbm);
         assertTrue(gateway.protocolSelected);
         assertTrue(gateway.inventoryConfigured);
+    }
+
+    @Test
+    public void stopsInventoryBeforeReadingModuleInformation() throws Exception {
+        FakeGateway gateway = new FakeGateway();
+
+        ReaderHandshake.perform(gateway);
+
+        assertTrue(gateway.stopInventoryCalled);
+        assertFalse(gateway.moduleInfoReadBeforeInventoryStopped);
     }
 
     @Test(expected = ReaderException.class)
@@ -31,17 +46,71 @@ public class ReaderHandshakeTest {
         ReaderHandshake.perform(gateway);
     }
 
+    @Test
+    public void configurationProgress_keepsInitialReadsButOmitsQ() {
+        FakeGateway gateway = new FakeGateway();
+        List<Integer> progress = new ArrayList<>();
+
+        ReaderConfiguration configuration = ReaderHandshake.readConfigurationStepwise(
+                gateway, ModuleSubtype.R2000_PLUS, new InMemoryConfigurationStore(),
+                progress::add);
+
+        assertEquals(270, configuration.powerTenthsDbm);
+        assertEquals(Arrays.asList(
+                R.string.handshake_reading_power,
+                R.string.handshake_reading_protocol,
+                R.string.handshake_reading_session,
+                R.string.handshake_reading_blf), progress);
+    }
+
+    @Test
+    public void updatingParametersStartsAfterModuleInfoIsRead() throws Exception {
+        FakeGateway gateway = new FakeGateway();
+
+        ReaderHandshake.perform(gateway, new InMemoryConfigurationStore(), resourceId ->
+                gateway.eventLog.add("progress:" + resourceId));
+
+        assertTrue(gateway.eventLog.indexOf("moduleInfo") >= 0);
+        assertTrue(gateway.eventLog.indexOf("moduleInfo")
+                < gateway.eventLog.indexOf("progress:" + R.string.handshake_updating_params));
+        assertTrue(gateway.eventLog.indexOf("progress:" + R.string.handshake_updating_params)
+                < gateway.eventLog.indexOf("setProtocol"));
+    }
+
+    private static final class InMemoryConfigurationStore implements ReaderConfigurationStore {
+        private ReaderConfiguration configuration;
+        private int selected;
+
+        @Override public void saveConfiguration(ModuleSubtype subtype, ReaderConfiguration value) {
+            configuration = value;
+        }
+        @Override public ReaderConfiguration loadConfiguration(ModuleSubtype subtype) {
+            return configuration;
+        }
+        @Override public void saveSelected(ModuleSubtype subtype, int value) { selected = value; }
+        @Override public int loadSelected(ModuleSubtype subtype) { return selected; }
+    }
+
     private static final class FakeGateway implements UhfSdkGateway {
         boolean protocolSelected;
         boolean inventoryConfigured;
+        boolean stopInventoryCalled;
+        boolean moduleInfoReadBeforeInventoryStopped;
         int protocolStatus;
+        List<String> eventLog = new ArrayList<>();
         ReaderModuleInfo moduleInfo = new ReaderModuleInfo(
                 ModuleSubtype.R2000_PLUS, 3, "board", "1.0", "rf", "2.0");
 
         @Override public ReaderModuleInfo readModuleInfo() {
+            moduleInfoReadBeforeInventoryStopped = !stopInventoryCalled;
+            eventLog.add("moduleInfo");
             return moduleInfo;
         }
-        @Override public int setProtocol(TagProtocol protocol) { protocolSelected = true; return protocolStatus; }
+        @Override public int setProtocol(TagProtocol protocol) {
+            protocolSelected = true;
+            eventLog.add("setProtocol");
+            return protocolStatus;
+        }
         @Override public int applyInventoryParams(TagProtocol protocol, int area, int address,
                 int wordLen) { inventoryConfigured = true; return 0; }
         @Override public ReaderConfiguration readConfiguration(ModuleSubtype subtype) {
@@ -56,7 +125,7 @@ public class ReaderHandshakeTest {
         @Override public void setOutboundDataListener(OutboundDataListener listener) {}
         @Override public void pushRemoteData(byte[] data) {}
         @Override public int startInventory(int mode, int maskFlag) { return 0; }
-        @Override public int stopInventory() { return 0; }
+        @Override public int stopInventory() { stopInventoryCalled = true; return 0; }
         @Override public void setInventoryListener(InventoryListener listener) {}
         @Override public void setInventoryStopListener(InventoryStopListener listener) {}
         @Override public int setLowPowerScheduler(int highPerformanceTime, int inventoryOnTime,

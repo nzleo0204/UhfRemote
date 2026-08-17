@@ -49,6 +49,12 @@ public final class ReaderSessionManager {
         return coordinator.getLastUnexpectedReason();
     }
     public void acknowledgeDisconnect() { coordinator.acknowledgeDisconnect(); }
+    public boolean isConnectionFailureAcknowledged(@NonNull ReaderState failure) {
+        return coordinator.isConnectionFailureAcknowledged(failure);
+    }
+    public void acknowledgeConnectionFailure(@NonNull ReaderState failure) {
+        coordinator.acknowledgeConnectionFailure(failure);
+    }
     public void addObserver(@NonNull ReaderObserver observer) { coordinator.addObserver(observer); }
     public void removeObserver(@NonNull ReaderObserver observer) {
         coordinator.removeObserver(observer);

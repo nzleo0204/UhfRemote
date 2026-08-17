@@ -312,4 +312,13 @@ public class ReaderDomainTest {
                 .phase(ConnectionPhase.DISCONNECTED).disconnectReason(DisconnectReason.USER)
                 .build().getConnectionStatus());
     }
+
+    @Test
+    public void parameterUpdateIsVisibleAsInitializingUntilItCompletes() {
+        ReaderState updating = new ReaderState.Builder()
+                .phase(ConnectionPhase.UPDATING_PARAMETERS).build();
+
+        assertFalse(updating.isConnected());
+        assertEquals(ReaderConnectionStatus.CONNECTED, updating.getConnectionStatus());
+    }
 }

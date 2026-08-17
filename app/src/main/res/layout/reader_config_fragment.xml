@@ -64,14 +64,17 @@
 
             <TextView
                 android:id="@+id/tv_config_disconnect_reason"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:layout_marginTop="@dimen/dp_4"
+                android:gravity="end"
                 android:maxLines="2"
                 android:textColor="@color/rfid_danger"
                 android:textSize="@dimen/sp_12"
+                android:textAlignment="viewEnd"
                 android:visibility="gone"
-                tools:text="与读写器的连接已丢失，请重新连接。" />
+                tools:text="与读写器的连接已丢失，请重新连接" />
         </LinearLayout>
 
         <ScrollView

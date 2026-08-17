@@ -6,6 +6,7 @@ import java.util.function.IntConsumer;
 
 final class ReaderHandshake {
     private static final String TAG = "UhfReader";
+    private static final long MODULE_INFO_SETTLE_MS = 200L;
     static final class Result {
         final ReaderModuleInfo moduleInfo;
         final ReaderConfiguration configuration;
@@ -19,7 +20,7 @@ final class ReaderHandshake {
     private ReaderHandshake() {}
 
     static Result perform(UhfSdkGateway gateway) throws ReaderException {
-        ReaderModuleInfo info = gateway.readModuleInfo();
+        ReaderModuleInfo info = readModuleInfoAfterStoppingInventory(gateway);
         if (info.subtype == ModuleSubtype.UNKNOWN) {
             throw new ReaderException("Unknown RM70XX subtype: " + info.rawSubtype, info.rawSubtype);
         }
@@ -40,10 +41,10 @@ final class ReaderHandshake {
 
     static Result perform(UhfSdkGateway gateway, ReaderConfigurationStore cache,
             IntConsumer progress) throws ReaderException {
-        progress.accept(R.string.handshake_updating_params);
-        ReaderModuleInfo info = gateway.readModuleInfo();
+        ReaderModuleInfo info = readModuleInfoAfterStoppingInventory(gateway);
         validateModuleInfo(info);
 
+        progress.accept(R.string.handshake_updating_params);
         int status = gateway.setProtocol(TagProtocol.ISO_18000_6C);
         if (status != 0) {
             throw new ReaderException("Unable to select 6C protocol", status);
@@ -57,6 +58,18 @@ final class ReaderHandshake {
             throw new ReaderException("Unable to configure inventory area", status);
         }
         return new Result(info, readConfigurationStepwise(gateway, info.subtype, cache, progress));
+    }
+
+    private static ReaderModuleInfo readModuleInfoAfterStoppingInventory(UhfSdkGateway gateway)
+            throws ReaderException {
+        gateway.stopInventory();
+        try {
+            Thread.sleep(MODULE_INFO_SETTLE_MS);
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            throw new ReaderException("Interrupted while preparing RM70XX module", -1);
+        }
+        return gateway.readModuleInfo();
     }
 
     static ReaderConfiguration readConfigurationStepwise(UhfSdkGateway gateway,
@@ -115,7 +128,6 @@ final class ReaderHandshake {
             }
         }
 
-        progress.accept(R.string.handshake_reading_q);
         boolean dynamic = fallback.dynamicQ;
         int q = fallback.qValue;
         int minQ = fallback.qMinValue;

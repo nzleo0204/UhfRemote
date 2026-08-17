@@ -194,6 +194,7 @@ dependencies {
     }
 
     implementation libs.androidAopCore
+    implementation files('libs/uhf.jar')
     annotationProcessor libs.androidAopApt
 
     testImplementation 'junit:junit:4.13.2'

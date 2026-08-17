@@ -69,12 +69,14 @@ public final class ReaderTagOperationsTest {
     @Test
     public void read_withEpc_updatesCurrentTagAndPublishesIt() throws Exception {
         gateway.readResult = new TagReadResult(new byte[] {0x11},
-                new byte[] {0x30, 0x40}, -47);
+                new byte[] {0x30, 0x40}, -47, "Impinj Monza 4QT", 0xE2003412);
 
         operations.read(TagProtocol.ISO_18000_6C, 1, 0, 2, new byte[4]);
 
         assertEquals("3040", operations.getCurrentTag().id);
         assertEquals(-47, operations.getCurrentTag().rssi);
+        assertEquals("Impinj Monza 4QT", operations.getCurrentTag().chipModel);
+        assertEquals(0xE2003412, operations.getCurrentTag().tidPrefix);
         assertEquals("3040", observer.tag.id);
     }
 
@@ -99,6 +101,19 @@ public final class ReaderTagOperationsTest {
 
         assertEquals("3040", operations.getCurrentTag().id);
         assertEquals("3040", observer.tag.id);
+    }
+
+    @Test
+    public void read_epcBank_preservesSeparateFullEpcAsCurrentTag() throws Exception {
+        gateway.readResult = new TagReadResult(
+                new byte[] {0x30, 0x40},
+                new byte[] {0x30, 0x40, 0x50, 0x60},
+                -47);
+
+        operations.read(TagProtocol.ISO_18000_6C, 6, 2, 1, new byte[4]);
+
+        assertEquals("30405060", operations.getCurrentTag().id);
+        assertEquals("30405060", observer.tag.id);
     }
 
     private static final class RecordingObserver implements ReaderObserver {

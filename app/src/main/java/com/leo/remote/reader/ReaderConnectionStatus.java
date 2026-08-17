@@ -7,7 +7,8 @@ public enum ReaderConnectionStatus {
     FAILED;
 
     public static ReaderConnectionStatus from(ReaderState state) {
-        if (state.getPhase() == ConnectionPhase.CONNECTED) {
+        if (state.getPhase() == ConnectionPhase.CONNECTED
+                || state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS) {
             return CONNECTED;
         }
         if (state.getPhase() == ConnectionPhase.FAILED) {

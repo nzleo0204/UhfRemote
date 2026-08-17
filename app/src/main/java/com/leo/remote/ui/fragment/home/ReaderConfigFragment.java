@@ -97,8 +97,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
-    private boolean connectionFailureDialogDismissed;
     private WaitDialog.Builder settingWaitDialog;
+    private WaitDialog.Builder parameterUpdateDialog;
     private int powerProgressBeforeDrag;
     private int imeInsetBottom;
     private int configScrollBaseBottomPadding;
@@ -276,6 +276,7 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
     @Override
     public void onDestroy() {
         dismissSettingWaitDialog();
+        dismissParameterUpdateDialog();
         if (session != null) { session.removeObserver(this); }
         super.onDestroy();
     }
@@ -310,23 +311,28 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             wifiSwitch.setChecked(true);
             bindingUi = false;
         }
-        bindTransportRows(bleSwitch.isChecked(), connected);
+        boolean parameterUpdating = state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS;
+        bindTransportRows(bleSwitch.isChecked(), connected || parameterUpdating);
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
             bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
         }
 
         if (isConnectingPhase(state.getPhase())) {
-            connectionFailureDialogDismissed = false;
             showOrUpdateConnectionDialog(state);
+        } else if (parameterUpdating) {
+            dismissConnectionDialog();
+            showOrUpdateParameterUpdateDialog(state);
         } else if (state.getPhase() == ConnectionPhase.FAILED
-                && !connectionFailureDialogDismissed) {
+                && !session.isConnectionFailureAcknowledged(state)) {
+            dismissParameterUpdateDialog();
             showOrUpdateConnectionDialog(state);
         } else {
             dismissConnectionDialog();
+            dismissParameterUpdateDialog();
         }
         applyModuleUi(state.getModuleSubtype());
-        // ReaderConnectionDialog owns the complete handshake progress lifecycle.
+        // The connection dialog ends before the parameter initialization dialog starts.
     }
 
     @Override
@@ -886,6 +892,23 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
         settingWaitDialog = null;
     }
 
+    private void showOrUpdateParameterUpdateDialog(ReaderState state) {
+        if (parameterUpdateDialog == null || !parameterUpdateDialog.isShowing()) {
+            parameterUpdateDialog = new WaitDialog.Builder(requireActivity())
+                    .setMessage(state.getMessage());
+            parameterUpdateDialog.show();
+        } else {
+            parameterUpdateDialog.setMessage(state.getMessage());
+        }
+    }
+
+    private void dismissParameterUpdateDialog() {
+        if (parameterUpdateDialog != null && parameterUpdateDialog.isShowing()) {
+            parameterUpdateDialog.dismiss();
+        }
+        parameterUpdateDialog = null;
+    }
+
     private void showOrUpdateConnectionDialog(ReaderState state) {
         ReaderConnectionDialog dialog = (ReaderConnectionDialog) getParentFragmentManager()
                 .findFragmentByTag(CONNECTION_DIALOG_TAG);
@@ -893,8 +916,8 @@ public final class ReaderConfigFragment extends AppFragment<HomeActivity> implem
             dialog = new ReaderConnectionDialog();
             dialog.show(getParentFragmentManager(), CONNECTION_DIALOG_TAG);
         }
-        dialog.setOnFailureDismissed(() -> connectionFailureDialogDismissed = true);
-        dialog.update(state.getPhase(), state.getMessage(), state.getErrorCode());
+        dialog.setOnFailureDismissed(() -> session.acknowledgeConnectionFailure(state));
+        dialog.update(state.getPhase(), state.getMessage(), state.getConnectionFailure());
     }
 
     private void dismissConnectionDialog() {

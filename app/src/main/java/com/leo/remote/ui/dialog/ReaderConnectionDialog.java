@@ -15,6 +15,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.leo.remote.R;
 import com.leo.remote.reader.ConnectionPhase;
 import com.leo.remote.reader.DisconnectReason;
+import com.leo.remote.reader.ReaderConnectionFailure;
 import com.leo.remote.reader.ReaderSessionManager;
 
 public final class ReaderConnectionDialog extends DialogFragment {
@@ -27,7 +28,7 @@ public final class ReaderConnectionDialog extends DialogFragment {
     private LottieAnimationView animationView;
     private ConnectionPhase currentPhase = ConnectionPhase.CONNECTING;
     private String currentDetail = "";
-    private int currentErrorCode;
+    private ReaderConnectionFailure currentFailure = ReaderConnectionFailure.NONE;
     @Nullable
     private Runnable onFailureDismissed;
     private final Runnable dismissSuccess = this::dismissAllowingStateLoss;
@@ -50,7 +51,7 @@ public final class ReaderConnectionDialog extends DialogFragment {
         cancelButton = view.findViewById(R.id.btn_reader_connect_cancel);
         closeButton = view.findViewById(R.id.btn_reader_connect_close);
         cancelButton.setOnClickListener(ignored -> {
-            update(ConnectionPhase.DISCONNECTING, "正在取消连接", 0);
+            update(ConnectionPhase.DISCONNECTING, "正在取消连接", ReaderConnectionFailure.NONE);
             ReaderSessionManager.getInstance(requireActivity().getApplication())
                     .disconnect(DisconnectReason.CANCELED);
         });
@@ -64,7 +65,7 @@ public final class ReaderConnectionDialog extends DialogFragment {
         dialog.setCanceledOnTouchOutside(false);
         Window window = dialog.getWindow();
         if (window != null) { window.setBackgroundDrawableResource(android.R.color.transparent); }
-        update(currentPhase, currentDetail, currentErrorCode);
+        update(currentPhase, currentDetail, currentFailure);
         return dialog;
     }
 
@@ -78,10 +79,10 @@ public final class ReaderConnectionDialog extends DialogFragment {
         window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    public void update(ConnectionPhase phase, String detail, int errorCode) {
+    public void update(ConnectionPhase phase, String detail, ReaderConnectionFailure failureType) {
         currentPhase = phase;
         currentDetail = detail == null ? "" : detail;
-        currentErrorCode = errorCode;
+        currentFailure = failureType == null ? ReaderConnectionFailure.NONE : failureType;
         if (phaseView == null || detailView == null) { return; }
         if (rootView != null) { rootView.removeCallbacks(dismissSuccess); }
 
@@ -107,7 +108,8 @@ public final class ReaderConnectionDialog extends DialogFragment {
             case DISCOVERING_SERVICES -> "正在发现服务";
             case ENABLING_NOTIFICATIONS -> "正在启用通知";
             case CONNECTING_DATA_CHANNEL -> "正在建立数据通道";
-            case VERIFYING_MODULE -> "正在验证 RM70XX";
+            case VERIFYING_MODULE -> "正在获取设备版本信息";
+            case UPDATING_PARAMETERS -> "正在更新设备参数";
             case CONNECTED -> "连接成功";
             case FAILED -> "连接失败";
             case DISCONNECTING -> "正在取消连接";
@@ -119,13 +121,12 @@ public final class ReaderConnectionDialog extends DialogFragment {
             case ENABLING_NOTIFICATIONS -> R.string.reader_notifications_detail;
             case CONNECTING_DATA_CHANNEL -> R.string.reader_data_channel_detail;
             case VERIFYING_MODULE -> R.string.reader_verifying_detail;
-            case FAILED -> R.string.reader_failed_detail;
+            case UPDATING_PARAMETERS -> R.string.handshake_updating_params;
+            case FAILED -> currentFailure == ReaderConnectionFailure.BLUETOOTH
+                    ? R.string.reader_bluetooth_failed_detail : R.string.reader_failed_detail;
             case DISCONNECTING -> R.string.reader_disconnecting_detail;
             default -> R.string.reader_connecting_detail;
         });
-        if (failure && currentErrorCode != 0) {
-            message = message + (message.isEmpty() ? "" : "\n") + "错误码：" + currentErrorCode;
-        }
         if (phase == ConnectionPhase.VERIFYING_MODULE && !currentDetail.isEmpty()) {
             message = currentDetail;
         }
