@@ -9,9 +9,10 @@ UhfRemote/
 ├── app/                        # 主应用模块
 │   ├── src/main/java/
 │   │   └── com/leo/remote/
-│   │       ├── reader/         # Reader 模型、会话、SDK、传输和持久化
-│   │       ├── ui/reader/      # 配置、盘点和单标签页面
-│   │       ├── util/           # 工具类
+│   │       ├── rfid/           # RFID 演示 UI、SDK 和 Native 桥接
+│   │       ├── business/       # 库存、订单、出货和认证业务
+│   │       ├── core/           # 基础 UI、网络、存储和工具
+│   │       ├── app/            # Application、主界面和启动页
 │   │       └── manager/        # 管理器
 │   └── src/main/res/           # 资源文件
 ├── library/                    # 基础库模块
@@ -33,7 +34,3 @@ JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
 ```
 
 Lint 使用 `app/lint-baseline.xml` 记录现有警告，并保持 `abortOnError` 开启。当前未使用模板资源暂时保留，新增警告不能进入基线。
-
-## 文档
-
-- [架构文档](docs/ARCHITECTURE.md) - Reader 包依赖、线程模型、连接流程和测试边界
