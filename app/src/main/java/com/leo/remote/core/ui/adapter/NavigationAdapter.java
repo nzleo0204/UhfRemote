@@ -18,10 +18,10 @@ import com.leo.remote.core.ui.base.BaseAdapter;
 import com.leo.remote.core.ui.adapter.NavigationAdapter.NavigationItem;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2021/02/28
- *    desc   : 导航栏适配器
+
+
+
+ *    导航栏适配器
  */
 public final class NavigationAdapter extends BaseAdapter<NavigationItem>
         implements com.hjq.base.BaseAdapter.OnItemClickListener {

@@ -22,10 +22,10 @@ import com.leo.remote.R;
 import com.hjq.smallest.width.SmallestWidthAdaptation;
 
 /**
- *    author : 王浩 & Android 轮子哥
- *    github : https://github.com/bingoogolapple/BGATransformersTip-Android
- *    time   : 2019/08/19
- *    desc   : 带箭头背景的 Drawable
+
+
+
+ *    带箭头背景的 Drawable
  */
 @SuppressLint("RtlHardcoded")
 public final class ArrowDrawable extends Drawable {

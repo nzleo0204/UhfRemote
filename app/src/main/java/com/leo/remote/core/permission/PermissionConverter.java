@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2025/05/30
- *    desc   : 权限转换器（根据权限获取对应的名称和说明）
+
+
+
+ *    权限转换器（根据权限获取对应的名称和说明）
  */
 public final class PermissionConverter {
 

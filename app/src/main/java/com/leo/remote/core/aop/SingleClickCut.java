@@ -7,10 +7,10 @@ import org.jetbrains.annotations.Nullable;
 import timber.log.Timber;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/12/06
- *    desc   : 防重复点击切面
+
+
+
+ *    防重复点击切面
  */
 public class SingleClickCut implements BasePointCut<SingleClick> {
 

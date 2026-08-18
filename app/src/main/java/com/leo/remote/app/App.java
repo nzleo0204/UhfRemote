@@ -7,10 +7,10 @@ import com.leo.remote.app.bootstrap.AppInitializer;
 import com.leo.remote.core.manager.OrientationManager;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 应用入口
+
+
+
+ *    应用入口
  */
 public final class App extends Application {
     private static volatile App instance;

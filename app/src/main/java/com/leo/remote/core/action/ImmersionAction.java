@@ -5,10 +5,10 @@ import androidx.annotation.Nullable;
 import com.hjq.bar.OnTitleBarListener;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2025/12/13
- *    desc   : 沉浸式意图
+
+
+
+ *    沉浸式意图
  */
 public interface ImmersionAction extends OnTitleBarListener {
 

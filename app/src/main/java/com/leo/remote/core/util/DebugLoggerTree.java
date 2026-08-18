@@ -5,10 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2020/08/12
- *    desc   : 自定义日志打印规则
+
+
+
+ *    自定义日志打印规则
  */
 public final class DebugLoggerTree extends Timber.DebugTree {
 

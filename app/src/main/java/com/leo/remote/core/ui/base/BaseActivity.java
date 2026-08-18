@@ -21,10 +21,10 @@ import com.leo.remote.core.ui.dialog.WaitDialog;
 import com.leo.remote.core.util.ThemeModeManager;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : Activity 业务基类
+
+
+
+ *    Activity 业务基类
  */
 public abstract class BaseActivity extends com.hjq.base.BaseActivity
     implements ToastAction, TitleBarAction, ImmersionAction {

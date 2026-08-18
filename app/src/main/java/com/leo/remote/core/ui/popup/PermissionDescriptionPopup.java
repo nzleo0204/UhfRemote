@@ -8,10 +8,10 @@ import com.hjq.base.BasePopupWindow;
 import com.leo.remote.R;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2025/06/01
- *    desc   : 权限说明弹窗
+
+
+
+ *    权限说明弹窗
  */
 public final class PermissionDescriptionPopup {
 

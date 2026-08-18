@@ -9,10 +9,10 @@ import androidx.annotation.NonNull;
 import com.hjq.toast.Toaster;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2026/07/21
- *    desc   : 外部链接跳转
+
+
+
+ *    外部链接跳转
  */
 public final class UrlLauncher {
 

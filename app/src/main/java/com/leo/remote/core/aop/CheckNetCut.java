@@ -12,10 +12,10 @@ import com.leo.remote.R;
 import com.hjq.toast.Toaster;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2020/01/11
- *    desc   : 网络检测切面
+
+
+
+ *    网络检测切面
  */
 public class CheckNetCut implements BasePointCut<CheckNet> {
 

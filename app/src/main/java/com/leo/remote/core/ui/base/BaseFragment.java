@@ -7,10 +7,10 @@ import androidx.annotation.Nullable;
 import com.leo.remote.core.action.ToastAction;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : Fragment 业务基类
+
+
+
+ *    Fragment 业务基类
  */
 public abstract class BaseFragment<A extends BaseActivity>
         extends com.hjq.base.BaseFragment<A> implements ToastAction {

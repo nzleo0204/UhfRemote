@@ -23,10 +23,10 @@ import com.hjq.permissions.tools.PermissionTaskHandler;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2025/05/30
- *    desc   : 权限请求描述实现
+
+
+
+ *    权限请求描述实现
  */
 public final class PermissionDescription implements OnPermissionDescription {
 

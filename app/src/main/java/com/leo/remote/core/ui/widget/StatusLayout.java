@@ -20,10 +20,10 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.leo.remote.R;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/04/18
- *    desc   : 状态布局（网络错误，异常错误，空数据）
+
+
+
+ *    状态布局（网络错误，异常错误，空数据）
  */
 public final class StatusLayout extends FrameLayout {
 

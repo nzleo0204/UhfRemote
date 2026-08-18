@@ -12,10 +12,10 @@ import com.leo.remote.core.util.LinkClickableSpan;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2023/06/24
- *    desc   : 用户协议与隐私政策弹窗
+
+
+
+ *    用户协议与隐私政策弹窗
  */
 public final class PrivacyAgreementDialog {
 

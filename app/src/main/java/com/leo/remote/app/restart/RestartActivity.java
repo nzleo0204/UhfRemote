@@ -11,10 +11,10 @@ import com.leo.remote.app.MainActivity;
 import com.leo.remote.app.splash.SplashActivity;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2020/11/29
- *    desc   : 重启应用
+
+
+
+ *    重启应用
  */
 public final class RestartActivity extends BaseActivity {
 

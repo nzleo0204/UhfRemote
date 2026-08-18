@@ -1,13 +1,13 @@
 package com.leo.remote.core.util;
 
 import com.hjq.toast.ToastLogInterceptor;
-import timber.log.Timber;
+import com.leo.remote.core.aop.Log;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2020/11/04
- *    desc   : 自定义 Toast 拦截器（用于追踪 Toast 调用的位置）
+
+
+
+ *    自定义 Toast 拦截器（用于追踪 Toast 调用的位置）
  */
 public final class ToastInterceptor extends ToastLogInterceptor {
 
@@ -16,9 +16,8 @@ public final class ToastInterceptor extends ToastLogInterceptor {
         return AppConfig.isLogEnable();
     }
 
+    @Log("Toaster")
     @Override
     protected void printLog(String msg) {
-        Timber.tag("Toaster");
-        Timber.i(msg);
     }
 }

@@ -67,7 +67,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".rfid.sdk.connection.service.ReaderConnectionService"
+            android:name="com.leo.rfid.sdk.connect.service.ReaderConnectionService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />

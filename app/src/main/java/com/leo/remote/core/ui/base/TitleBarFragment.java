@@ -15,10 +15,10 @@ import com.leo.remote.core.action.ImmersionAction;
 import com.leo.remote.core.action.TitleBarAction;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2020/10/31
- *    desc   : 带标题栏的 Fragment 业务基类
+
+
+
+ *    带标题栏的 Fragment 业务基类
  */
 public abstract class TitleBarFragment<A extends BaseActivity>
         extends BaseFragment<A> implements TitleBarAction, ImmersionAction {

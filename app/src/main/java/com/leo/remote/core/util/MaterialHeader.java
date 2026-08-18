@@ -27,10 +27,10 @@ import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
 import com.scwang.smart.refresh.layout.simple.SimpleComponent;
 
 /**
- *    author : 树朾 & Android 轮子哥
- *    github : https://github.com/scwang90/SmartRefreshLayout/tree/master/refresh-header-material
- *    time   : 2021/02/28
- *    desc   : Material 风格的刷新球，参考 {@link com.scwang.smart.refresh.header.MaterialHeader}
+
+
+
+ *    Material 风格的刷新球，参考 {@link com.scwang.smart.refresh.header.MaterialHeader}
  */
 public final class MaterialHeader extends SimpleComponent implements RefreshHeader {
 

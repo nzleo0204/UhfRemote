@@ -13,10 +13,10 @@ import com.leo.remote.R;
 import com.leo.remote.core.ui.widget.StatusLayout;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/12/08
- *    desc   : 状态布局意图
+
+
+
+ *    状态布局意图
  */
 public interface StatusAction {
 

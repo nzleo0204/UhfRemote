@@ -16,16 +16,16 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BasePagerAdapter;
 import com.hjq.core.tools.DoubleClickHelper;
 import com.leo.remote.R;
-import com.leo.remote.rfid.demo.ui.common.ReaderAwareActivity;
+import com.leo.rfid.demo.common.ReaderAwareActivity;
 import com.leo.remote.core.ui.base.BaseFragment;
 import com.leo.remote.core.ui.adapter.NavigationAdapter;
 import com.leo.remote.core.ui.adapter.NavigationAdapter.NavigationItem;
-import com.leo.remote.rfid.demo.ui.inventory.InventoryFragment;
+import com.leo.rfid.demo.inventory.InventoryFragment;
 import com.leo.remote.business.auth.ui.MineFragment;
-import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
-import com.leo.remote.rfid.demo.ui.singletag.SingleTagFragment;
+import com.leo.rfid.demo.config.ReaderConfigFragment;
+import com.leo.rfid.demo.tag.SingleTagFragment;
 import com.leo.remote.business.stock.ui.StockListFragment;
-import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
+import com.leo.rfid.sdk.connect.ReaderSessionManager;
 
 /**
  * 应用主界面
@@ -39,10 +39,10 @@ import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
  *
  * 平板设备使用侧边导航栏（layout-sw600dp-land）
  *
- * 原作者: Android 轮子哥
- * 原项目: https://github.com/getActivity/AndroidProject
- * 修改时间: 2024
- * 修改说明: 基于原框架改造为 RFID 应用
+
+
+
+
  */
 public final class MainActivity extends ReaderAwareActivity
         implements NavigationAdapter.OnNavigationListener {

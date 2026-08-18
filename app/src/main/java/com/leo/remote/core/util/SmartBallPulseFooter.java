@@ -19,10 +19,10 @@ import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
 import com.scwang.smart.refresh.layout.simple.SimpleComponent;
 
 /**
- *    author : 树朾 & Android 轮子哥
- *    github : https://github.com/scwang90/SmartRefreshLayout/tree/master/refresh-footer-ball
- *    time   : 2020/08/01
- *    desc   : 球脉冲底部加载组件
+
+
+
+ *    球脉冲底部加载组件
  */
 public final class SmartBallPulseFooter extends SimpleComponent implements RefreshFooter {
 

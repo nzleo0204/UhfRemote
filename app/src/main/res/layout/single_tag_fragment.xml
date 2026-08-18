@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
     android:orientation="vertical"
-    tools:context=".rfid.demo.ui.singletag.SingleTagFragment">
+    tools:context="com.leo.rfid.demo.tag.SingleTagFragment">
 
     <TextView
         android:layout_width="match_parent"

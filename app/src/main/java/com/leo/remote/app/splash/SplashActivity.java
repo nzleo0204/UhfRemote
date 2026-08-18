@@ -23,10 +23,10 @@ import com.leo.remote.core.ui.dialog.MessageDialog;
 import java.util.Locale;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 闪屏界面
+
+
+
+ *    闪屏界面
  */
 @SuppressLint("CustomSplashScreen")
 public final class SplashActivity extends BaseActivity {

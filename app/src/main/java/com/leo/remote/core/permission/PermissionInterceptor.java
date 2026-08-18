@@ -19,10 +19,10 @@ import com.hjq.toast.Toaster;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2021/01/04
- *    desc   : 权限申请拦截器
+
+
+
+ *    权限申请拦截器
  */
 public final class PermissionInterceptor implements OnPermissionInterceptor {
 

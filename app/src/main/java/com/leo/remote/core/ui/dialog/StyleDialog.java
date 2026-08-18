@@ -13,10 +13,10 @@ import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/09/21
- *    desc   : 项目通用样式 Dialog 布局封装
+
+
+
+ *    项目通用样式 Dialog 布局封装
  */
 public final class StyleDialog {
 

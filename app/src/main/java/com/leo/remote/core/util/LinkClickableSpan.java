@@ -5,10 +5,10 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2023/06/24
- *    desc   : 点击跳转链接的 ClickableSpan
+
+
+
+ *    点击跳转链接的 ClickableSpan
  */
 public class LinkClickableSpan extends ClickableSpan {
 
