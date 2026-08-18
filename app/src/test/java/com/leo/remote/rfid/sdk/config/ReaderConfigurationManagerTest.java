@@ -12,6 +12,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证读写器参数读取、更新和缓存行为。
+ */
 public final class ReaderConfigurationManagerTest {
     private FakeUhfSdkGateway gateway;
     private MemoryStore store;

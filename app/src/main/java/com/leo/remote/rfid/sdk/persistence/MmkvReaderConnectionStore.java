@@ -5,6 +5,9 @@ import com.leo.remote.rfid.sdk.model.*;
 
 import com.tencent.mmkv.MMKV;
 
+/**
+ * 使用 MMKV 保存最近一次读写器连接参数。
+ */
 public final class MmkvReaderConnectionStore implements ReaderConnectionStore {
     private static final String MMKV_ID = "reader_connection";
     private static final String KEY_WIFI_ADDRESS = "wifi_address";

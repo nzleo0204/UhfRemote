@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.Arrays;
 
-/** Complete result returned by the SDK read operation. */
+/**
+ * 保存 SDK 单标签读取返回的数据、完整 EPC 和附加信息。
+ */
 public final class TagReadResult {
     private final byte[] data;
     private final byte[] epc;

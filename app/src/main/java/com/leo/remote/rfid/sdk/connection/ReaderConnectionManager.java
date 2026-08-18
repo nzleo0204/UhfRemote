@@ -6,7 +6,9 @@ import androidx.annotation.NonNull;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-/** Owns connection state, attempt generations, and unexpected-disconnect alerts. */
+/**
+ * 管理连接状态、连接代次和意外断开提示。
+ */
 public final class ReaderConnectionManager {
     private final ReaderStatePublisher publisher;
     private final Consumer<ReaderState> stateConsumer;

@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 定义读写器支持的 RFID 空中接口协议。
+ */
 public enum TagProtocol {
     ISO_18000_6C(0),
     ISO_18000_6B(1),

@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 
+/**
+ * 验证握手流程的模块校验、参数读取和缓存回退。
+ */
 public class ReaderHandshakeTest {
     @Test
     public void completesOnlyAfterModuleProtocolInventoryAndConfiguration() throws Exception {

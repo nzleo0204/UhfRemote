@@ -17,6 +17,9 @@ import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 将库存记录绑定到库存列表视图。
+ */
 public final class StockAdapter extends ListAdapter<StockItem, StockAdapter.ViewHolder> {
     private static final DiffUtil.ItemCallback<StockItem> DIFF = new DiffUtil.ItemCallback<>() {
         @Override

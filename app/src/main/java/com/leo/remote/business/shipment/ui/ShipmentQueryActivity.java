@@ -10,6 +10,9 @@ import com.leo.remote.business.common.data.BusinessRepositories;
 import com.leo.remote.business.common.ui.PagedQueryActivity;
 import java.util.List;
 
+/**
+ * 提供发运单查询与详情入口页面。
+ */
 public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
     private ShipmentAdapter adapter;
 

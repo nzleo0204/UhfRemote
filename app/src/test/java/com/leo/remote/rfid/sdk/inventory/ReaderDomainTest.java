@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Locale;
 import org.junit.Test;
 
+/**
+ * 验证 RFID 领域模型的默认值和边界行为。
+ */
 public class ReaderDomainTest {
 
     @Test

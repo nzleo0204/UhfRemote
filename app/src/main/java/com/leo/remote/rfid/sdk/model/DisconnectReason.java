@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 定义读写器连接断开的原因。
+ */
 public enum DisconnectReason {
     NONE(false),
     USER(false),

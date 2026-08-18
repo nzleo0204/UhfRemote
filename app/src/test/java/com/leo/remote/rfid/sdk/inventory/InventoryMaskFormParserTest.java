@@ -12,6 +12,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * 验证盘点掩码表单的协议映射和输入校验。
+ */
 public final class InventoryMaskFormParserTest {
     @Test
     public void mapsBanksForAllProtocols() {

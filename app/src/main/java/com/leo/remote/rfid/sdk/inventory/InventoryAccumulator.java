@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 按标签标识聚合盘点结果，并累计次数与信号强度信息。
+ */
 public final class InventoryAccumulator {
     private final Map<String, InventoryItem> items = new LinkedHashMap<>();
     private long totalReads;

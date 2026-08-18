@@ -23,6 +23,9 @@ import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 将发运单记录绑定到查询列表视图。
+ */
 public final class ShipmentAdapter extends ListAdapter<Shipment, ShipmentAdapter.ViewHolder> {
     private static final DiffUtil.ItemCallback<Shipment> DIFF = new DiffUtil.ItemCallback<>() {
         @Override

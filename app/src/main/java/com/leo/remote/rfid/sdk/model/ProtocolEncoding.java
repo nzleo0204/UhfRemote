@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 定义协议数据在 SDK 与界面之间使用的编码方式。
+ */
 public final class ProtocolEncoding {
 
     private ProtocolEncoding() {}
@@ -44,7 +47,7 @@ public final class ProtocolEncoding {
         return encodeMaskOffset(protocol, protocol == TagProtocol.ISO_18000_6C ? 32 : 0);
     }
 
-    /** Returns the protocol-specific initial bit offset for a selected mask bank. */
+    /** 返回指定掩码存储区在当前协议下的初始位偏移。 */
     public static int defaultMaskOffsetBits(TagProtocol protocol, int bankPosition) {
         return switch (protocol) {
             case ISO_18000_6C -> bankPosition == 1 ? 32 : 0;

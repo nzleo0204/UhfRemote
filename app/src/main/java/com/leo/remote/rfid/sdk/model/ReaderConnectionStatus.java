@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 定义对外发布的读写器连接状态。
+ */
 public enum ReaderConnectionStatus {
     NOT_CONNECTED,
     CONNECTED,

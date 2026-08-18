@@ -7,7 +7,9 @@ import androidx.core.content.ContextCompat;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.connection.ReaderConnectionServiceHost;
 
-/** Owns Android foreground-service lifecycle and state delivery. */
+/**
+ * 管理 Android 前台连接服务的生命周期和状态转发。
+ */
 public final class ReaderConnectionServiceController implements ReaderConnectionServiceHost {
     private static final String TAG = "UhfReader";
 

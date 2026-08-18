@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * 负责读写器 BLE 连接、服务发现、通知订阅和数据收发。
+ */
 public final class BleTransport implements EventObserver, ReaderBleTransport {
     private static final String TAG = "UhfBle";
     private static final String REQUEST_TAG_PREFIX = "uhf-ble-";

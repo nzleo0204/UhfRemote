@@ -11,6 +11,9 @@ import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.dialog.StyleDialog;
 
+/**
+ * 提供单标签锁定操作的表单弹窗。
+ */
 public final class TagLockDialog {
     public interface Listener {
         void onSubmit(BaseDialog dialog, int bank, int policy, String password);

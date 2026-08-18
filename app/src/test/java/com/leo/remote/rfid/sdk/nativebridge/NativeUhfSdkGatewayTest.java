@@ -8,6 +8,9 @@ import com.uhf.structures.AntennaPorts;
 import com.uhf.structures.LowpowerParams;
 import org.junit.Test;
 
+/**
+ * 验证原生 SDK 网关的返回码、异常和数据映射。
+ */
 public class NativeUhfSdkGatewayTest {
 
     @Test

@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * 提供发运单页面使用的本地模拟数据。
+ */
 public final class MockShipmentRepository extends BaseMockRepository implements ShipmentRepository {
     @Override
     public void queryShipments(String keyword, ShipmentStatus filter, DataCallback<List<Shipment>> callback) {

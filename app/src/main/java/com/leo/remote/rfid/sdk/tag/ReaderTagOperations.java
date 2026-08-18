@@ -7,7 +7,9 @@ import com.leo.remote.rfid.sdk.connection.ReaderStatePublisher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-/** Owns the selected tag, single-tag mask, and direct tag SDK operations. */
+/**
+ * 管理当前目标标签、单标签掩码及直接标签操作。
+ */
 public final class ReaderTagOperations {
     private final ReaderTagGateway gateway;
     private final ReaderStatePublisher publisher;

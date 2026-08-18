@@ -6,6 +6,9 @@ import com.leo.remote.business.feedback.data.model.FeedbackDraft;
 import com.leo.remote.business.feedback.data.FeedbackRepository;
 import com.leo.remote.core.data.mock.BaseMockRepository;
 
+/**
+ * 提供反馈页面使用的本地模拟数据仓库。
+ */
 public final class MockFeedbackRepository extends BaseMockRepository implements FeedbackRepository {
     @Override
     public void submitFeedback(FeedbackDraft draft, DataCallback<Boolean> callback) {

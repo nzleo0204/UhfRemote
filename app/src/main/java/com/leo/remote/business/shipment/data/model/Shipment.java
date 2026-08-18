@@ -2,6 +2,9 @@ package com.leo.remote.business.shipment.data.model;
 
 import java.util.List;
 
+/**
+ * 表示发运单查询列表中的一条记录。
+ */
 public final class Shipment {
     public String orderNo;
     public String batchNo;

@@ -2,6 +2,9 @@ package com.leo.remote.rfid.sdk.nativebridge;
 
 import com.leo.remote.rfid.sdk.model.*;
 
+/**
+ * 为 JVM 测试提供不依赖原生库的读写器网关 Fake。
+ */
 public final class FakeUhfSdkGateway implements ReaderTransportGateway,
         ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {
     public int powerStatus;

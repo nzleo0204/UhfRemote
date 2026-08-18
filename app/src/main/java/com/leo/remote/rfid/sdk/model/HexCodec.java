@@ -2,6 +2,9 @@ package com.leo.remote.rfid.sdk.model;
 
 import java.util.Locale;
 
+/**
+ * 提供 RFID 数据使用的十六进制字符串编解码能力。
+ */
 public final class HexCodec {
 
     private HexCodec() {}

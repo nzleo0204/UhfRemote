@@ -1,5 +1,8 @@
 package com.leo.remote.business.shipment.data.model;
 
+/**
+ * 定义发运单当前所处的业务状态。
+ */
 public enum ShipmentStatus {
     SHIPPED("已发货"),
     IN_TRANSIT("运输中"),

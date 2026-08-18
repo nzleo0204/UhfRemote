@@ -16,7 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Owns the shared confirm, progress, failure, and rollback flow for reader settings. */
+/**
+ * 管理读写器设置共用的确认、进度、失败和回滚流程。
+ */
 public final class ReaderSettingDialogController {
     private final Fragment fragment;
     private final Consumer<Runnable> uiDispatcher;

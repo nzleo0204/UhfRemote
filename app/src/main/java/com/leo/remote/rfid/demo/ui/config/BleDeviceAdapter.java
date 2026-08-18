@@ -12,6 +12,9 @@ import cn.wandersnail.ble.Device;
 import com.leo.remote.R;
 import java.util.List;
 
+/**
+ * 展示可用 BLE 读写器并转发用户选择事件。
+ */
 public final class BleDeviceAdapter extends ListAdapter<BleDeviceAdapter.Item, BleDeviceAdapter.ViewHolder> {
     private static final Object PAYLOAD_RSSI = new Object();
 

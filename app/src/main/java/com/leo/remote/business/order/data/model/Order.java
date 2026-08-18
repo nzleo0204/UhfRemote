@@ -2,6 +2,9 @@ package com.leo.remote.business.order.data.model;
 
 import java.util.List;
 
+/**
+ * 表示订单查询列表中的一条订单记录。
+ */
 public final class Order {
     public String orderNo;
     public String productName;

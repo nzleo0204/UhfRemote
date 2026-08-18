@@ -2,7 +2,9 @@ package com.leo.remote.rfid.sdk.nativebridge;
 
 import com.leo.remote.rfid.sdk.model.*;
 
-
+/**
+ * 定义原生 SDK 传输初始化、释放和模块信息读取能力。
+ */
 public interface ReaderTransportGateway {
     interface OutboundDataListener { void onOutboundData(byte[] data); }
 

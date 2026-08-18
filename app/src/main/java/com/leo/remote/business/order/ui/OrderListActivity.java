@@ -10,6 +10,9 @@ import com.leo.remote.business.common.data.BusinessRepositories;
 import com.leo.remote.business.common.ui.PagedQueryActivity;
 import java.util.List;
 
+/**
+ * 提供订单查询列表页面。
+ */
 public final class OrderListActivity extends PagedQueryActivity<Order> {
     private OrderAdapter adapter;
 

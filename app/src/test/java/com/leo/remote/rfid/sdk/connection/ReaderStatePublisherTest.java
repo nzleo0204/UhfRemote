@@ -12,6 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 
+/**
+ * 验证连接状态发布器的观察者通知和生命周期行为。
+ */
 public final class ReaderStatePublisherTest {
 
     @Test

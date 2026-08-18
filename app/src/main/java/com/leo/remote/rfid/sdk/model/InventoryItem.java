@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 表示盘点过程中聚合后的单个标签数据。
+ */
 public final class InventoryItem {
     private final String id;
     private final String data;

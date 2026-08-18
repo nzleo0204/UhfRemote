@@ -2,7 +2,9 @@ package com.leo.remote.rfid.sdk.nativebridge;
 
 import com.leo.remote.rfid.sdk.model.*;
 
-
+/**
+ * 定义读写器参数读取与设置的底层能力。
+ */
 public interface ReaderConfigurationGateway {
     ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException;
     int setProtocol(TagProtocol protocol);

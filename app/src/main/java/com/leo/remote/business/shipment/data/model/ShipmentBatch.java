@@ -1,5 +1,8 @@
 package com.leo.remote.business.shipment.data.model;
 
+/**
+ * 表示发运单中的批次信息。
+ */
 public final class ShipmentBatch {
     public String title;
     public int quantity;

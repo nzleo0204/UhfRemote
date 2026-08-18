@@ -5,6 +5,9 @@ import com.leo.remote.rfid.sdk.connection.ReaderMainThreadDispatcher;
 import android.os.Handler;
 import android.os.Looper;
 
+/**
+ * 基于 Android 主线程 Handler 的任务调度器。
+ */
 public final class AndroidMainThreadDispatcher implements ReaderMainThreadDispatcher {
     private final Handler handler = new Handler(Looper.getMainLooper());
 

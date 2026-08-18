@@ -8,7 +8,9 @@ import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.demo.ui.common.ReaderConnectionDialog;
 import com.leo.remote.core.ui.dialog.WaitDialog;
 
-/** Owns the connection and parameter-initialization progress dialogs. */
+/**
+ * 管理连接进度与参数初始化进度弹窗。
+ */
 public final class ReaderConnectionDialogController {
     private static final String CONNECTION_TAG = "reader_connection";
     private static final String DEVICE_INFO_TAG = "reader_device_info";

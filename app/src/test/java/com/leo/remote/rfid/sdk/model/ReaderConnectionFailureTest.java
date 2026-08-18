@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/**
+ * 验证连接失败原因到用户可见文案的转换。
+ */
 public final class ReaderConnectionFailureTest {
     @Test
     public void bleTransportPhasesReportBluetoothFailure() {

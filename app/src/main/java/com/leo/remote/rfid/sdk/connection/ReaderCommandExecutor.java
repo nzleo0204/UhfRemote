@@ -10,7 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Serializes SDK commands and owns their Future/error-disconnect contract. */
+/**
+ * 串行执行 SDK 命令，并统一处理 Future 完成和异常断连。
+ */
 final class ReaderCommandExecutor {
     private final ExecutorService executor;
     private final Supplier<ReaderState> stateSupplier;

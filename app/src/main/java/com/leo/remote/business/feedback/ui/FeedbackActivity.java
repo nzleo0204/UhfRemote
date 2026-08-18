@@ -29,6 +29,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 提供用户提交意见反馈的页面。
+ */
 public final class FeedbackActivity extends BusinessPageActivity {
     private FeedbackType selectedType = FeedbackType.PRODUCT;
     private final List<String> imagePaths = new ArrayList<>();

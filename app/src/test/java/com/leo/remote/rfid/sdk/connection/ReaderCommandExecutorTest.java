@@ -20,6 +20,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证 SDK 串行命令执行、Future 完成和错误处理。
+ */
 public class ReaderCommandExecutorTest {
     private ExecutorService executor;
     private AtomicReference<ReaderState> state;

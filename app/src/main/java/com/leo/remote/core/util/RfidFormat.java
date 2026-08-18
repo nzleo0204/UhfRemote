@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * 提供 RFID 显示值、长度和十六进制数据的格式化工具。
+ */
 public final class RfidFormat {
     private static final NumberFormat NUMBER = NumberFormat.getNumberInstance(Locale.US);
 

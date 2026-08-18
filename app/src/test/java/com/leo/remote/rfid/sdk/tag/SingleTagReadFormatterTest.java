@@ -8,6 +8,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/**
+ * 验证单标签读取结果的长度截取和展示格式。
+ */
 public final class SingleTagReadFormatterTest {
     @Test
     public void exposesProtocolDefaults() {

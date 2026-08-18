@@ -2,6 +2,9 @@ package com.leo.remote.business.feedback.data.model;
 
 import java.util.List;
 
+/**
+ * 保存用户尚未提交的反馈内容。
+ */
 public final class FeedbackDraft {
     public FeedbackType type;
     public String relatedOrderNo;

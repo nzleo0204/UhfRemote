@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.leo.remote.R;
 import com.tencent.mmkv.MMKV;
 
+/**
+ * 保存并应用应用程序的主题模式设置。
+ */
 public final class ThemeModeManager {
     public static final int MODE_SYSTEM = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
     public static final int MODE_LIGHT = AppCompatDelegate.MODE_NIGHT_NO;

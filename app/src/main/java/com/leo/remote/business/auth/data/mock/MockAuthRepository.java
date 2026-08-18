@@ -8,6 +8,9 @@ import com.leo.remote.business.auth.data.model.UserInfo;
 import com.leo.remote.business.auth.data.AuthRepository;
 import java.util.Random;
 
+/**
+ * 提供认证和用户页面使用的本地模拟数据。
+ */
 public final class MockAuthRepository implements AuthRepository {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();

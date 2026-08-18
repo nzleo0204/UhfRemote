@@ -14,6 +14,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证连接管理器的连接、切换和断开行为。
+ */
 public final class ReaderConnectionManagerTest {
     private RecordingObserver observer;
     private List<ReaderState> consumedStates;

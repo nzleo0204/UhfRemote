@@ -19,6 +19,9 @@ import com.leo.remote.rfid.sdk.model.DisconnectReason;
 import com.leo.remote.rfid.sdk.model.ReaderConnectionFailure;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 
+/**
+ * 展示读写器连接、握手和失败状态的进度弹窗。
+ */
 public final class ReaderConnectionDialog extends DialogFragment {
     private TextView phaseView;
     private TextView detailView;

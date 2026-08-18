@@ -10,6 +10,9 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import androidx.annotation.NonNull;
 
+/**
+ * 使用 Android 网络回调监视 Wi-Fi 连接变化。
+ */
 public final class WifiNetworkMonitor implements ReaderWifiMonitor {
 
     private final ConnectivityManager connectivityManager;

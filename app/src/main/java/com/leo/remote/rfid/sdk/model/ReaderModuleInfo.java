@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 保存读写器板卡与射频模块的身份和版本信息。
+ */
 public final class ReaderModuleInfo {
     public final ModuleSubtype subtype;
     public final int rawSubtype;

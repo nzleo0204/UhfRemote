@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 展示 BLE 设备扫描结果并处理设备选择。
+ */
 public final class BleDeviceSheet extends DialogFragment {
     private static final String TAG = "UhfBleScan";
     private static final int REQUEST_BLE_PERMISSIONS = 201;

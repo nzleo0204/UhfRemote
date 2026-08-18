@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-/** Owns inventory accumulation, mask state, and synchronous inventory SDK operations. */
+/**
+ * 管理盘点结果聚合、掩码状态及同步盘点 SDK 操作。
+ */
 public final class ReaderInventoryController {
     private static final int STATUS_UNSUPPORTED = -1001;
 

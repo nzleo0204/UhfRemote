@@ -20,6 +20,9 @@ import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 将订单记录绑定到订单查询列表视图。
+ */
 public final class OrderAdapter extends ListAdapter<Order, OrderAdapter.ViewHolder> {
     private static final DiffUtil.ItemCallback<Order> DIFF = new DiffUtil.ItemCallback<>() {
         @Override

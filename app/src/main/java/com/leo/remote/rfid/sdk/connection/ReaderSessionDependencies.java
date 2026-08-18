@@ -16,10 +16,17 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * 集中保存 Reader 会话所需的可注入依赖，并提供生产环境装配入口。
+ */
 final class ReaderSessionDependencies {
+    /** 创建 SDK 串行执行器的工厂。 */
     final Supplier<ExecutorService> sdkExecutorFactory;
+    /** 将状态通知切换到 Android 主线程的调度器。 */
     final ReaderMainThreadDispatcher mainThread;
+    /** 创建 BLE 传输对象的工厂。 */
     final Function<ReaderBleTransport.Listener, ReaderBleTransport> bleTransportFactory;
+    /** 创建 Wi-Fi 网络监视器的工厂。 */
     final Function<ReaderWifiMonitor.Listener, ReaderWifiMonitor> wifiMonitorFactory;
     final ReaderConnectionStore connectionStore;
     final ReaderConfigurationStore configurationStore;

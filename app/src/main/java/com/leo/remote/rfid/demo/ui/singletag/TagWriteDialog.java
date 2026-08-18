@@ -14,6 +14,9 @@ import com.leo.remote.R;
 import com.leo.remote.core.ui.dialog.StyleDialog;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 
+/**
+ * 提供单标签写入数据的表单弹窗。
+ */
 public final class TagWriteDialog {
     public interface Listener { void onSubmit(BaseDialog dialog, Form form); }
 

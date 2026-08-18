@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 表示一次盘点返回的原始标签信息。
+ */
 public final class ReaderTag {
     public final String id;
     public final String data;

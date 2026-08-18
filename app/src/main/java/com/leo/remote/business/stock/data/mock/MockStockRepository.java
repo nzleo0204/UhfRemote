@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * 提供库存页面使用的本地模拟数据。
+ */
 public final class MockStockRepository extends BaseMockRepository implements StockRepository {
     @Override
     public void queryStock(String keyword, DataCallback<List<StockItem>> callback) {

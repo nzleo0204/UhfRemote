@@ -19,6 +19,9 @@ import com.leo.remote.rfid.sdk.model.Rm610PowerLevels;
 import com.leo.remote.rfid.sdk.model.TransportType;
 import java.util.Locale;
 
+/**
+ * 展示当前读写器模块版本、连接方式和运行参数。
+ */
 public final class ReaderDeviceInfoDialog extends DialogFragment implements ReaderObserver {
     private ReaderSessionManager session;
 

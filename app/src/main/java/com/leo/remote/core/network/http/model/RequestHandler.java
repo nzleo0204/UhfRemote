@@ -34,6 +34,9 @@ import okhttp3.Headers;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+/**
+ * 封装网络请求结果的统一分发与异常转换。
+ */
 public final class RequestHandler implements IRequestHandler {
     private final Application application;
 

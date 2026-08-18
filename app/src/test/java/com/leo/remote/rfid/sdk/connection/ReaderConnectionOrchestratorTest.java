@@ -30,6 +30,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证连接编排器在不同传输和代次下的状态发布。
+ */
 public class ReaderConnectionOrchestratorTest {
     private ExecutorService executor;
     private TestGateway gateway;

@@ -8,9 +8,13 @@ import com.leo.remote.rfid.sdk.nativebridge.*;
 import android.util.Log;
 import java.util.function.Consumer;
 
+/**
+ * 执行读写器握手，校验模块信息并读取设备当前参数。
+ */
 final class ReaderHandshake {
     private static final String TAG = "UhfReader";
     private static final long MODULE_INFO_SETTLE_MS = 200L;
+    /** 握手成功后返回的模块信息与参数快照。 */
     static final class Result {
         final ReaderModuleInfo moduleInfo;
         final ReaderConfiguration configuration;
@@ -23,6 +27,9 @@ final class ReaderHandshake {
 
     private ReaderHandshake() {}
 
+    /**
+     * 执行基础握手并读取设备参数。
+     */
     static Result perform(ReaderTransportGateway transport,
             ReaderConfigurationGateway configuration, ReaderInventoryGateway inventory)
             throws ReaderException {
@@ -45,6 +52,9 @@ final class ReaderHandshake {
         return new Result(info, configuration.readConfiguration(info.subtype));
     }
 
+    /**
+     * 执行带分步进度通知和缓存回退的完整握手。
+     */
     static Result perform(ReaderTransportGateway transport,
             ReaderConfigurationGateway configuration, ReaderInventoryGateway inventory,
             ReaderConfigurationStore cache, Consumer<ReaderProgress> progress)
@@ -82,6 +92,9 @@ final class ReaderHandshake {
         return transport.readModuleInfo();
     }
 
+    /**
+     * 分步骤读取设备参数；单项读取失败时使用对应模块的缓存值。
+     */
     static ReaderConfiguration readConfigurationStepwise(ReaderConfigurationGateway gateway,
             ModuleSubtype subtype, ReaderConfigurationStore cache,
             Consumer<ReaderProgress> progress) {

@@ -19,7 +19,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Owns connection attempts, transports, handshake, heartbeat, and disconnect cleanup. */
+/**
+ * 编排连接代次、传输通道、握手、心跳和断开清理。
+ */
 final class ReaderConnectionOrchestrator {
     static final int WIFI_PORT = 1200;
     private static final Logger LOGGER = Logger.getLogger("UhfReader");

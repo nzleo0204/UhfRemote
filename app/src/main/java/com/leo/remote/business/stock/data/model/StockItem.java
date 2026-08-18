@@ -2,6 +2,9 @@ package com.leo.remote.business.stock.data.model;
 
 import java.util.List;
 
+/**
+ * 表示库存列表中的一条库存记录。
+ */
 public final class StockItem {
     public String productName;
     public String chipModel;

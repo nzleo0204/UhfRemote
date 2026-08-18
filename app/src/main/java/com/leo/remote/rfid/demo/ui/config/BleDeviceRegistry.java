@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * 按设备地址去重并维护扫描到的 BLE 设备。
+ */
 final class BleDeviceRegistry<T> {
     static final class Entry<T> {
         final String name;

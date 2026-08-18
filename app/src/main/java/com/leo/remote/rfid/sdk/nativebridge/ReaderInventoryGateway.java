@@ -2,7 +2,9 @@ package com.leo.remote.rfid.sdk.nativebridge;
 
 import com.leo.remote.rfid.sdk.model.*;
 
-
+/**
+ * 定义标签盘点及盘点参数设置的底层能力。
+ */
 public interface ReaderInventoryGateway {
     interface InventoryListener { void onTag(ReaderTag tag); }
     interface InventoryStopListener { void onInventoryStopped(int status); }

@@ -22,6 +22,9 @@ import com.uhf.structures.TagGroup;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+/**
+ * 将业务网关接口映射到原生 UHF SDK 的实现。
+ */
 @SuppressLint("LogNotTimber")
 public final class NativeUhfSdkGateway implements ReaderTransportGateway,
         ReaderConfigurationGateway, ReaderInventoryGateway, ReaderTagGateway {

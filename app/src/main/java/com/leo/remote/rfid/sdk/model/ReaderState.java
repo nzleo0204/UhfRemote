@@ -3,6 +3,9 @@ package com.leo.remote.rfid.sdk.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * 保存读写器连接、参数和盘点结果的对外状态快照。
+ */
 public final class ReaderState {
 
     private final TransportType transport;
@@ -53,7 +56,7 @@ public final class ReaderState {
         return phase == ConnectionPhase.CONNECTED;
     }
 
-    /** Returns whether the underlying BLE or Wi-Fi transport is already available. */
+    /** 返回底层 BLE 或 Wi-Fi 传输链路是否已经可用。 */
     public boolean hasTransportLink() {
         return switch (phase) {
             case CONNECTING_DATA_CHANNEL, VERIFYING_MODULE, UPDATING_PARAMETERS, CONNECTED -> true;
@@ -61,7 +64,7 @@ public final class ReaderState {
         };
     }
 
-    /** Returns whether the transport is linked but the reader is not operation-ready yet. */
+    /** 返回传输链路已建立但读写器尚未完成初始化的状态。 */
     public boolean isInitializing() {
         return phase == ConnectionPhase.VERIFYING_MODULE
                 || phase == ConnectionPhase.UPDATING_PARAMETERS;

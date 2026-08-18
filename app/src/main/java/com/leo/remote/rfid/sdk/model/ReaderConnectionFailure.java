@@ -1,6 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
-/** User-facing category for a failed connection attempt. */
+/**
+ * 定义面向用户展示的连接失败类别。
+ */
 public enum ReaderConnectionFailure {
     NONE,
     BLUETOOTH,

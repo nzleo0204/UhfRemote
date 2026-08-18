@@ -1,5 +1,8 @@
 package com.leo.remote.business.shipment.data.model;
 
+/**
+ * 表示发运流程时间线上的一个节点。
+ */
 public final class TimelineNode {
     public String title;
     public String desc;

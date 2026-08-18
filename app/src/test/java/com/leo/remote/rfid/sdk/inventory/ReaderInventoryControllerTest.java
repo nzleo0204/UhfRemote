@@ -15,6 +15,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证盘点控制器的启动、停止和结果分发行为。
+ */
 public final class ReaderInventoryControllerTest {
     private FakeUhfSdkGateway gateway;
     private MemoryStore store;

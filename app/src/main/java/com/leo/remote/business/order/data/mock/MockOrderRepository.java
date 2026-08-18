@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * 提供订单查询页面使用的本地模拟数据。
+ */
 public final class MockOrderRepository extends BaseMockRepository implements OrderRepository {
     @Override
     public void queryOrders(String keyword, OrderStatus filter, DataCallback<List<Order>> callback) {

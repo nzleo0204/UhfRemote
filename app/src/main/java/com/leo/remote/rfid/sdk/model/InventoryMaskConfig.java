@@ -2,7 +2,9 @@ package com.leo.remote.rfid.sdk.model;
 
 import java.util.Arrays;
 
-/** Immutable inventory mask submitted to the reader Select criteria. */
+/**
+ * 表示提交给读写器 Select 条件的不可变盘点掩码。
+ */
 public final class InventoryMaskConfig {
     public final int bank;
     public final int offsetBits;

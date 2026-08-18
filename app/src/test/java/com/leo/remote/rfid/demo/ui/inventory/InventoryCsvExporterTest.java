@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.Test;
 
+/**
+ * 验证盘点结果导出 CSV 的字段、转义和编码。
+ */
 public final class InventoryCsvExporterTest {
     @Test
     public void writesStableUtf8CsvAndEscapesQuotes() throws Exception {

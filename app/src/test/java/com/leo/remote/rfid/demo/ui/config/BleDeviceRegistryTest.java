@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
 
+/**
+ * 验证 BLE 设备注册表的去重和排序行为。
+ */
 public class BleDeviceRegistryTest {
     @Test
     public void filtersUnnamedDevicesAndDeduplicatesByAddress() {

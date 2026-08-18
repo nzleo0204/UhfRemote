@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.Map;
 
+/**
+ * 表示服务端返回的单对象数据包装。
+ */
 public class HttpData<T> {
     @Nullable
     private Map<String, String> responseHeaders;

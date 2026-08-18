@@ -13,6 +13,9 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * 验证单标签读写操作对底层网关的调用和结果转换。
+ */
 public final class ReaderTagOperationsTest {
     private FakeUhfSdkGateway gateway;
     private RecordingObserver observer;

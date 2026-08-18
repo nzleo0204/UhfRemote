@@ -3,6 +3,9 @@ package com.leo.remote.rfid.sdk.model;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * 定义读写器射频模块型号及其协议能力。
+ */
 public enum ModuleSubtype {
     R2000(0),
     RM8011(1),

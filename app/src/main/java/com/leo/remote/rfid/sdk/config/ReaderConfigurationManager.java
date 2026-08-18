@@ -8,7 +8,9 @@ import com.leo.remote.rfid.sdk.connection.ReaderStatePublisher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-/** Owns the current reader configuration and its persistent module-scoped cache. */
+/**
+ * 管理当前读写器参数及按模块型号隔离的持久化缓存。
+ */
 public final class ReaderConfigurationManager {
     private final ReaderConfigurationGateway gateway;
     private final ReaderConfigurationStore cache;

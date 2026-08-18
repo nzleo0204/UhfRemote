@@ -6,10 +6,9 @@ import com.leo.remote.rfid.sdk.model.*;
 import java.util.Locale;
 
 /**
- * Formats chip metadata recognized by the UHF SDK.
+ * 格式化 UHF SDK 识别出的芯片型号信息。
  *
- * <p>Chip recognition belongs to the SDK. This class only selects a localized name and falls
- * back to the SDK-provided TID prefix when the model is unknown.</p>
+ * <p>芯片识别由 SDK 完成，本类只选择本地化名称，并在型号未知时回退展示 TID 前缀。</p>
  */
 public final class ChipModelFormatter {
     private ChipModelFormatter() {}

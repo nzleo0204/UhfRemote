@@ -5,6 +5,9 @@ import android.os.Looper;
 import com.leo.remote.core.data.DataCallback;
 import java.util.Random;
 
+/**
+ * 为本地演示数据仓库提供统一的模拟数据基类。
+ */
 public abstract class BaseMockRepository {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();

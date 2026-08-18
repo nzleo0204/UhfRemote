@@ -9,6 +9,9 @@ import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.dialog.StyleDialog;
 
+/**
+ * 提供单标签销毁操作的表单弹窗。
+ */
 public final class TagKillDialog {
     public interface Listener {
         void onNext(BaseDialog dialog, String accessPassword, String killPassword);

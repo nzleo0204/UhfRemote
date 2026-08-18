@@ -9,6 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * 将盘点结果转换为 UTF-8 编码的 CSV 内容。
+ */
 public final class InventoryCsvExporter {
     private InventoryCsvExporter() {}
 

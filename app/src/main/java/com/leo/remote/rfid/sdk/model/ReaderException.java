@@ -1,5 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
+/**
+ * 表示读写器 SDK 操作失败，并保留底层返回码。
+ */
 public final class ReaderException extends Exception {
     private final int errorCode;
 

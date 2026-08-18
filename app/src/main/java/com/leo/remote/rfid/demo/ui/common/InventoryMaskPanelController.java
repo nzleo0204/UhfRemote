@@ -22,7 +22,9 @@ import com.leo.remote.rfid.sdk.model.ProtocolEncoding;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.core.util.ViewUtils;
 
-/** Owns the shared mask-panel binding and presentation state used by both RFID pages. */
+/**
+ * 管理两个 RFID 页面共用的掩码面板绑定和展示状态。
+ */
 public final class InventoryMaskPanelController {
     public enum Appearance { INVENTORY, SINGLE_TAG }
 

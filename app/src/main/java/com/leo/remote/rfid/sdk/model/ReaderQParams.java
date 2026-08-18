@@ -1,6 +1,8 @@
 package com.leo.remote.rfid.sdk.model;
 
-/** Snapshot of the SDK's fixed or dynamic Q configuration. */
+/**
+ * 保存 SDK 固定 Q 或动态 Q 参数的不可变快照。
+ */
 public final class ReaderQParams {
     public final boolean dynamic;
     public final int qValue;
