@@ -73,13 +73,13 @@
             android:foregroundServiceType="connectedDevice" />
 
         <activity
-            android:name=".ui.activity.OrderProgressActivity"
+            android:name=".business.order.ui.OrderListActivity"
             android:exported="false"
             android:label="@string/order_progress_title"
             android:launchMode="singleTop" />
 
         <activity
-            android:name=".ui.activity.ShipmentQueryActivity"
+            android:name=".business.shipment.ui.ShipmentQueryActivity"
             android:exported="false"
             android:label="@string/shipment_query_title"
             android:launchMode="singleTop" />

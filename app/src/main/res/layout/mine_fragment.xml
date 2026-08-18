@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
-    tools:context=".ui.fragment.home.MineFragment">
+    tools:context=".business.auth.ui.MineFragment">
 
     <ScrollView
         android:id="@+id/sv_mine_content"

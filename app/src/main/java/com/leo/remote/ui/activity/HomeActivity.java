@@ -21,10 +21,10 @@ import com.leo.remote.app.AppFragment;
 import com.leo.remote.ui.adapter.common.NavigationAdapter;
 import com.leo.remote.ui.adapter.common.NavigationAdapter.NavigationItem;
 import com.leo.remote.rfid.demo.ui.inventory.InventoryFragment;
-import com.leo.remote.ui.fragment.home.MineFragment;
+import com.leo.remote.business.auth.ui.MineFragment;
 import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
 import com.leo.remote.rfid.demo.ui.singletag.SingleTagFragment;
-import com.leo.remote.ui.fragment.home.StockFragment;
+import com.leo.remote.business.stock.ui.StockListFragment;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 
 /**
@@ -127,7 +127,7 @@ public final class HomeActivity extends ReaderAwareActivity
         pagerAdapter.addFragment(ReaderConfigFragment.newInstance());
         pagerAdapter.addFragment(InventoryFragment.newInstance());
         pagerAdapter.addFragment(SingleTagFragment.newInstance());
-        pagerAdapter.addFragment(StockFragment.newInstance());
+        pagerAdapter.addFragment(StockListFragment.newInstance());
         pagerAdapter.addFragment(MineFragment.newInstance());
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(pageChangeListener);

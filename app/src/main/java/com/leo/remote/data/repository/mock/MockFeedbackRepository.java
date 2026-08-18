@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import com.leo.remote.data.DataCallback;
 import com.leo.remote.data.model.FeedbackDraft;
 import com.leo.remote.data.repository.FeedbackRepository;
+import com.leo.remote.core.data.mock.BaseMockRepository;
 
 public final class MockFeedbackRepository extends BaseMockRepository implements FeedbackRepository {
     @Override
