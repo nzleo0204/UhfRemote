@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.airbnb.lottie.LottieAnimationView;
+import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.rfid.sdk.model.ConnectionPhase;
 import com.leo.remote.rfid.sdk.model.DisconnectReason;
@@ -40,7 +41,6 @@ public final class ReaderConnectionDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dialog = new Dialog(requireContext());
         View view = getLayoutInflater().inflate(R.layout.reader_connection_dialog,
                 new FrameLayout(requireContext()), false);
         rootView = view;
@@ -61,8 +61,12 @@ public final class ReaderConnectionDialog extends DialogFragment {
             }
             dismissAllowingStateLoss();
         });
-        dialog.setContentView(view);
-        dialog.setCanceledOnTouchOutside(false);
+        BaseDialog dialog = new BaseDialog.Builder<>(requireContext())
+                .setContentView(view)
+                .setAnimStyle(BaseDialog.ANIM_IOS)
+                .setGravity(android.view.Gravity.CENTER)
+                .setCanceledOnTouchOutside(false)
+                .create();
         Window window = dialog.getWindow();
         if (window != null) { window.setBackgroundDrawableResource(android.R.color.transparent); }
         update(currentPhase, currentDetail, currentFailure);

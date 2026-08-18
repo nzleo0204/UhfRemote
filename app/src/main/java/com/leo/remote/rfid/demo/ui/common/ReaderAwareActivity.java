@@ -10,8 +10,6 @@ import com.leo.remote.rfid.sdk.model.DisconnectReason;
 import com.leo.remote.rfid.sdk.model.ReaderConnectionStatus;
 import com.leo.remote.rfid.sdk.connection.ReaderObserver;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
-import com.leo.remote.app.MainActivity;
-import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.core.ui.base.BaseActivity;
 import java.lang.ref.WeakReference;
@@ -85,13 +83,7 @@ public abstract class ReaderAwareActivity extends BaseActivity implements Reader
         disconnectDialog = null;
     }
 
-    private void openReaderConfig() {
-        if (this instanceof MainActivity homeActivity) {
-            homeActivity.showReaderConfig();
-        } else {
-            MainActivity.start(this, ReaderConfigFragment.class);
-        }
-    }
+    protected abstract void openReaderConfig();
 
     @StringRes
     public static int readerStatusText(ReaderConnectionStatus status) {

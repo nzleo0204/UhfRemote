@@ -2,7 +2,7 @@ package com.leo.remote.rfid.sdk.connection;
 
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.*;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

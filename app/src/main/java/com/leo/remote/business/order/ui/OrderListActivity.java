@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.order.data.model.Order;
-import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.core.ui.base.PagedQueryActivity;
+import com.leo.remote.business.common.data.BusinessRepositories;
+import com.leo.remote.business.common.ui.PagedQueryActivity;
 import java.util.List;
 
 public final class OrderListActivity extends PagedQueryActivity<Order> {
@@ -50,7 +50,7 @@ public final class OrderListActivity extends PagedQueryActivity<Order> {
 
     @Override
     protected void queryData(DataCallback<List<Order>> callback) {
-        RepositoryProvider.order().queryOrders("", null, callback);
+        BusinessRepositories.order().queryOrders("", null, callback);
     }
 
     @Override

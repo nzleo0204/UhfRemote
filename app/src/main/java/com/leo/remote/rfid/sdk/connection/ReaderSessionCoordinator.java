@@ -4,7 +4,7 @@ import com.leo.remote.rfid.sdk.inventory.ReaderInventoryController;
 import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 import com.leo.remote.rfid.sdk.tag.ReaderTagOperations;
 
 import android.annotation.SuppressLint;

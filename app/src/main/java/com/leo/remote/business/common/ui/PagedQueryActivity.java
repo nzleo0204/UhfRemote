@@ -1,4 +1,4 @@
-package com.leo.remote.core.ui.base;
+package com.leo.remote.business.common.ui;
 
 import android.view.View;
 import android.widget.TextView;
@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.core.data.DataCallback;
-import com.leo.remote.rfid.demo.ui.common.RfidPageActivity;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
@@ -16,7 +15,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 /** Shared pull-to-refresh and paged loading behavior for query result pages. */
-public abstract class PagedQueryActivity<T> extends RfidPageActivity
+public abstract class PagedQueryActivity<T> extends BusinessPageActivity
         implements OnRefreshLoadMoreListener {
     private static final int PAGE_SIZE = 4;
 

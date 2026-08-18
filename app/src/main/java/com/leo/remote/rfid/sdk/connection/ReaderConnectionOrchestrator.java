@@ -5,7 +5,7 @@ import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
 import com.leo.remote.rfid.sdk.persistence.ReaderConnectionStore;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 import com.leo.remote.rfid.sdk.tag.ReaderTagOperations;
 import com.leo.remote.rfid.sdk.connection.transport.ReaderBleTransport;
 import com.leo.remote.rfid.sdk.connection.transport.ReaderWifiMonitor;
@@ -13,10 +13,9 @@ import com.leo.remote.rfid.sdk.connection.transport.ReaderWifiMonitor;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import cn.wandersnail.ble.Device;
-import com.leo.remote.R;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntFunction;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,11 +35,11 @@ final class ReaderConnectionOrchestrator {
     private final ReaderConnectionManager connectionManager;
     private final ReaderCommandExecutor commandExecutor;
     private final ReaderMainThreadDispatcher mainThread;
+    private final Function<ReaderProgress, String> messageResolver;
     private final ReaderBleTransport bleTransport;
     private final ReaderWifiMonitor wifiMonitor;
     private final Runnable startService;
     private final Runnable stopService;
-    private final IntFunction<String> stringResolver;
     private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
     private final Object sdkLock = new Object();
     private volatile boolean sdkInitialized;
@@ -68,7 +67,7 @@ final class ReaderConnectionOrchestrator {
         this.connectionManager = connectionManager;
         this.commandExecutor = commandExecutor;
         mainThread = dependencies.mainThread;
-        stringResolver = dependencies.stringResolver;
+        messageResolver = dependencies.messageResolver;
         this.startService = startService;
         this.stopService = stopService;
         bleTransport = dependencies.bleTransportFactory.apply(new ReaderBleTransport.Listener() {
@@ -289,7 +288,7 @@ final class ReaderConnectionOrchestrator {
                 + " transport=" + attemptTransport + " address=" + currentState().getAddress());
         if (!connectionManager.publishIfCurrent(generation, currentState().buildUpon()
                 .phase(ConnectionPhase.VERIFYING_MODULE)
-                .message(stringResolver.apply(R.string.reader_verifying_detail)).build())) {
+                .message(resolveMessage(ReaderProgress.VERIFYING_MODULE)).build())) {
             disconnectTransport(attemptTransport, false);
             return;
         }
@@ -297,12 +296,12 @@ final class ReaderConnectionOrchestrator {
             ReaderHandshake.Result result = ReaderHandshake.perform(transportGateway,
                     configurationGateway, inventoryGateway, configStore, resourceId -> {
                         if (!isCurrent(generation)) { return; }
-                        ConnectionPhase phase = resourceId == R.string.handshake_updating_params
+                        ConnectionPhase phase = resourceId == ReaderProgress.UPDATING_PARAMETERS
                                 || currentState().getPhase() == ConnectionPhase.UPDATING_PARAMETERS
                                 ? ConnectionPhase.UPDATING_PARAMETERS
                                 : ConnectionPhase.VERIFYING_MODULE;
                         connectionManager.publishIfCurrent(generation, currentState().buildUpon()
-                                .phase(phase).message(stringResolver.apply(resourceId)).build());
+                                .phase(phase).message(resolveMessage(resourceId)).build());
                     });
             if (!isCurrent(generation)) {
                 disconnectTransport(attemptTransport, false);
@@ -386,6 +385,11 @@ final class ReaderConnectionOrchestrator {
 
     private boolean isCurrent(long generation) {
         return connectionManager.isCurrent(generation);
+    }
+
+    private String resolveMessage(ReaderProgress progress) {
+        String message = messageResolver.apply(progress);
+        return message == null ? progress.getDefaultMessage() : message;
     }
 
     private void publishFailure(TransportType transport, String message, int errorCode,

@@ -8,31 +8,29 @@ import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leo.remote.R;
 import com.leo.remote.core.aop.SingleClick;
 import com.leo.remote.core.ui.base.BaseFragment;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.auth.data.model.UserInfo;
 import com.leo.remote.business.auth.data.AuthRepository;
-import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.business.feedback.ui.FeedbackActivity;
-import com.leo.remote.app.MainActivity;
-import com.leo.remote.business.order.ui.OrderListActivity;
-import com.leo.remote.business.shipment.ui.ShipmentQueryActivity;
+import com.leo.remote.business.common.data.BusinessRepositories;
+import com.leo.remote.business.common.navigation.BusinessNavigation;
+import com.leo.remote.core.ui.base.BaseActivity;
+import com.leo.remote.core.ui.dialog.SelectDialog;
 import com.leo.remote.core.util.ThemeModeManager;
 import com.tencent.mmkv.MMKV;
 
 /**
  * 我的页面，承载查询和反馈入口。
  */
-public final class MineFragment extends BaseFragment<MainActivity> {
+public final class MineFragment extends BaseFragment<BaseActivity> {
     private static final String MMKV_ID = "auth_config";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_ROLE = "role";
 
-    private final AuthRepository authRepository = RepositoryProvider.auth();
+    private final AuthRepository authRepository = BusinessRepositories.auth();
     private MMKV authStorage;
     private TextView usernameView;
     private TextView roleView;
@@ -69,10 +67,12 @@ public final class MineFragment extends BaseFragment<MainActivity> {
         inputGuard = findViewById(R.id.v_mine_input_guard);
         rootView = findViewById(R.id.fl_mine_root);
 
-        findViewById(R.id.ll_mine_order).setOnClickListener(v -> OrderListActivity.start(getAttachActivity()));
+        findViewById(R.id.ll_mine_order).setOnClickListener(
+                v -> BusinessNavigation.get().openOrders(requireContext()));
         findViewById(R.id.ll_mine_shipment).setOnClickListener(
-                v -> ShipmentQueryActivity.start(getAttachActivity()));
-        findViewById(R.id.ll_mine_feedback).setOnClickListener(v -> FeedbackActivity.start(getAttachActivity()));
+                v -> BusinessNavigation.get().openShipments(requireContext()));
+        findViewById(R.id.ll_mine_feedback).setOnClickListener(
+                v -> BusinessNavigation.get().openFeedback(requireContext()));
         loginButton.setOnClickListener(v -> login());
         findViewById(R.id.ll_mine_theme_setting).setOnClickListener(v -> showThemeDialog());
         bindLoginInputGuard();
@@ -205,14 +205,13 @@ public final class MineFragment extends BaseFragment<MainActivity> {
                 break;
             }
         }
-        new MaterialAlertDialogBuilder(requireContext())
+        new SelectDialog.Builder(requireContext())
                 .setTitle(R.string.theme_setting_title)
-                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                .setList(labels)
+                .setSelect(checked)
+                .setListener((dialog, which, value) -> {
                     ThemeModeManager.setMode(modes[which]);
                     themeValueView.setText(labels[which]);
-                    dialog.dismiss();
-                })
-                .setNegativeButton(R.string.common_cancel, null)
-                .show();
+                }).show();
     }
 }

@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.shipment.data.model.Shipment;
-import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.core.ui.base.PagedQueryActivity;
+import com.leo.remote.business.common.data.BusinessRepositories;
+import com.leo.remote.business.common.ui.PagedQueryActivity;
 import java.util.List;
 
 public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
@@ -45,7 +45,7 @@ public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
 
     @Override
     protected void queryData(DataCallback<List<Shipment>> callback) {
-        RepositoryProvider.shipment().queryShipments("", null, callback);
+        BusinessRepositories.shipment().queryShipments("", null, callback);
     }
 
     @Override

@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cn.wandersnail.ble.Device;
@@ -24,15 +25,14 @@ import cn.wandersnail.ble.EasyBLE;
 import cn.wandersnail.ble.ScannerType;
 import cn.wandersnail.ble.callback.ScanListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.hjq.base.BottomSheetDialog;
 import com.leo.remote.R;
 import com.leo.remote.rfid.demo.ui.config.BleDeviceAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class BleDeviceSheet extends BottomSheetDialogFragment {
+public final class BleDeviceSheet extends DialogFragment {
     private static final String TAG = "UhfBleScan";
     private static final int REQUEST_BLE_PERMISSIONS = 201;
     private static final long LIST_UPDATE_INTERVAL_MS = 150L;
@@ -73,7 +73,7 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Dialog dialog = new BottomSheetDialog(requireContext());
         dialog.setCanceledOnTouchOutside(false);
         return dialog;
     }
@@ -112,14 +112,19 @@ public final class BleDeviceSheet extends BottomSheetDialogFragment {
         super.onStart();
         Dialog currentDialog = getDialog();
         if (!(currentDialog instanceof BottomSheetDialog bottomSheetDialog)) { return; }
-        FrameLayout bottomSheet = bottomSheetDialog.findViewById(
-                com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet == null) { return; }
         int targetHeight = Math.round(getResources().getDisplayMetrics().heightPixels * 0.8f);
-        ViewGroup.LayoutParams params = bottomSheet.getLayoutParams();
-        params.height = targetHeight;
-        bottomSheet.setLayoutParams(params);
-        BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+        View content = getView();
+        if (content != null) {
+            ViewGroup.LayoutParams params = content.getLayoutParams();
+            if (params == null) {
+                params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        targetHeight);
+            } else {
+                params.height = targetHeight;
+            }
+            content.setLayoutParams(params);
+        }
+        BottomSheetBehavior<FrameLayout> behavior = bottomSheetDialog.getBottomSheetBehavior();
         behavior.setPeekHeight(targetHeight, false);
         behavior.setSkipCollapsed(true);
         behavior.setDraggable(false);

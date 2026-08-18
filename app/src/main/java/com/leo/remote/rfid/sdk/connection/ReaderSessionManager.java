@@ -2,8 +2,9 @@ package com.leo.remote.rfid.sdk.connection;
 
 import com.leo.remote.rfid.sdk.connection.service.ReaderConnectionService;
 import com.leo.remote.rfid.sdk.connection.service.ReaderConnectionServiceController;
+import com.leo.remote.rfid.sdk.connection.service.ReaderServiceNotificationConfig;
 import com.leo.remote.rfid.sdk.model.*;
-import com.leo.remote.rfid.native_bridge.NativeUhfSdkGateway;
+import com.leo.remote.rfid.sdk.nativebridge.NativeUhfSdkGateway;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.annotation.Nullable;
 import cn.wandersnail.ble.Device;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /** Public facade for the process-wide RFID reader session. */
 public final class ReaderSessionManager {
@@ -19,18 +21,40 @@ public final class ReaderSessionManager {
 
     private final ReaderSessionCoordinator coordinator;
     private final ReaderConnectionServiceController serviceController;
+    private final ReaderServiceNotificationConfig notificationConfig;
 
     private ReaderSessionManager(ReaderSessionCoordinator coordinator,
-            ReaderConnectionServiceController serviceController) {
+            ReaderConnectionServiceController serviceController,
+            ReaderServiceNotificationConfig notificationConfig) {
         this.coordinator = coordinator;
         this.serviceController = serviceController;
+        this.notificationConfig = notificationConfig;
     }
 
     public static void initialize(@NonNull Application application) {
         getInstance(application).coordinator.initializeNativeAtApplication();
     }
 
+    public static void initialize(@NonNull Application application,
+            @NonNull Function<ReaderProgress, String> messageResolver) {
+        initialize(application, messageResolver, ReaderServiceNotificationConfig.defaultConfig(application));
+    }
+
+    public static void initialize(@NonNull Application application,
+            @NonNull Function<ReaderProgress, String> messageResolver,
+            @NonNull ReaderServiceNotificationConfig notificationConfig) {
+        getInstance(application, messageResolver, notificationConfig)
+                .coordinator.initializeNativeAtApplication();
+    }
+
     public static ReaderSessionManager getInstance(@NonNull Application application) {
+        return getInstance(application, ReaderProgress::getDefaultMessage,
+                ReaderServiceNotificationConfig.defaultConfig(application));
+    }
+
+    private static ReaderSessionManager getInstance(@NonNull Application application,
+            @NonNull Function<ReaderProgress, String> messageResolver,
+            @NonNull ReaderServiceNotificationConfig notificationConfig) {
         if (instance == null) {
             synchronized (ReaderSessionManager.class) {
                 if (instance == null) {
@@ -39,11 +63,17 @@ public final class ReaderSessionManager {
                     NativeUhfSdkGateway gateway = new NativeUhfSdkGateway();
                     instance = new ReaderSessionManager(new ReaderSessionCoordinator(
                             gateway, gateway, gateway, gateway,
-                            ReaderSessionDependencies.production(application), services), services);
+                            ReaderSessionDependencies.production(application, messageResolver),
+                            services), services, notificationConfig);
                 }
             }
         }
         return instance;
+    }
+
+    @NonNull
+    public ReaderServiceNotificationConfig getNotificationConfig() {
+        return notificationConfig;
     }
 
     public ReaderState getState() { return coordinator.getState(); }

@@ -11,9 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.core.aop.SingleClick;
@@ -29,7 +27,6 @@ import com.leo.remote.rfid.sdk.model.ReaderTag;
 import com.leo.remote.rfid.sdk.model.TagReadResult;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.tag.SingleTagReadFormatter;
-import com.leo.remote.app.MainActivity;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
 import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
@@ -41,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 
 /** Single-target RFID operations. */
 @SuppressLint("LogNotTimber")
-public final class SingleTagFragment extends ReaderFragment<MainActivity> implements ReaderObserver {
+public final class SingleTagFragment extends ReaderFragment implements ReaderObserver {
     private static final String TAG = "UhfReader/SingleTag";
 
     // ========== Fields ==========
@@ -81,7 +78,7 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
     private ReaderState readerState = ReaderState.disconnected();
 
     private int lastReadBankPosition = -1;
-    private AlertDialog activeDialog;
+    private BaseDialog activeDialog;
 
     public static SingleTagFragment newInstance() { return new SingleTagFragment(); }
 
@@ -397,7 +394,7 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
     private void showWriteDialog(boolean updateEpc) {
         if (!ensureTarget()) { return; }
         TagProtocol protocol = readerState.getProtocol();
-        AlertDialog dialog = TagWriteDialog.create(this, protocol, updateEpc, currentTag.id,
+        BaseDialog dialog = TagWriteDialog.create(this, protocol, updateEpc, currentTag.id,
                 (formDialog, form) -> {
                     try {
                         byte[] password = parsePassword(form.password);
@@ -436,7 +433,7 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
     @SingleClick
     private void showLockDialog() {
         if (!ensureTarget()) { return; }
-        AlertDialog dialog = TagLockDialog.create(this, (formDialog, bank, policy, password) -> {
+        BaseDialog dialog = TagLockDialog.create(this, (formDialog, bank, policy, password) -> {
             try {
                 byte[] parsedPassword = parsePassword(password);
                 confirmSingleTagMask(() -> executeStatus(session.lockCurrentTag(parsedPassword,
@@ -450,20 +447,24 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
     @SingleClick
     private void showKillDialog() {
         if (!ensureTarget()) { return; }
-        AlertDialog form = TagKillDialog.create(this, (formDialog, accessValue, killValue) -> {
+        BaseDialog form = TagKillDialog.create(this, (formDialog, accessValue, killValue) -> {
             try {
                 byte[] access = parsePassword(accessValue);
                 byte[] kill = parsePassword(killValue);
-                AlertDialog confirmation = new MaterialAlertDialogBuilder(requireContext())
+                BaseDialog confirmation = new MessageDialog.Builder(requireActivity())
                         .setTitle(R.string.single_kill_confirm_title)
                         .setMessage(R.string.single_kill_confirm_message)
-                        .setNegativeButton(R.string.common_cancel, null)
-                        .setPositiveButton(R.string.single_kill_confirm, (dialog, which) -> {
-                            confirmSingleTagMask(() -> {
-                                formDialog.dismiss();
-                                executeStatus(session.killCurrentTag(access, kill),
-                                        R.string.single_kill_operation, null);
-                            });
+                        .setCancel(R.string.common_cancel)
+                        .setConfirm(R.string.single_kill_confirm)
+                        .setListener(new MessageDialog.OnListener() {
+                            @Override
+                            public void onConfirm(@NonNull BaseDialog dialog) {
+                                confirmSingleTagMask(() -> {
+                                    formDialog.dismiss();
+                                    executeStatus(session.killCurrentTag(access, kill),
+                                            R.string.single_kill_operation, null);
+                                });
+                            }
                         }).create();
                 trackDialog(confirmation);
                 confirmation.show();
@@ -528,7 +529,7 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
     }
 
     private void executeStatus(CompletableFuture<Integer> future, @StringRes int operationRes,
-            AlertDialog dialog) {
+            BaseDialog dialog) {
         showLoadingDialog();
         future.whenComplete((status, error) -> {
             runOnViewThread(() -> {
@@ -547,7 +548,7 @@ public final class SingleTagFragment extends ReaderFragment<MainActivity> implem
         });
     }
 
-    private void trackDialog(AlertDialog dialog) {
+    private void trackDialog(BaseDialog dialog) {
         if (activeDialog != null && activeDialog.isShowing()) {
             activeDialog.dismiss();
         }

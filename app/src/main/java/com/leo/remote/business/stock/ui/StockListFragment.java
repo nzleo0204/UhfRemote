@@ -11,8 +11,8 @@ import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseFragment;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.stock.data.model.StockItem;
-import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.app.MainActivity;
+import com.leo.remote.business.common.data.BusinessRepositories;
+import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.business.stock.ui.StockAdapter;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 /** Real-time stock query shown directly in the bottom navigation. */
-public final class StockListFragment extends BaseFragment<MainActivity>
+public final class StockListFragment extends BaseFragment<BaseActivity>
         implements OnRefreshLoadMoreListener {
     private static final int PAGE_SIZE = 4;
 
@@ -100,7 +100,7 @@ public final class StockListFragment extends BaseFragment<MainActivity>
         if (visibleItemCount == 0) {
             showState(getString(R.string.common_loading));
         }
-        RepositoryProvider.stock().queryStock(keywordView.getText().toString(),
+        BusinessRepositories.stock().queryStock(keywordView.getText().toString(),
                 new QueryCallback(this, generation, fromRefresh));
     }
 

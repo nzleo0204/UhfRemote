@@ -75,7 +75,10 @@ public final class StyleDialog {
         }
         public B setCancel(CharSequence text) {
             cancelView.setText(text);
-            lineView.setVisibility((text == null || "".equals(text.toString())) ? View.GONE : View.VISIBLE);
+            boolean visible = text != null && !"".equals(text.toString());
+            cancelView.setVisibility(visible ? View.VISIBLE : View.GONE);
+            lineView.setVisibility(visible && confirmView.getVisibility() == View.VISIBLE
+                    ? View.VISIBLE : View.GONE);
             return (B) this;
         }
 
@@ -84,6 +87,10 @@ public final class StyleDialog {
         }
         public B setConfirm(CharSequence text) {
             confirmView.setText(text);
+            boolean visible = text != null && !"".equals(text.toString());
+            confirmView.setVisibility(visible ? View.VISIBLE : View.GONE);
+            lineView.setVisibility(visible && cancelView.getVisibility() == View.VISIBLE
+                    ? View.VISIBLE : View.GONE);
             return (B) this;
         }
 

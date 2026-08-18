@@ -5,16 +5,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Spinner;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.hjq.base.BaseDialog;
 import com.google.android.material.textfield.TextInputLayout;
 import com.leo.remote.R;
+import com.leo.remote.core.ui.dialog.StyleDialog;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 
 public final class TagWriteDialog {
-    public interface Listener { void onSubmit(AlertDialog dialog, Form form); }
+    public interface Listener { void onSubmit(BaseDialog dialog, Form form); }
 
     public static final class Form {
         public final int bankPosition;
@@ -37,10 +38,11 @@ public final class TagWriteDialog {
 
     private TagWriteDialog() {}
 
-    public static AlertDialog create(Fragment fragment, TagProtocol protocol, boolean updateEpc,
+    public static BaseDialog create(Fragment fragment, TagProtocol protocol, boolean updateEpc,
             String currentEpc, Listener listener) {
         View content = LayoutInflater.from(fragment.requireContext())
-                .inflate(R.layout.tag_write_dialog, null, false);
+                .inflate(R.layout.tag_write_dialog,
+                        new FrameLayout(fragment.requireContext()), false);
         Spinner bank = content.findViewById(R.id.sp_tag_bank);
         Spinner gbSubBank = content.findViewById(R.id.sp_tag_gb_sub_bank);
         View gbSubBankGroup = content.findViewById(R.id.group_tag_gb_sub_bank);
@@ -77,18 +79,17 @@ public final class TagWriteDialog {
             bank.setEnabled(false);
             data.setText(currentEpc);
         }
-        AlertDialog dialog = new MaterialAlertDialogBuilder(fragment.requireContext())
+        StyleDialog.Builder<?> builder = new StyleDialog.Builder<>(fragment.requireContext())
                 .setTitle(updateEpc ? R.string.single_update_epc_title : R.string.single_write_title)
-                .setView(content)
-                .setNegativeButton(R.string.common_cancel, null)
-                .setPositiveButton(R.string.single_execute, null)
-                .create();
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> listener.onSubmit(dialog, new Form(
+                .setCustomView(content)
+                .setCancel(R.string.common_cancel)
+                .setConfirm(R.string.single_execute);
+        builder.setOnClickListenerByView(R.id.tv_ui_confirm,
+                (BaseDialog.OnClickListener<View>) (dialog, view) -> listener.onSubmit(dialog, new Form(
                         bank.getSelectedItemPosition(), gbSubBank.getSelectedItemPosition(),
                         address.getText().toString(), auxiliary.getText().toString(),
-                        data.getText().toString(), password.getText().toString()))));
-        return dialog;
+                        data.getText().toString(), password.getText().toString())));
+        return builder.create();
     }
 
     private static String[] bankLabels(Fragment fragment, TagProtocol protocol) {

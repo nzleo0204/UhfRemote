@@ -1,7 +1,7 @@
 package com.leo.remote.rfid.sdk.tag;
 
 import com.leo.remote.rfid.sdk.model.*;
-import com.leo.remote.rfid.native_bridge.ReaderTagGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderTagGateway;
 import com.leo.remote.rfid.sdk.connection.ReaderStatePublisher;
 
 import androidx.annotation.NonNull;

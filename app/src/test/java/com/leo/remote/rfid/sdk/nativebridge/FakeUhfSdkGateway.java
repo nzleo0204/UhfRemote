@@ -1,4 +1,4 @@
-package com.leo.remote.rfid.native_bridge;
+package com.leo.remote.rfid.sdk.nativebridge;
 
 import com.leo.remote.rfid.sdk.model.*;
 

@@ -191,7 +191,8 @@ public final class MainActivity extends ReaderAwareActivity
         }
     }
 
-    public void showReaderConfig() {
+    @Override
+    public void openReaderConfig() {
         switchFragment(0);
     }
 

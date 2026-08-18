@@ -2,9 +2,9 @@ package com.leo.remote.rfid.sdk.inventory;
 
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.*;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 import com.leo.remote.rfid.sdk.connection.*;
-import com.leo.remote.rfid.native_bridge.FakeUhfSdkGateway;
+import com.leo.remote.rfid.sdk.nativebridge.FakeUhfSdkGateway;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

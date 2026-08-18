@@ -11,10 +11,10 @@ import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
 import com.leo.remote.rfid.sdk.persistence.ReaderConnectionStore;
-import com.leo.remote.rfid.native_bridge.ReaderConfigurationGateway;
-import com.leo.remote.rfid.native_bridge.ReaderInventoryGateway;
-import com.leo.remote.rfid.native_bridge.ReaderTagGateway;
-import com.leo.remote.rfid.native_bridge.ReaderTransportGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderConfigurationGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderInventoryGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderTagGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderTransportGateway;
 import com.leo.remote.rfid.sdk.tag.ReaderTagOperations;
 import com.leo.remote.rfid.sdk.connection.transport.ReaderBleTransport;
 import com.leo.remote.rfid.sdk.connection.transport.ReaderWifiMonitor;
@@ -64,7 +64,7 @@ public class ReaderConnectionOrchestratorTest {
                 }, listener -> {
                     wifi.listener = listener;
                     return wifi;
-                }, store, store, resourceId -> "message:" + resourceId);
+                }, store, store, progress -> "message:" + progress);
         orchestrator = new ReaderConnectionOrchestrator(gateway, gateway, gateway, store, store,
                 configuration, tags, inventory, connections, commands, dependencies,
                 () -> {}, () -> {});

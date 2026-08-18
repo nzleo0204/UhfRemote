@@ -20,8 +20,8 @@ import com.leo.remote.core.aop.SingleClick;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.feedback.data.model.FeedbackDraft;
 import com.leo.remote.business.feedback.data.model.FeedbackType;
-import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.rfid.demo.ui.common.RfidPageActivity;
+import com.leo.remote.business.common.data.BusinessRepositories;
+import com.leo.remote.business.common.ui.BusinessPageActivity;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FeedbackActivity extends RfidPageActivity {
+public final class FeedbackActivity extends BusinessPageActivity {
     private FeedbackType selectedType = FeedbackType.PRODUCT;
     private final List<String> imagePaths = new ArrayList<>();
     private TextView productTab;
@@ -200,7 +200,7 @@ public final class FeedbackActivity extends RfidPageActivity {
         FeedbackDraft draft = new FeedbackDraft(selectedType,
                 orderNoView.getText().toString().trim(), title, detail, List.copyOf(imagePaths));
         showLoadingDialog(getString(R.string.feedback_submitting));
-        RepositoryProvider.feedback().submitFeedback(draft, new DataCallback<>() {
+        BusinessRepositories.feedback().submitFeedback(draft, new DataCallback<>() {
             @Override
             public void onSuccess(Boolean data) {
                 hideLoadingDialog();

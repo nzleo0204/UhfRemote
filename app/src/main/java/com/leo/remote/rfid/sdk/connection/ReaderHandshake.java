@@ -3,11 +3,10 @@ package com.leo.remote.rfid.sdk.connection;
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigCache;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 
 import android.util.Log;
-import com.leo.remote.R;
-import java.util.function.IntConsumer;
+import java.util.function.Consumer;
 
 final class ReaderHandshake {
     private static final String TAG = "UhfReader";
@@ -48,11 +47,12 @@ final class ReaderHandshake {
 
     static Result perform(ReaderTransportGateway transport,
             ReaderConfigurationGateway configuration, ReaderInventoryGateway inventory,
-            ReaderConfigurationStore cache, IntConsumer progress) throws ReaderException {
+            ReaderConfigurationStore cache, Consumer<ReaderProgress> progress)
+            throws ReaderException {
         ReaderModuleInfo info = readModuleInfoAfterStoppingInventory(transport, inventory);
         validateModuleInfo(info);
 
-        progress.accept(R.string.handshake_updating_params);
+        progress.accept(ReaderProgress.UPDATING_PARAMETERS);
         int status = configuration.setProtocol(TagProtocol.ISO_18000_6C);
         if (status != 0) {
             throw new ReaderException("Unable to select 6C protocol", status);
@@ -83,11 +83,12 @@ final class ReaderHandshake {
     }
 
     static ReaderConfiguration readConfigurationStepwise(ReaderConfigurationGateway gateway,
-            ModuleSubtype subtype, ReaderConfigurationStore cache, IntConsumer progress) {
+            ModuleSubtype subtype, ReaderConfigurationStore cache,
+            Consumer<ReaderProgress> progress) {
         ReaderConfiguration fallback = cache.loadConfiguration(subtype);
         if (fallback == null) { fallback = ReaderConfigCache.getDefaultConfiguration(subtype); }
 
-        progress.accept(R.string.handshake_reading_power);
+        progress.accept(ReaderProgress.READING_POWER);
         int power = fallback.powerTenthsDbm;
         try {
             Integer value = gateway.getPowerTenthsDbm();
@@ -96,7 +97,7 @@ final class ReaderHandshake {
             Log.w(TAG, "读取功率失败，使用缓存值 " + power, error);
         }
 
-        progress.accept(R.string.handshake_reading_protocol);
+        progress.accept(ReaderProgress.READING_PROTOCOL);
         int inventoryArea = fallback.inventoryArea;
         int inventoryAddress = fallback.inventoryAddress;
         int inventoryWordLen = fallback.inventoryWordLen;
@@ -111,7 +112,7 @@ final class ReaderHandshake {
             Log.w(TAG, "读取盘点区域失败，使用缓存值", error);
         }
 
-        progress.accept(R.string.handshake_reading_session);
+        progress.accept(ReaderProgress.READING_SESSION);
         int session = fallback.session;
         int target = fallback.target;
         int selected = cache.loadSelected(subtype);
@@ -127,7 +128,7 @@ final class ReaderHandshake {
         }
         cache.saveSelected(subtype, selected);
 
-        progress.accept(R.string.handshake_reading_blf);
+        progress.accept(ReaderProgress.READING_BLF);
         int blf = fallback.blfProfile;
         if (subtype != ModuleSubtype.RM8011) {
             try {

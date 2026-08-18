@@ -17,7 +17,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.leo.remote.R;
 
 /**
  * Reader 连接服务
@@ -41,12 +40,14 @@ public final class ReaderConnectionService extends Service {
     private ReaderSessionManager session;
     private ReaderState state = ReaderState.disconnected();
     private WifiManager.WifiLock wifiLock;
+    private ReaderServiceNotificationConfig notificationConfig;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "创建 Reader 连接服务");
         session = ReaderSessionManager.getInstance(getApplication());
+        notificationConfig = session.getNotificationConfig();
         WifiManager wifiManager = getSystemService(WifiManager.class);
         if (wifiManager != null) {
             wifiLock = createWifiLock(wifiManager);
@@ -97,24 +98,25 @@ public final class ReaderConnectionService extends Service {
         if (state.isConnected()) {
             String target = state.getTransport() == TransportType.WIFI
                     ? state.getAddress() : state.getDeviceName();
-            content = getString(R.string.reader_service_connected, target);
+            content = String.format(java.util.Locale.getDefault(),
+                    notificationConfig.connectedMessage, target);
         } else if (state.getPhase() == ConnectionPhase.CONNECTING
                 || state.getPhase() == ConnectionPhase.DISCOVERING_SERVICES
                 || state.getPhase() == ConnectionPhase.ENABLING_NOTIFICATIONS
                 || state.getPhase() == ConnectionPhase.CONNECTING_DATA_CHANNEL
                 || state.getPhase() == ConnectionPhase.VERIFYING_MODULE
                 || state.getPhase() == ConnectionPhase.UPDATING_PARAMETERS) {
-            content = getString(R.string.reader_service_connecting);
+            content = notificationConfig.connectingMessage;
         } else {
-            content = getString(R.string.reader_service_disconnected);
+            content = notificationConfig.disconnectedMessage;
         }
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.launcher_ic)
-                .setContentTitle(getString(R.string.reader_service_channel_name))
+                .setSmallIcon(notificationConfig.smallIcon)
+                .setContentTitle(notificationConfig.channelName)
                 .setContentText(content)
                 .setContentIntent(contentIntent())
                 .addAction(new NotificationCompat.Action.Builder(0,
-                        getString(R.string.reader_service_action_disconnect), disconnectIntent()).build())
+                        notificationConfig.disconnectAction, disconnectIntent()).build())
                 .setOngoing(true)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -134,8 +136,8 @@ public final class ReaderConnectionService extends Service {
     }
 
     private PendingIntent contentIntent() {
-        Intent intent = new Intent(this, com.leo.remote.app.MainActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent intent = new Intent(notificationConfig.contentIntent);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return PendingIntent.getActivity(this, 702, intent, pendingIntentFlags());
     }
 
@@ -162,7 +164,7 @@ public final class ReaderConnectionService extends Service {
         NotificationManager manager = getSystemService(NotificationManager.class);
         if (manager != null) {
             manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    getString(R.string.reader_service_channel_name), NotificationManager.IMPORTANCE_LOW));
+                    notificationConfig.channelName, NotificationManager.IMPORTANCE_LOW));
         }
     }
 }

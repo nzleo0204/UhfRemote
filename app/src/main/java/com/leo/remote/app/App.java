@@ -3,7 +3,7 @@ package com.leo.remote.app;
 import android.app.Application;
 import com.hjq.core.manager.ActivityManager;
 import com.leo.remote.core.aop.Log;
-import com.leo.remote.core.manager.InitManager;
+import com.leo.remote.app.bootstrap.AppInitializer;
 import com.leo.remote.core.manager.OrientationManager;
 
 /**
@@ -30,9 +30,9 @@ public final class App extends Application {
             return;
         }
 
-        InitManager.preInitSdk(this);
+        AppInitializer.initializeApplication(this);
         // 创建全局读写器会话并初始化一次 JNI。连接页面只复用这个会话。
-        InitManager.initSdk(this);
+        AppInitializer.initializeReader(this);
     }
 
 }

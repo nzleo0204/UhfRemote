@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.rfid.sdk.model.ModuleSubtype;
 import com.leo.remote.rfid.sdk.model.ReaderConfiguration;
@@ -33,8 +33,10 @@ public final class ReaderDeviceInfoDialog extends DialogFragment implements Read
         // 设置关闭按钮点击事件
         view.findViewById(R.id.btn_device_info_close).setOnClickListener(v -> dismiss());
 
-        return new MaterialAlertDialogBuilder(requireContext())
-                .setView(view)
+        return new BaseDialog.Builder<>(requireContext())
+                .setContentView(view)
+                .setAnimStyle(BaseDialog.ANIM_IOS)
+                .setGravity(android.view.Gravity.CENTER)
                 .create();
     }
 

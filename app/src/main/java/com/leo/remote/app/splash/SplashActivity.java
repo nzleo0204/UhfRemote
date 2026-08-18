@@ -16,7 +16,7 @@ import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.app.MainActivity;
-import com.leo.remote.core.manager.InitManager;
+import com.leo.remote.app.bootstrap.AppInitializer;
 import com.leo.remote.core.util.AppConfig;
 import com.leo.remote.core.ui.dialog.PrivacyAgreementDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
@@ -60,7 +60,7 @@ public final class SplashActivity extends BaseActivity {
             public void onAnimationEnd(Animator animation) {
                 lottieView.removeAnimatorListener(this);
 
-                if (InitManager.isAgreePrivacy(SplashActivity.this)) {
+                if (AppInitializer.isAgreePrivacy(SplashActivity.this)) {
                     agreePrivacyAfter();
                     return;
                 }
@@ -71,7 +71,7 @@ public final class SplashActivity extends BaseActivity {
 
                             @Override
                             public void onConfirm(@NonNull BaseDialog dialog) {
-                                InitManager.setAgreePrivacy(SplashActivity.this, true);
+                                AppInitializer.setAgreePrivacy(SplashActivity.this, true);
                                 agreePrivacyAfter();
                             }
 
@@ -132,7 +132,7 @@ public final class SplashActivity extends BaseActivity {
      * 同意隐私后需要做的事情
      */
     private void agreePrivacyAfter() {
-        InitManager.initSdk(getApplication());
+        AppInitializer.initializeReader(getApplication());
         MainActivity.start(this);
         finish();
     }

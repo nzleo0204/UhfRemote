@@ -2,8 +2,8 @@ package com.leo.remote.rfid.sdk.config;
 
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.*;
-import com.leo.remote.rfid.native_bridge.*;
-import com.leo.remote.rfid.native_bridge.FakeUhfSdkGateway;
+import com.leo.remote.rfid.sdk.nativebridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.FakeUhfSdkGateway;
 import com.leo.remote.rfid.sdk.connection.ReaderObserver;
 import com.leo.remote.rfid.sdk.connection.ReaderStatePublisher;
 

@@ -2,8 +2,8 @@ package com.leo.remote.rfid.sdk.inventory;
 
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
-import com.leo.remote.rfid.native_bridge.ReaderConfigurationGateway;
-import com.leo.remote.rfid.native_bridge.ReaderInventoryGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderConfigurationGateway;
+import com.leo.remote.rfid.sdk.nativebridge.ReaderInventoryGateway;
 import com.leo.remote.rfid.sdk.connection.ReaderStatePublisher;
 import com.leo.remote.rfid.sdk.tag.ChipModelFormatter;
 

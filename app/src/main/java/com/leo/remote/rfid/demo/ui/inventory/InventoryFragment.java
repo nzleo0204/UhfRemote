@@ -26,7 +26,6 @@ import com.leo.remote.rfid.sdk.connection.ReaderObserver;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
-import com.leo.remote.app.MainActivity;
 import com.leo.remote.rfid.demo.ui.inventory.InventoryAdapter;
 import com.leo.remote.rfid.demo.ui.inventory.InventoryDetailSheet;
 import java.io.IOException;
@@ -49,7 +48,7 @@ import com.leo.remote.core.util.ThrowableUtils;
  * - 实时显示标签信息（EPC、TID、USER 等）
  */
 @SuppressLint("LogNotTimber")
-public final class InventoryFragment extends ReaderFragment<MainActivity> implements ReaderObserver {
+public final class InventoryFragment extends ReaderFragment implements ReaderObserver {
     private static final String TAG = "UhfReader/Inventory";
 
     // ========== Fields ==========

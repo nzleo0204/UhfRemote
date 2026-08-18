@@ -2,13 +2,12 @@ package com.leo.remote.rfid.sdk.connection;
 
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.*;
-import com.leo.remote.rfid.native_bridge.*;
+import com.leo.remote.rfid.sdk.nativebridge.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.leo.remote.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +52,7 @@ public class ReaderHandshakeTest {
     @Test
     public void configurationProgress_keepsInitialReadsButOmitsQ() {
         FakeGateway gateway = new FakeGateway();
-        List<Integer> progress = new ArrayList<>();
+        List<ReaderProgress> progress = new ArrayList<>();
 
         ReaderConfiguration configuration = ReaderHandshake.readConfigurationStepwise(
                 gateway, ModuleSubtype.R2000_PLUS, new InMemoryConfigurationStore(),
@@ -61,10 +60,10 @@ public class ReaderHandshakeTest {
 
         assertEquals(270, configuration.powerTenthsDbm);
         assertEquals(Arrays.asList(
-                R.string.handshake_reading_power,
-                R.string.handshake_reading_protocol,
-                R.string.handshake_reading_session,
-                R.string.handshake_reading_blf), progress);
+                ReaderProgress.READING_POWER,
+                ReaderProgress.READING_PROTOCOL,
+                ReaderProgress.READING_SESSION,
+                ReaderProgress.READING_BLF), progress);
     }
 
     @Test
@@ -72,13 +71,13 @@ public class ReaderHandshakeTest {
         FakeGateway gateway = new FakeGateway();
 
         ReaderHandshake.perform(gateway, gateway, gateway,
-                new InMemoryConfigurationStore(), resourceId ->
-                gateway.eventLog.add("progress:" + resourceId));
+                new InMemoryConfigurationStore(), progress ->
+                gateway.eventLog.add("progress:" + progress));
 
         assertTrue(gateway.eventLog.indexOf("moduleInfo") >= 0);
         assertTrue(gateway.eventLog.indexOf("moduleInfo")
-                < gateway.eventLog.indexOf("progress:" + R.string.handshake_updating_params));
-        assertTrue(gateway.eventLog.indexOf("progress:" + R.string.handshake_updating_params)
+                < gateway.eventLog.indexOf("progress:" + ReaderProgress.UPDATING_PARAMETERS));
+        assertTrue(gateway.eventLog.indexOf("progress:" + ReaderProgress.UPDATING_PARAMETERS)
                 < gateway.eventLog.indexOf("setProtocol"));
     }
 

@@ -17,7 +17,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
@@ -35,10 +34,10 @@ import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.model.TransportType;
-import com.leo.remote.app.MainActivity;
 import com.leo.remote.rfid.demo.ui.config.BleDeviceSheet;
 import com.leo.remote.rfid.demo.ui.config.ReaderDeviceInfoDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
+import com.leo.remote.core.ui.dialog.SelectDialog;
 import com.leo.remote.rfid.demo.ui.config.InventoryRangeDialog;
 import com.leo.remote.rfid.demo.ui.config.ReaderConnectionDialogController;
 import com.leo.remote.rfid.demo.ui.config.ReaderSettingDialogController;
@@ -48,13 +47,14 @@ import com.leo.remote.core.util.ThrowableUtils;
 import com.leo.remote.core.util.ViewUtils;
 import com.hjq.base.BaseDialog;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /** RFID reader connection and parameter configuration page. */
 @SuppressLint({"LogNotTimber", "ClickableViewAccessibility"})
-public final class ReaderConfigFragment extends ReaderFragment<MainActivity> implements ReaderObserver {
+public final class ReaderConfigFragment extends ReaderFragment implements ReaderObserver {
     private static final String TAG = "UhfReader/Config";
     private static final String DEVICE_INFO_DIALOG_TAG = "reader_device_info";
 
@@ -155,7 +155,7 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
             wifiSwitch.setChecked(false);
             bindingUi = false;
             dismissWifiKeyboard();
-            bindTransportRows(true, readerState.isConnected());
+            bindTransportRows(true, readerState.hasTransportLink());
         });
         wifiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (bindingUi) { return; }
@@ -167,7 +167,7 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
             bindingUi = true;
             bleSwitch.setChecked(false);
             bindingUi = false;
-            bindTransportRows(false, readerState.isConnected());
+            bindTransportRows(false, readerState.hasTransportLink());
         });
         deviceInfoButton.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
@@ -479,15 +479,16 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         List<TagProtocol> protocols = new ArrayList<>(readerState.getModuleSubtype().supportedProtocols());
         String[] labels = protocols.stream().map(TagProtocol::getDisplayName).toArray(String[]::new);
         int selected = Math.max(0, protocols.indexOf(readerState.getProtocol()));
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_protocol))
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    dialog.dismiss();
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_protocol)
+                .setList(Arrays.asList(labels))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> {
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_protocol, labels[which],
+                    confirmAndApply(R.string.config_protocol, value,
                             () -> session.setProtocol(protocols.get(which)),
                             R.string.config_protocol_set_failed, () -> {});
-                }).setNegativeButton(R.string.common_cancel, null).show();
+                }).show();
     }
 
     private void refreshParameters() {
@@ -519,15 +520,11 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         int currentValue = configuration == null ? 0 : configuration.inventoryArea;
         int selected = Math.max(0, areas.indexOf(InventoryArea.of(readerState.getProtocol(),
                 currentValue)));
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_inventory_area))
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    dialog.dismiss();
-                    InventoryArea target = areas.get(which);
-                    // 所有选项都弹出输入弹窗
-                    showInventoryRangeDialog(target);
-                })
-                .setNegativeButton(R.string.common_cancel, null)
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_inventory_area)
+                .setList(Arrays.asList(labels))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> showInventoryRangeDialog(areas.get(which)))
                 .show();
     }
 
@@ -635,16 +632,17 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         }
         String[] labels = getResources().getStringArray(R.array.config_work_mode_labels);
         int selected = configuration == null ? 1 : configuration.inventoryMode;
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_work_mode))
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    dialog.dismiss();
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_work_mode)
+                .setList(Arrays.asList(labels))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> {
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_work_mode, labels[which], () -> {
+                    confirmAndApply(R.string.config_work_mode, value, () -> {
                         session.setInventoryMode(which);
                         return CompletableFuture.completedFuture(0);
                     }, R.string.config_query_set_failed, () -> {});
-                }).setNegativeButton(R.string.common_cancel, null).show();
+                }).show();
     }
 
     private void showSessionDialog() {
@@ -655,15 +653,16 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         }
         String[] labels = getResources().getStringArray(R.array.config_session_labels);
         int selected = configuration == null ? 0 : configuration.session;
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_session))
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    dialog.dismiss();
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_session)
+                .setList(Arrays.asList(labels))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> {
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_session, labels[which],
+                    confirmAndApply(R.string.config_session, value,
                             () -> session.setSession(which),
                             R.string.config_query_set_failed, () -> {});
-                }).setNegativeButton(R.string.common_cancel, null).show();
+                }).show();
     }
 
     private static boolean supportsSession(TagProtocol protocol) {
@@ -674,14 +673,15 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         if (!requireReaderOnline()) { return; }
         String[] labels = getResources().getStringArray(R.array.config_blf_labels);
         int selected = configuration == null ? 1 : configuration.blfProfile;
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_blf_rate))
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    dialog.dismiss();
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_blf_rate)
+                .setList(Arrays.asList(labels))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> {
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_blf_rate, labels[which],
+                    confirmAndApply(R.string.config_blf_rate, value,
                             () -> session.setBlf(which), R.string.config_blf_set_failed, () -> {});
-                }).setNegativeButton(R.string.common_cancel, null).show();
+                }).show();
     }
 
 
@@ -690,28 +690,16 @@ public final class ReaderConfigFragment extends ReaderFragment<MainActivity> imp
         String[] values = Rm610PowerLevels.nonCmtLabels();
         int selected = configuration == null ? -1 : configuration.powerTenthsDbm;
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setCustomTitle(createDialogTitle(R.string.config_transmit_power))
-                .setSingleChoiceItems(values, selected, (dialog, which) -> {
-                    dialog.dismiss();
+        new SelectDialog.Builder(requireContext())
+                .setTitle(R.string.config_transmit_power)
+                .setList(Arrays.asList(values))
+                .setSelect(selected)
+                .setListener((dialog, which, value) -> {
                     if (which == selected) { return; }
-                    confirmAndApply(R.string.config_transmit_power, values[which],
+                    confirmAndApply(R.string.config_transmit_power, value,
                             () -> session.setPower(which), R.string.config_power_set_failed,
                             () -> {});
-                })
-                .setNegativeButton(R.string.common_cancel, null)
-                .show();
-    }
-
-    /** 创建居中显示的弹窗标题 */
-    private TextView createDialogTitle(@StringRes int titleRes) {
-        TextView titleView = new TextView(requireContext());
-        titleView.setText(titleRes);
-        titleView.setTextSize(15); // 标题字号 15sp
-        titleView.setGravity(android.view.Gravity.CENTER);
-        titleView.setPadding(0, 40, 0, 20);
-        titleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.rfid_text));
-        return titleView;
+                }).show();
     }
 
 

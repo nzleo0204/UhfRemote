@@ -2,11 +2,12 @@ package com.leo.remote.rfid.demo.ui.inventory;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.hjq.base.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
 import com.leo.remote.rfid.sdk.model.InventoryArea;
@@ -15,18 +16,20 @@ import com.leo.remote.rfid.sdk.model.TagProtocol;
 
 /** Displays complete inventory values and lets the user reuse them as a mask. */
 @SuppressLint("InflateParams")
-public final class InventoryDetailSheet extends BottomSheetDialog {
+public final class InventoryDetailSheet {
 
     public interface Listener {
         void onFillMask(int bank, String value);
     }
 
+    private final BottomSheetDialog dialog;
+
     public InventoryDetailSheet(@NonNull Context context, @NonNull InventoryItem item,
             @NonNull InventoryArea area, @NonNull Listener listener) {
-        super(context);
+        dialog = new BottomSheetDialog(context);
         View content = LayoutInflater.from(context).inflate(R.layout.inventory_detail_sheet,
                 null, false);
-        setContentView(content);
+        dialog.setContentView(content);
 
         setText(content, R.id.tv_inventory_detail_id_label, idLabel(area));
         setText(content, R.id.tv_inventory_detail_id, item.getId());
@@ -48,7 +51,7 @@ public final class InventoryDetailSheet extends BottomSheetDialog {
         MaterialButton fillId = content.findViewById(R.id.btn_inventory_detail_fill_id);
         fillId.setOnClickListener(view -> {
             listener.onFillMask(idBank(area), item.getId());
-            dismiss();
+            dialog.dismiss();
         });
 
         MaterialButton fillData = content.findViewById(R.id.btn_inventory_detail_fill_data);
@@ -59,11 +62,23 @@ public final class InventoryDetailSheet extends BottomSheetDialog {
             fillData.setText(fillDataLabel(area));
             fillData.setOnClickListener(view -> {
                 listener.onFillMask(secondaryBank, item.getData());
-                dismiss();
+                dialog.dismiss();
             });
         }
         content.findViewById(R.id.btn_inventory_detail_close)
-                .setOnClickListener(view -> dismiss());
+                .setOnClickListener(view -> dialog.dismiss());
+    }
+
+    public void show() {
+        dialog.show();
+    }
+
+    public void dismiss() {
+        dialog.dismiss();
+    }
+
+    public void setOnDismissListener(DialogInterface.OnDismissListener listener) {
+        dialog.setOnDismissListener(listener);
     }
 
     private static void setText(View root, int id, CharSequence value) {
