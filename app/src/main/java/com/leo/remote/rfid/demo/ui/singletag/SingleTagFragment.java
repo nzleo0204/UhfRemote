@@ -30,13 +30,13 @@ import com.leo.remote.rfid.sdk.model.TagReadResult;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.tag.SingleTagReadFormatter;
 import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
 import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
 import com.leo.remote.rfid.demo.ui.singletag.TagKillDialog;
 import com.leo.remote.rfid.demo.ui.singletag.TagLockDialog;
 import com.leo.remote.rfid.demo.ui.singletag.TagWriteDialog;
-import com.leo.remote.util.ThrowableUtils;
+import com.leo.remote.core.util.ThrowableUtils;
 import java.util.concurrent.CompletableFuture;
 
 /** Single-target RFID operations. */

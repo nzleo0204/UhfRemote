@@ -8,8 +8,8 @@ import android.view.Gravity;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.leo.remote.R;
-import com.leo.remote.util.LinkClickableSpan;
-import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.core.util.LinkClickableSpan;
+import com.leo.remote.core.ui.dialog.MessageDialog;
 
 /**
  *    author : Android 轮子哥

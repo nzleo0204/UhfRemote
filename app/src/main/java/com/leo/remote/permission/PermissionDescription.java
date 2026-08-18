@@ -14,7 +14,7 @@ import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.leo.remote.R;
-import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.ui.popup.PermissionDescriptionPopup;
 import com.hjq.permissions.OnPermissionDescription;
 import com.hjq.permissions.permission.PermissionPageType;

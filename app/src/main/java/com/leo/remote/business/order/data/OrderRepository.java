@@ -1,6 +1,6 @@
 package com.leo.remote.business.order.data;
 
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.order.data.model.Order;
 import com.leo.remote.business.order.data.model.OrderStatus;
 import java.util.List;

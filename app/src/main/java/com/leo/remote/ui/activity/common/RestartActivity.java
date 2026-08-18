@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.leo.remote.R;
-import com.leo.remote.app.AppActivity;
+import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.activity.SplashActivity;
 
@@ -16,7 +16,7 @@ import com.leo.remote.ui.activity.SplashActivity;
  *    time   : 2020/11/29
  *    desc   : 重启应用
  */
-public final class RestartActivity extends AppActivity {
+public final class RestartActivity extends BaseActivity {
 
     public static void start(@NonNull Context context) {
         Intent intent = new Intent(context, RestartActivity.class);

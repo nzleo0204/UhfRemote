@@ -3,7 +3,7 @@ package com.leo.remote.business.auth.data.mock;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.auth.data.model.UserInfo;
 import com.leo.remote.business.auth.data.AuthRepository;
 import java.util.Random;

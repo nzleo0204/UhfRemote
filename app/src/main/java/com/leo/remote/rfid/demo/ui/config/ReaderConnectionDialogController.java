@@ -6,7 +6,7 @@ import com.leo.remote.rfid.sdk.model.ConnectionPhase;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.demo.ui.common.ReaderConnectionDialog;
-import com.leo.remote.ui.dialog.common.WaitDialog;
+import com.leo.remote.core.ui.dialog.WaitDialog;
 
 /** Owns the connection and parameter-initialization progress dialogs. */
 public final class ReaderConnectionDialogController {

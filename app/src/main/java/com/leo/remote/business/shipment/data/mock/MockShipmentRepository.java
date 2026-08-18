@@ -1,7 +1,7 @@
 package com.leo.remote.business.shipment.data.mock;
 
 import android.text.TextUtils;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.shipment.data.model.Shipment;
 import com.leo.remote.business.shipment.data.model.ShipmentStatus;
 import com.leo.remote.business.shipment.data.model.ShipmentBatch;

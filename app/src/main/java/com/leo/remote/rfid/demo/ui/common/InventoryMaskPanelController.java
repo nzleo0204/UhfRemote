@@ -20,7 +20,7 @@ import com.leo.remote.rfid.sdk.model.InventoryMaskConfig;
 import com.leo.remote.rfid.sdk.inventory.InventoryMaskFormParser;
 import com.leo.remote.rfid.sdk.model.ProtocolEncoding;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
-import com.leo.remote.util.ViewUtils;
+import com.leo.remote.core.util.ViewUtils;
 
 /** Owns the shared mask-panel binding and presentation state used by both RFID pages. */
 public final class InventoryMaskPanelController {

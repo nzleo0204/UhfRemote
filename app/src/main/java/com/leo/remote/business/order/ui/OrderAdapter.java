@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.business.order.data.model.Order;
 import com.leo.remote.business.order.data.model.OrderStatus;
-import com.leo.remote.util.RfidFormat;
+import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 

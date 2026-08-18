@@ -1,7 +1,7 @@
 package com.leo.remote.business.order.data.mock;
 
 import android.text.TextUtils;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.order.data.model.Order;
 import com.leo.remote.business.order.data.model.OrderStatus;
 import com.leo.remote.business.order.data.OrderRepository;

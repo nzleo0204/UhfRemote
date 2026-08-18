@@ -26,8 +26,8 @@ import com.hjq.core.manager.ThreadPoolManager;
 import com.hjq.core.tools.AndroidVersion;
 import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
-import com.leo.remote.app.AppActivity;
-import com.leo.remote.util.AppConfig;
+import com.leo.remote.core.ui.base.BaseActivity;
+import com.leo.remote.core.util.AppConfig;
 import com.hjq.device.compat.DeviceBrand;
 import com.hjq.device.compat.DeviceMarketName;
 import com.hjq.device.compat.DeviceOs;
@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  *    time   : 2019/06/27
  *    desc   : 崩溃捕捉界面
  */
-public final class CrashActivity extends AppActivity {
+public final class CrashActivity extends BaseActivity {
 
     private static final String INTENT_KEY_IN_THROWABLE = "throwable";
 

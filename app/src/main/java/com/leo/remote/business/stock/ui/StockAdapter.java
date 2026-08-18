@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
 import com.leo.remote.business.stock.data.model.StockItem;
-import com.leo.remote.util.RfidFormat;
+import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 

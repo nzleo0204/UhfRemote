@@ -2,7 +2,7 @@ package com.leo.remote.core.data.mock;
 
 import android.os.Handler;
 import android.os.Looper;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import java.util.Random;
 
 public abstract class BaseMockRepository {

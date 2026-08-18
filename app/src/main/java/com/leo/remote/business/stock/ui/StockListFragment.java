@@ -8,10 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
-import com.leo.remote.app.AppFragment;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.ui.base.BaseFragment;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.stock.data.model.StockItem;
-import com.leo.remote.data.repository.RepositoryProvider;
+import com.leo.remote.core.data.RepositoryProvider;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.business.stock.ui.StockAdapter;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 /** Real-time stock query shown directly in the bottom navigation. */
-public final class StockListFragment extends AppFragment<HomeActivity>
+public final class StockListFragment extends BaseFragment<HomeActivity>
         implements OnRefreshLoadMoreListener {
     private static final int PAGE_SIZE = 4;
 

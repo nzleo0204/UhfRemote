@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.order.data.model.Order;
-import com.leo.remote.data.repository.RepositoryProvider;
-import com.leo.remote.ui.activity.PagedQueryActivity;
+import com.leo.remote.core.data.RepositoryProvider;
+import com.leo.remote.core.ui.base.PagedQueryActivity;
 import java.util.List;
 
 public final class OrderListActivity extends PagedQueryActivity<Order> {

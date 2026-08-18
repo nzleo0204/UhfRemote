@@ -1,7 +1,7 @@
 package com.leo.remote.business.stock.data.mock;
 
 import android.text.TextUtils;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.stock.data.model.StockItem;
 import com.leo.remote.business.stock.data.StockRepository;
 import com.leo.remote.core.data.mock.BaseMockRepository;

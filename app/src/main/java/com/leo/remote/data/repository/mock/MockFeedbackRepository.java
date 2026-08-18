@@ -1,7 +1,7 @@
 package com.leo.remote.data.repository.mock;
 
 import android.text.TextUtils;
-import com.leo.remote.data.DataCallback;
+import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.data.model.FeedbackDraft;
 import com.leo.remote.data.repository.FeedbackRepository;
 import com.leo.remote.core.data.mock.BaseMockRepository;

@@ -19,7 +19,7 @@ import com.leo.remote.business.shipment.data.model.Shipment;
 import com.leo.remote.business.shipment.data.model.ShipmentBatch;
 import com.leo.remote.business.shipment.data.model.ShipmentStatus;
 import com.leo.remote.business.shipment.data.model.TimelineNode;
-import com.leo.remote.util.RfidFormat;
+import com.leo.remote.core.util.RfidFormat;
 import java.util.List;
 import java.util.Objects;
 

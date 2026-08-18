@@ -37,7 +37,7 @@ import java.util.List;
 import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
 import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
 import com.leo.remote.rfid.demo.ui.inventory.InventoryCsvExporter;
-import com.leo.remote.util.ThrowableUtils;
+import com.leo.remote.core.util.ThrowableUtils;
 
 /**
  * 盘点页面 Fragment

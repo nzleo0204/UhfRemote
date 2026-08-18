@@ -14,11 +14,11 @@ import com.hjq.base.BaseDialog;
 import com.hjq.core.manager.ActivityManager;
 import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
-import com.leo.remote.app.AppActivity;
+import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.manager.InitManager;
-import com.leo.remote.util.AppConfig;
+import com.leo.remote.core.util.AppConfig;
 import com.leo.remote.ui.dialog.PrivacyAgreementDialog;
-import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.core.ui.dialog.MessageDialog;
 import java.util.Locale;
 
 /**
@@ -28,7 +28,7 @@ import java.util.Locale;
  *    desc   : 闪屏界面
  */
 @SuppressLint("CustomSplashScreen")
-public final class SplashActivity extends AppActivity {
+public final class SplashActivity extends BaseActivity {
 
     private LottieAnimationView lottieView;
     private SlantedTextView buildTypeView;

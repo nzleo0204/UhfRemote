@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.hjq.core.tools.AndroidVersion;
 import com.leo.remote.R;
-import com.leo.remote.ui.dialog.common.MessageDialog;
+import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.OnPermissionInterceptor;
 import com.hjq.permissions.XXPermissions;

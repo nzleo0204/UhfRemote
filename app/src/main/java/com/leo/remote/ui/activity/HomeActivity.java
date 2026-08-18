@@ -16,10 +16,10 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BasePagerAdapter;
 import com.hjq.core.tools.DoubleClickHelper;
 import com.leo.remote.R;
-import com.leo.remote.app.ReaderAwareActivity;
-import com.leo.remote.app.AppFragment;
-import com.leo.remote.ui.adapter.common.NavigationAdapter;
-import com.leo.remote.ui.adapter.common.NavigationAdapter.NavigationItem;
+import com.leo.remote.rfid.demo.ui.common.ReaderAwareActivity;
+import com.leo.remote.core.ui.base.BaseFragment;
+import com.leo.remote.core.ui.adapter.NavigationAdapter;
+import com.leo.remote.core.ui.adapter.NavigationAdapter.NavigationItem;
 import com.leo.remote.rfid.demo.ui.inventory.InventoryFragment;
 import com.leo.remote.business.auth.ui.MineFragment;
 import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
@@ -55,7 +55,7 @@ public final class HomeActivity extends ReaderAwareActivity
     private RecyclerView navigationView;
 
     private NavigationAdapter navigationAdapter;
-    private BasePagerAdapter<AppFragment<?>> pagerAdapter;
+    private BasePagerAdapter<BaseFragment<?>> pagerAdapter;
     private ReaderSessionManager readerSession;
     private int selectedPage;
     private final ViewPager.SimpleOnPageChangeListener pageChangeListener =
@@ -76,7 +76,7 @@ public final class HomeActivity extends ReaderAwareActivity
         start(context, ReaderConfigFragment.class);
     }
 
-    public static void start(@NonNull Context context, @NonNull Class<? extends AppFragment<?>> fragmentClass) {
+    public static void start(@NonNull Context context, @NonNull Class<? extends BaseFragment<?>> fragmentClass) {
         Intent intent = new Intent(context, HomeActivity.class);
         intent.putExtra(INTENT_KEY_IN_FRAGMENT_CLASS, fragmentClass);
         if (!(context instanceof Activity)) {

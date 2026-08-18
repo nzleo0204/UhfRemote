@@ -10,7 +10,7 @@ import androidx.annotation.RawRes;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import com.leo.remote.R;
-import com.leo.remote.widget.StatusLayout;
+import com.leo.remote.core.ui.widget.StatusLayout;
 
 /**
  *    author : Android 轮子哥
