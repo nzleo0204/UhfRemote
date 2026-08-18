@@ -14,9 +14,9 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
 import com.leo.remote.R;
-import com.leo.remote.action.ImmersionAction;
-import com.leo.remote.action.TitleBarAction;
-import com.leo.remote.action.ToastAction;
+import com.leo.remote.core.action.ImmersionAction;
+import com.leo.remote.core.action.TitleBarAction;
+import com.leo.remote.core.action.ToastAction;
 import com.leo.remote.core.ui.dialog.WaitDialog;
 import com.leo.remote.core.util.ThemeModeManager;
 

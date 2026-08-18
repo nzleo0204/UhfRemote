@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import com.hjq.base.BaseDialog;
 import com.hjq.custom.widget.view.RegexEditText;
 import com.leo.remote.R;
-import com.leo.remote.aop.SingleClick;
+import com.leo.remote.core.aop.SingleClick;
 import com.leo.remote.rfid.sdk.model.ReaderConfiguration;
 import com.leo.remote.core.ui.dialog.StyleDialog;
 

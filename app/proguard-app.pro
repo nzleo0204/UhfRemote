@@ -41,7 +41,7 @@
 
 # 不混淆被 Log 注解的方法信息
 -keepclassmembernames class ** {
-    @com.leo.remote.aop.Log <methods>;
+    @com.leo.remote.core.aop.Log <methods>;
 }
 
 # 保留被 AOP 注解标记的方法

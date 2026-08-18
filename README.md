@@ -11,9 +11,8 @@ UhfRemote/
 │   │   └── com/leo/remote/
 │   │       ├── rfid/           # RFID 演示 UI、SDK 和 Native 桥接
 │   │       ├── business/       # 库存、订单、出货和认证业务
-│   │       ├── core/           # 基础 UI、网络、存储和工具
+│   │       ├── core/           # 基础 UI、网络、存储、管理器和工具
 │   │       ├── app/            # Application、主界面和启动页
-│   │       └── manager/        # 管理器
 │   └── src/main/res/           # 资源文件
 ├── library/                    # 基础库模块
 └── docs/                       # 文档

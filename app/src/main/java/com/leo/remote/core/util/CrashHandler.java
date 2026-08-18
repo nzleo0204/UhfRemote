@@ -5,8 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
-import com.leo.remote.ui.activity.common.CrashActivity;
-import com.leo.remote.ui.activity.common.RestartActivity;
+import com.leo.remote.app.crash.CrashActivity;
+import com.leo.remote.app.restart.RestartActivity;
 
 /**
  *    author : Android 轮子哥

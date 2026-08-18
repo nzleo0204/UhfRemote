@@ -1,7 +1,7 @@
 package com.leo.remote.core.data;
 
 import com.leo.remote.business.auth.data.AuthRepository;
-import com.leo.remote.data.repository.mock.MockFeedbackRepository;
+import com.leo.remote.business.feedback.data.mock.MockFeedbackRepository;
 import com.leo.remote.business.auth.data.mock.MockAuthRepository;
 import com.leo.remote.business.order.data.OrderRepository;
 import com.leo.remote.business.order.data.mock.MockOrderRepository;
@@ -9,7 +9,7 @@ import com.leo.remote.business.shipment.data.ShipmentRepository;
 import com.leo.remote.business.shipment.data.mock.MockShipmentRepository;
 import com.leo.remote.business.stock.data.StockRepository;
 import com.leo.remote.business.stock.data.mock.MockStockRepository;
-import com.leo.remote.data.repository.FeedbackRepository;
+import com.leo.remote.business.feedback.data.FeedbackRepository;
 
 public final class RepositoryProvider {
     private static final AuthRepository AUTH = new MockAuthRepository();

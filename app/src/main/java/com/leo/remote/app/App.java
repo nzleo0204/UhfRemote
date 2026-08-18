@@ -2,9 +2,9 @@ package com.leo.remote.app;
 
 import android.app.Application;
 import com.hjq.core.manager.ActivityManager;
-import com.leo.remote.aop.Log;
-import com.leo.remote.manager.InitManager;
-import com.leo.remote.manager.OrientationManager;
+import com.leo.remote.core.aop.Log;
+import com.leo.remote.core.manager.InitManager;
+import com.leo.remote.core.manager.OrientationManager;
 
 /**
  *    author : Android 轮子哥

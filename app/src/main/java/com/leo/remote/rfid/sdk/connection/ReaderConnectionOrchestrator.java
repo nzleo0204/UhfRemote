@@ -1,6 +1,7 @@
 package com.leo.remote.rfid.sdk.connection;
 
 import com.leo.remote.rfid.sdk.inventory.ReaderInventoryController;
+import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
 import com.leo.remote.rfid.sdk.persistence.ReaderConnectionStore;

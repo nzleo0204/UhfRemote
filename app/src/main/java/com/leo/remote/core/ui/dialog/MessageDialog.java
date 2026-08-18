@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
-import com.leo.remote.aop.SingleClick;
+import com.leo.remote.core.aop.SingleClick;
 
 /**
  *    author : Android 轮子哥

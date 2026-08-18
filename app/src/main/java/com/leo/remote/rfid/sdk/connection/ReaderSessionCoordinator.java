@@ -1,6 +1,7 @@
 package com.leo.remote.rfid.sdk.connection;
 
 import com.leo.remote.rfid.sdk.inventory.ReaderInventoryController;
+import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.model.*;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
 import com.leo.remote.rfid.native_bridge.*;
@@ -192,7 +193,10 @@ final class ReaderSessionCoordinator {
 
     public CompletableFuture<Integer> refreshConfiguration() {
         return submitConnected(() -> {
-            configurationManager.refresh(currentState().getModuleSubtype());
+            ModuleSubtype subtype = currentState().getModuleSubtype();
+            configurationManager.restore(ReaderHandshake.readConfigurationStepwise(
+                    configurationGateway, subtype, configStore, ignored -> {}));
+            configurationManager.publishCurrent();
             return 0;
         }, false);
     }

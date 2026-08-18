@@ -11,8 +11,8 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
 import com.hjq.core.tools.AndroidVersion;
 import com.leo.remote.R;
-import com.leo.remote.action.ImmersionAction;
-import com.leo.remote.action.TitleBarAction;
+import com.leo.remote.core.action.ImmersionAction;
+import com.leo.remote.core.action.TitleBarAction;
 
 /**
  *    author : Android 轮子哥

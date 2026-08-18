@@ -16,7 +16,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
-import com.leo.remote.aop.SingleClick;
+import com.leo.remote.core.aop.SingleClick;
 import com.leo.remote.rfid.sdk.model.HexCodec;
 import com.leo.remote.rfid.sdk.model.InventoryMaskConfig;
 import com.leo.remote.rfid.sdk.inventory.InventoryMaskFormParser;

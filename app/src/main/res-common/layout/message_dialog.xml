@@ -12,5 +12,5 @@
     android:scrollbars="vertical"
     android:textColor="#333333"
     android:textSize="@dimen/sp_14"
-    tools:context=".ui.dialog.common.MessageDialog"
+    tools:context=".core.ui.dialog.MessageDialog"
     tools:text="内容" />

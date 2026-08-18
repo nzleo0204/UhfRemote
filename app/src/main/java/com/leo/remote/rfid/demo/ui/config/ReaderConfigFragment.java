@@ -43,7 +43,7 @@ import com.leo.remote.rfid.demo.ui.config.InventoryRangeDialog;
 import com.leo.remote.rfid.demo.ui.config.ReaderConnectionDialogController;
 import com.leo.remote.rfid.demo.ui.config.ReaderSettingDialogController;
 import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
-import com.leo.remote.ui.view.IpAddressInputView;
+import com.leo.remote.core.ui.widget.IpAddressInputView;
 import com.leo.remote.core.util.ThrowableUtils;
 import com.leo.remote.core.util.ViewUtils;
 import com.hjq.base.BaseDialog;

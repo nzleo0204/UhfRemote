@@ -87,7 +87,7 @@ public final class MainActivity extends ReaderAwareActivity
 
     @Override
     protected int getLayoutId() {
-        return R.layout.home_activity;
+        return R.layout.main_activity;
     }
 
     @Override

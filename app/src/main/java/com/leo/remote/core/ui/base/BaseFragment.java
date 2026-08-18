@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.leo.remote.action.ToastAction;
+import com.leo.remote.core.action.ToastAction;
 
 /**
  *    author : Android 轮子哥

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import cn.wandersnail.ble.Device;
 import com.leo.remote.rfid.sdk.inventory.ReaderInventoryController;
 import com.leo.remote.rfid.sdk.model.*;
+import com.leo.remote.rfid.sdk.config.ReaderConfigurationManager;
 import com.leo.remote.rfid.sdk.persistence.ReaderConfigurationStore;
 import com.leo.remote.rfid.sdk.persistence.ReaderConnectionStore;
 import com.leo.remote.rfid.native_bridge.ReaderConfigurationGateway;

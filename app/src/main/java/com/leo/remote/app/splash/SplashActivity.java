@@ -16,9 +16,9 @@ import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.app.MainActivity;
-import com.leo.remote.manager.InitManager;
+import com.leo.remote.core.manager.InitManager;
 import com.leo.remote.core.util.AppConfig;
-import com.leo.remote.ui.dialog.PrivacyAgreementDialog;
+import com.leo.remote.core.ui.dialog.PrivacyAgreementDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 import java.util.Locale;
 

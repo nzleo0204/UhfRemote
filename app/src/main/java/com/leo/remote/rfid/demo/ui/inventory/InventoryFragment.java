@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
-import com.leo.remote.aop.SingleClick;
+import com.leo.remote.core.aop.SingleClick;
 import com.leo.remote.rfid.sdk.model.InventoryMaskConfig;
 import com.leo.remote.rfid.sdk.inventory.InventoryMaskFormParser;
 import com.leo.remote.rfid.sdk.model.InventoryItem;

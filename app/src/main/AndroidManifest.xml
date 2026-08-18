@@ -85,7 +85,7 @@
             android:launchMode="singleTop" />
 
         <activity
-            android:name=".ui.activity.FeedbackActivity"
+            android:name=".business.feedback.ui.FeedbackActivity"
             android:exported="false"
             android:label="@string/feedback_title"
             android:launchMode="singleTop"
@@ -93,14 +93,14 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.activity.common.CrashActivity"
+            android:name=".app.crash.CrashActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:process=":crash" />
 
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.activity.common.RestartActivity"
+            android:name=".app.restart.RestartActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:process=":restart" />

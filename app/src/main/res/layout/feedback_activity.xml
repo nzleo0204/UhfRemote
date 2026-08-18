@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
     android:fillViewport="true"
-    tools:context=".ui.activity.FeedbackActivity">
+    tools:context=".business.feedback.ui.FeedbackActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

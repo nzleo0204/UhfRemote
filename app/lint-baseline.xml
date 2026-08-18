@@ -703,7 +703,7 @@
         errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout-sw600dp-land/home_activity.xml"
+            file="src/main/res/layout-sw600dp-land/main_activity.xml"
             line="7"
             column="5"/>
     </issue>
@@ -714,7 +714,7 @@
         errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/home_activity.xml"
+            file="src/main/res/layout/main_activity.xml"
             line="8"
             column="5"/>
     </issue>
@@ -2690,7 +2690,7 @@
         errorLine1="    &lt;LinearLayout"
         errorLine2="     ~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/home_activity.xml"
+            file="src/main/res/layout/main_activity.xml"
             line="11"
             column="6"/>
     </issue>
