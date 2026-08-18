@@ -25,7 +25,7 @@
     <!-- Application 节点详解：https://developer.android.google.cn/guide/topics/manifest/application-element -->
     <!-- Activity 节点详解：https://developer.android.google.cn/guide/topics/manifest/activity-element -->
     <application
-        android:name="com.leo.remote.App"
+        android:name="com.leo.remote.app.App"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -43,7 +43,7 @@
 
         <!-- 闪屏页 -->
         <activity
-            android:name=".ui.activity.SplashActivity"
+            android:name=".app.splash.SplashActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/SplashTheme">
@@ -60,7 +60,7 @@
 
         <!-- 首页 -->
         <activity
-            android:name=".ui.activity.HomeActivity"
+            android:name=".app.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"
             android:launchMode="singleTask"

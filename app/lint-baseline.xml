@@ -351,7 +351,7 @@
         errorLine1="                    Log.d(TAG, &quot;切换页面: &quot; + position);"
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="65"
             column="21"/>
     </issue>
@@ -362,7 +362,7 @@
         errorLine1="                        Log.i(TAG, &quot;离开盘点页面，自动停止盘点&quot;);"
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="68"
             column="25"/>
     </issue>
@@ -373,7 +373,7 @@
         errorLine1="        Log.d(TAG, &quot;初始化主界面视图&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="95"
             column="9"/>
     </issue>
@@ -384,7 +384,7 @@
         errorLine1="        Log.d(TAG, &quot;初始化主界面数据，加载 Fragment&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="124"
             column="9"/>
     </issue>
@@ -395,7 +395,7 @@
         errorLine1="        Log.d(TAG, &quot;导航栏点击: &quot; + position);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="204"
             column="9"/>
     </issue>
@@ -406,7 +406,7 @@
         errorLine1="        Log.d(TAG, &quot;销毁主界面，清理资源&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/activity/HomeActivity.java"
+            file="src/main/java/com/leo/remote/app/MainActivity.java"
             line="239"
             column="9"/>
     </issue>

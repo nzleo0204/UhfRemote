@@ -1,4 +1,4 @@
-package com.leo.remote;
+package com.leo.remote.app;
 
 import android.app.Application;
 import com.hjq.core.manager.ActivityManager;

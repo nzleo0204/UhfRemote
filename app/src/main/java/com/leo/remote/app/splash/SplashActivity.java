@@ -1,4 +1,4 @@
-package com.leo.remote.ui.activity;
+package com.leo.remote.app.splash;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,6 +15,7 @@ import com.hjq.core.manager.ActivityManager;
 import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseActivity;
+import com.leo.remote.app.MainActivity;
 import com.leo.remote.manager.InitManager;
 import com.leo.remote.core.util.AppConfig;
 import com.leo.remote.ui.dialog.PrivacyAgreementDialog;
@@ -132,7 +133,7 @@ public final class SplashActivity extends BaseActivity {
      */
     private void agreePrivacyAfter() {
         InitManager.initSdk(getApplication());
-        HomeActivity.start(this);
+        MainActivity.start(this);
         finish();
     }
 }

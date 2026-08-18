@@ -12,7 +12,7 @@ import com.leo.remote.core.ui.base.BaseFragment;
 import com.leo.remote.core.data.DataCallback;
 import com.leo.remote.business.stock.data.model.StockItem;
 import com.leo.remote.core.data.RepositoryProvider;
-import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.app.MainActivity;
 import com.leo.remote.business.stock.ui.StockAdapter;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 /** Real-time stock query shown directly in the bottom navigation. */
-public final class StockListFragment extends BaseFragment<HomeActivity>
+public final class StockListFragment extends BaseFragment<MainActivity>
         implements OnRefreshLoadMoreListener {
     private static final int PAGE_SIZE = 4;
 

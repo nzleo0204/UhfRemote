@@ -7,8 +7,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseActivity;
-import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.activity.SplashActivity;
+import com.leo.remote.app.MainActivity;
+import com.leo.remote.app.splash.SplashActivity;
 
 /**
  *    author : Android 轮子哥
@@ -52,7 +52,7 @@ public final class RestartActivity extends BaseActivity {
             intent = new Intent(context, SplashActivity.class);
         } else {
             // 如果是已登录的情况下跳转到首页
-            intent = new Intent(context, HomeActivity.class);
+            intent = new Intent(context, MainActivity.class);
         }
 
         if (!(context instanceof Activity)) {

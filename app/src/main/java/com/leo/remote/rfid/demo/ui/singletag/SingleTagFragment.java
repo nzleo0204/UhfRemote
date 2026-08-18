@@ -29,7 +29,7 @@ import com.leo.remote.rfid.sdk.model.ReaderTag;
 import com.leo.remote.rfid.sdk.model.TagReadResult;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.tag.SingleTagReadFormatter;
-import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.app.MainActivity;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
 import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 
 /** Single-target RFID operations. */
 @SuppressLint("LogNotTimber")
-public final class SingleTagFragment extends ReaderFragment<HomeActivity> implements ReaderObserver {
+public final class SingleTagFragment extends ReaderFragment<MainActivity> implements ReaderObserver {
     private static final String TAG = "UhfReader/SingleTag";
 
     // ========== Fields ==========

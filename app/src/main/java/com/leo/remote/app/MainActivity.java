@@ -1,4 +1,4 @@
-package com.leo.remote.ui.activity;
+package com.leo.remote.app;
 
 import android.app.Activity;
 import android.content.Context;
@@ -44,7 +44,7 @@ import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
  * 修改时间: 2024
  * 修改说明: 基于原框架改造为 RFID 应用
  */
-public final class HomeActivity extends ReaderAwareActivity
+public final class MainActivity extends ReaderAwareActivity
         implements NavigationAdapter.OnNavigationListener {
 
     private static final String TAG = "UhfRemote/Home";
@@ -77,7 +77,7 @@ public final class HomeActivity extends ReaderAwareActivity
     }
 
     public static void start(@NonNull Context context, @NonNull Class<? extends BaseFragment<?>> fragmentClass) {
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra(INTENT_KEY_IN_FRAGMENT_CLASS, fragmentClass);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

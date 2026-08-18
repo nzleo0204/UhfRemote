@@ -134,7 +134,7 @@ public final class ReaderConnectionService extends Service {
     }
 
     private PendingIntent contentIntent() {
-        Intent intent = new Intent(this, com.leo.remote.ui.activity.HomeActivity.class)
+        Intent intent = new Intent(this, com.leo.remote.app.MainActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return PendingIntent.getActivity(this, 702, intent, pendingIntentFlags());
     }

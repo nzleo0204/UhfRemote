@@ -17,7 +17,7 @@ import com.leo.remote.business.auth.data.model.UserInfo;
 import com.leo.remote.business.auth.data.AuthRepository;
 import com.leo.remote.core.data.RepositoryProvider;
 import com.leo.remote.ui.activity.FeedbackActivity;
-import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.app.MainActivity;
 import com.leo.remote.business.order.ui.OrderListActivity;
 import com.leo.remote.business.shipment.ui.ShipmentQueryActivity;
 import com.leo.remote.core.util.ThemeModeManager;
@@ -26,7 +26,7 @@ import com.tencent.mmkv.MMKV;
 /**
  * 我的页面，承载查询和反馈入口。
  */
-public final class MineFragment extends BaseFragment<HomeActivity> {
+public final class MineFragment extends BaseFragment<MainActivity> {
     private static final String MMKV_ID = "auth_config";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USERNAME = "username";

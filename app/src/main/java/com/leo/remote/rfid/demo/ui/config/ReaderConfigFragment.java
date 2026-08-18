@@ -35,7 +35,7 @@ import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.model.TransportType;
-import com.leo.remote.ui.activity.HomeActivity;
+import com.leo.remote.app.MainActivity;
 import com.leo.remote.rfid.demo.ui.config.BleDeviceSheet;
 import com.leo.remote.rfid.demo.ui.config.ReaderDeviceInfoDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 
 /** RFID reader connection and parameter configuration page. */
 @SuppressLint({"LogNotTimber", "ClickableViewAccessibility"})
-public final class ReaderConfigFragment extends ReaderFragment<HomeActivity> implements ReaderObserver {
+public final class ReaderConfigFragment extends ReaderFragment<MainActivity> implements ReaderObserver {
     private static final String TAG = "UhfReader/Config";
     private static final String DEVICE_INFO_DIALOG_TAG = "reader_device_info";
 
