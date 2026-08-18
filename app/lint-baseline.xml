@@ -197,7 +197,7 @@
         errorLine1="        Log.i(TAG, &quot;connect attempt=&quot; + attemptId + &quot; name=&quot; + target.getName()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="62"
             column="9"/>
     </issue>
@@ -208,7 +208,7 @@
         errorLine1="        Log.d(TAG, &quot;state attempt=&quot; + attemptId + &quot; state=&quot; + state"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="123"
             column="9"/>
     </issue>
@@ -219,7 +219,7 @@
         errorLine1="            Log.d(TAG, &quot;Bluetooth adapter is available; waiting for explicit connection&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="142"
             column="13"/>
     </issue>
@@ -230,7 +230,7 @@
         errorLine1="            Log.e(TAG, &quot;connect failed attempt=&quot; + attemptId + &quot; type=&quot; + failType);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="149"
             column="13"/>
     </issue>
@@ -241,7 +241,7 @@
         errorLine1="            Log.e(TAG, &quot;connect timeout attempt=&quot; + attemptId + &quot; type=&quot; + type);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="157"
             column="13"/>
     </issue>
@@ -252,7 +252,7 @@
         errorLine1="            Log.e(TAG, &quot;connection error attempt=&quot; + attemptId + &quot; gattStatus=&quot; + status);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="165"
             column="13"/>
     </issue>
@@ -263,7 +263,7 @@
         errorLine1="            Log.v(TAG, &quot;receive attempt=&quot; + attemptId + &quot; bytes=&quot; + value.length);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="174"
             column="13"/>
     </issue>
@@ -274,7 +274,7 @@
         errorLine1="        Log.e(TAG, &quot;request failed type=&quot; + request.getType() + &quot; failType=&quot; + failType"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="182"
             column="9"/>
     </issue>
@@ -285,7 +285,7 @@
         errorLine1="            Log.i(TAG, &quot;data channel attempt=&quot; + attemptId + &quot; service=&quot; + serviceUuid"
         errorLine2="            ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="226"
             column="13"/>
     </issue>
@@ -296,7 +296,7 @@
         errorLine1="            Log.i(TAG, &quot;service attempt=&quot; + attemptId + &quot; uuid=&quot; + service.getUuid());"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="310"
             column="13"/>
     </issue>
@@ -307,7 +307,7 @@
         errorLine1="                Log.i(TAG, &quot;characteristic attempt=&quot; + attemptId + &quot; uuid=&quot; + characteristic.getUuid()"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="312"
             column="17"/>
     </issue>
@@ -318,7 +318,7 @@
         errorLine1="                        Log.i(TAG, &quot;MTU negotiated attempt=&quot; + requestAttempt + &quot; mtu=&quot; + mtu"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="332"
             column="25"/>
     </issue>
@@ -329,7 +329,7 @@
         errorLine1="                        Log.w(TAG, &quot;MTU negotiation failed attempt=&quot; + requestAttempt"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="342"
             column="25"/>
     </issue>
@@ -340,7 +340,7 @@
         errorLine1="        Log.i(TAG, &quot;receive channel attempt=&quot; + requestAttempt + &quot; enabled=&quot; + enabled + &quot; service=&quot; + serviceUuid"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="394"
             column="9"/>
     </issue>
@@ -450,7 +450,7 @@
         errorLine1="        Log.i(TAG, &quot;创建 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="48"
             column="9"/>
     </issue>
@@ -461,7 +461,7 @@
         errorLine1="        Log.d(TAG, &quot;更新 Reader 状态: phase=&quot; + updated.getPhase()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="72"
             column="9"/>
     </issue>
@@ -472,7 +472,7 @@
         errorLine1="        Log.i(TAG, &quot;销毁 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="82"
             column="9"/>
     </issue>
@@ -483,7 +483,7 @@
         errorLine1="            Log.d(TAG, &quot;释放 Wi-Fi 锁&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="85"
             column="13"/>
     </issue>
@@ -494,7 +494,7 @@
         errorLine1="            Log.e(TAG, &quot;Unable to start reader connection service&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="30"
             column="13"/>
     </issue>
@@ -505,7 +505,7 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service created&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="51"
             column="9"/>
     </issue>
@@ -516,7 +516,7 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service destroyed&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="58"
             column="9"/>
     </issue>
@@ -527,7 +527,7 @@
         errorLine1="            Log.w(TAG, &quot;读取功率失败，使用缓存值 &quot; + power, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/session/ReaderHandshake.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
             line="105"
             column="13"/>
     </issue>
@@ -538,7 +538,7 @@
         errorLine1="            Log.w(TAG, &quot;读取盘点区域失败，使用缓存值&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/session/ReaderHandshake.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
             line="120"
             column="13"/>
     </issue>
@@ -549,7 +549,7 @@
         errorLine1="            Log.w(TAG, &quot;读取 Session 失败，使用缓存值 S&quot; + session, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/session/ReaderHandshake.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
             line="135"
             column="13"/>
     </issue>
@@ -560,7 +560,7 @@
         errorLine1="                Log.w(TAG, &quot;读取 BLF 失败，使用缓存值 &quot; + blf, error);"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/session/ReaderHandshake.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
             line="146"
             column="17"/>
     </issue>
@@ -571,7 +571,7 @@
         errorLine1="            Log.w(TAG, &quot;读取 Q 值失败，使用缓存值 Q&quot; + q, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/session/ReaderHandshake.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
             line="171"
             column="13"/>
     </issue>
@@ -604,7 +604,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP || currentConnection == null) {"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/transport/BleTransport.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
             line="321"
             column="13"/>
     </issue>
@@ -615,7 +615,7 @@
         errorLine1="        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M"
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="149"
             column="16"/>
     </issue>
@@ -626,7 +626,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.O) { return; }"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/reader/android/ReaderConnectionService.java"
+            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="155"
             column="13"/>
     </issue>

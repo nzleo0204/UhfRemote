@@ -8,7 +8,7 @@ import com.hjq.base.BaseDialog;
 import com.hjq.custom.widget.view.RegexEditText;
 import com.leo.remote.R;
 import com.leo.remote.aop.SingleClick;
-import com.leo.remote.reader.model.ReaderConfiguration;
+import com.leo.remote.rfid.sdk.model.ReaderConfiguration;
 import com.leo.remote.ui.dialog.common.StyleDialog;
 
 /** 盘点区域的起始地址与长度输入弹窗。 */

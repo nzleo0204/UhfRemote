@@ -1,0 +1,18 @@
+package com.leo.remote.rfid.native_bridge;
+
+import com.leo.remote.rfid.sdk.model.*;
+
+
+public interface ReaderConfigurationGateway {
+    ReaderConfiguration readConfiguration(ModuleSubtype subtype) throws ReaderException;
+    int setProtocol(TagProtocol protocol);
+    int setPowerTenthsDbm(int powerTenthsDbm);
+    int setBlfProfile(int profile);
+    int setSession(ModuleSubtype subtype, int session, int target, int selected);
+    int setInventoryArea(int area, int address, int wordLen);
+    int[] getInventoryArea();
+    Integer getPowerTenthsDbm();
+    Integer getBlfProfile();
+    int[] getQueryValues(ModuleSubtype subtype);
+    ReaderQParams getQParams(ModuleSubtype subtype);
+}

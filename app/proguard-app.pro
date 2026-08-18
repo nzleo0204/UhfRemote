@@ -12,27 +12,27 @@
 -keep enum com.uhf.** { *; }
 
 # 保留 Reader 核心类（避免反射调用问题）
--keep class com.leo.remote.reader.** { *; }
+-keep class com.leo.remote.rfid.** { *; }
 
 # 保留观察者接口的所有方法
--keep interface com.leo.remote.reader.ReaderObserver {
+-keep interface com.leo.remote.rfid.sdk.connection.ReaderObserver {
     public <methods>;
 }
 
 # 保留实现 ReaderObserver 的类的回调方法
--keepclassmembers class * implements com.leo.remote.reader.ReaderObserver {
+-keepclassmembers class * implements com.leo.remote.rfid.sdk.connection.ReaderObserver {
     public <methods>;
 }
 
 # 保留数据模型类（可能用于序列化）
--keep class com.leo.remote.reader.ReaderState { *; }
--keep class com.leo.remote.reader.ReaderConfiguration { *; }
--keep class com.leo.remote.reader.ReaderTag { *; }
--keep class com.leo.remote.reader.InventoryItem { *; }
--keep class com.leo.remote.reader.ReaderModuleInfo { *; }
+-keep class com.leo.remote.rfid.sdk.model.ReaderState { *; }
+-keep class com.leo.remote.rfid.sdk.model.ReaderConfiguration { *; }
+-keep class com.leo.remote.rfid.sdk.model.ReaderTag { *; }
+-keep class com.leo.remote.rfid.sdk.model.InventoryItem { *; }
+-keep class com.leo.remote.rfid.sdk.model.ReaderModuleInfo { *; }
 
 # 保留枚举类
--keepclassmembers enum com.leo.remote.reader.** {
+-keepclassmembers enum com.leo.remote.rfid.** {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }

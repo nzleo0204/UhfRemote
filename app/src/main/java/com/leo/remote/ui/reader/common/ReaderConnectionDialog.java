@@ -13,10 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.airbnb.lottie.LottieAnimationView;
 import com.leo.remote.R;
-import com.leo.remote.reader.model.ConnectionPhase;
-import com.leo.remote.reader.model.DisconnectReason;
-import com.leo.remote.reader.model.ReaderConnectionFailure;
-import com.leo.remote.reader.session.ReaderSessionManager;
+import com.leo.remote.rfid.sdk.model.ConnectionPhase;
+import com.leo.remote.rfid.sdk.model.DisconnectReason;
+import com.leo.remote.rfid.sdk.model.ReaderConnectionFailure;
+import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 
 public final class ReaderConnectionDialog extends DialogFragment {
     private TextView phaseView;

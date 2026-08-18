@@ -12,7 +12,7 @@ import com.hjq.toast.Toaster;
 import com.leo.remote.R;
 import com.leo.remote.http.model.RequestHandler;
 import com.leo.remote.http.model.RequestServer;
-import com.leo.remote.reader.session.ReaderSessionManager;
+import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.util.AppConfig;
 import com.leo.remote.util.CrashHandler;
 import com.leo.remote.util.DebugLoggerTree;

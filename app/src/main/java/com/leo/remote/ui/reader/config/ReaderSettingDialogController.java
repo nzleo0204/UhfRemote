@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
-import com.leo.remote.reader.model.ReaderException;
+import com.leo.remote.rfid.sdk.model.ReaderException;
 import com.leo.remote.ui.dialog.common.MessageDialog;
 import com.leo.remote.ui.dialog.common.WaitDialog;
 import com.leo.remote.util.ThrowableUtils;

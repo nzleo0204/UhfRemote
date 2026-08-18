@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.leo.remote.R;
-import com.leo.remote.reader.model.InventoryArea;
-import com.leo.remote.reader.model.InventoryItem;
-import com.leo.remote.reader.model.InventoryMaskConfig;
-import com.leo.remote.reader.inventory.InventoryMaskMatcher;
-import com.leo.remote.reader.model.ModuleSubtype;
-import com.leo.remote.reader.model.TagProtocol;
+import com.leo.remote.rfid.sdk.model.InventoryArea;
+import com.leo.remote.rfid.sdk.model.InventoryItem;
+import com.leo.remote.rfid.sdk.model.InventoryMaskConfig;
+import com.leo.remote.rfid.sdk.inventory.InventoryMaskMatcher;
+import com.leo.remote.rfid.sdk.model.ModuleSubtype;
+import com.leo.remote.rfid.sdk.model.TagProtocol;
 import java.util.List;
 
 /**

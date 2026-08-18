@@ -10,13 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leo.remote.R;
-import com.leo.remote.reader.model.ModuleSubtype;
-import com.leo.remote.reader.model.ReaderConfiguration;
-import com.leo.remote.reader.session.ReaderObserver;
-import com.leo.remote.reader.session.ReaderSessionManager;
-import com.leo.remote.reader.model.ReaderState;
-import com.leo.remote.reader.model.Rm610PowerLevels;
-import com.leo.remote.reader.model.TransportType;
+import com.leo.remote.rfid.sdk.model.ModuleSubtype;
+import com.leo.remote.rfid.sdk.model.ReaderConfiguration;
+import com.leo.remote.rfid.sdk.connection.ReaderObserver;
+import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
+import com.leo.remote.rfid.sdk.model.ReaderState;
+import com.leo.remote.rfid.sdk.model.Rm610PowerLevels;
+import com.leo.remote.rfid.sdk.model.TransportType;
 import java.util.Locale;
 
 public final class ReaderDeviceInfoDialog extends DialogFragment implements ReaderObserver {

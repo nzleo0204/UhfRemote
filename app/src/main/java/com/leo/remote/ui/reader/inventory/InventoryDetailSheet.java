@@ -9,9 +9,9 @@ import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.leo.remote.R;
-import com.leo.remote.reader.model.InventoryArea;
-import com.leo.remote.reader.model.InventoryItem;
-import com.leo.remote.reader.model.TagProtocol;
+import com.leo.remote.rfid.sdk.model.InventoryArea;
+import com.leo.remote.rfid.sdk.model.InventoryItem;
+import com.leo.remote.rfid.sdk.model.TagProtocol;
 
 /** Displays complete inventory values and lets the user reuse them as a mask. */
 @SuppressLint("InflateParams")

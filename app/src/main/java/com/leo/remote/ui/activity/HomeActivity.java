@@ -25,7 +25,7 @@ import com.leo.remote.ui.fragment.home.MineFragment;
 import com.leo.remote.ui.reader.config.ReaderConfigFragment;
 import com.leo.remote.ui.reader.singletag.SingleTagFragment;
 import com.leo.remote.ui.fragment.home.StockFragment;
-import com.leo.remote.reader.session.ReaderSessionManager;
+import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 
 /**
  * 应用主界面
