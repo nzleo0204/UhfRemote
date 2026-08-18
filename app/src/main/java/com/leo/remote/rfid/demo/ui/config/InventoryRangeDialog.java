@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.config;
+package com.leo.remote.rfid.demo.ui.config;
 
 import android.content.Context;
 import android.view.View;

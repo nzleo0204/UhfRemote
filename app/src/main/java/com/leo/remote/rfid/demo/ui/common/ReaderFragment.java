@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.common;
+package com.leo.remote.rfid.demo.ui.common;
 
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.app.ReaderAwareActivity;

@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.config;
+package com.leo.remote.rfid.demo.ui.config;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -27,7 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.leo.remote.R;
-import com.leo.remote.ui.reader.config.BleDeviceAdapter;
+import com.leo.remote.rfid.demo.ui.config.BleDeviceAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

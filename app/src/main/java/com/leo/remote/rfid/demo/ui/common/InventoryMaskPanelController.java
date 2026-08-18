@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.common;
+package com.leo.remote.rfid.demo.ui.common;
 
 import android.text.Editable;
 import android.text.TextWatcher;

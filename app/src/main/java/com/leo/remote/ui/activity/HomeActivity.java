@@ -20,10 +20,10 @@ import com.leo.remote.app.ReaderAwareActivity;
 import com.leo.remote.app.AppFragment;
 import com.leo.remote.ui.adapter.common.NavigationAdapter;
 import com.leo.remote.ui.adapter.common.NavigationAdapter.NavigationItem;
-import com.leo.remote.ui.reader.inventory.InventoryFragment;
+import com.leo.remote.rfid.demo.ui.inventory.InventoryFragment;
 import com.leo.remote.ui.fragment.home.MineFragment;
-import com.leo.remote.ui.reader.config.ReaderConfigFragment;
-import com.leo.remote.ui.reader.singletag.SingleTagFragment;
+import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
+import com.leo.remote.rfid.demo.ui.singletag.SingleTagFragment;
 import com.leo.remote.ui.fragment.home.StockFragment;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 

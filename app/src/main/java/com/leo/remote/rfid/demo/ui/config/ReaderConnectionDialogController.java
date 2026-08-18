@@ -1,11 +1,11 @@
-package com.leo.remote.ui.reader.config;
+package com.leo.remote.rfid.demo.ui.config;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import com.leo.remote.rfid.sdk.model.ConnectionPhase;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
-import com.leo.remote.ui.reader.common.ReaderConnectionDialog;
+import com.leo.remote.rfid.demo.ui.common.ReaderConnectionDialog;
 import com.leo.remote.ui.dialog.common.WaitDialog;
 
 /** Owns the connection and parameter-initialization progress dialogs. */

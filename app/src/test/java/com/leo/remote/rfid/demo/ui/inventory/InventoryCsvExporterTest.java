@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.inventory;
+package com.leo.remote.rfid.demo.ui.inventory;
 
 import static org.junit.Assert.assertEquals;
 

@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.singletag;
+package com.leo.remote.rfid.demo.ui.singletag;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -31,11 +31,11 @@ import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.tag.SingleTagReadFormatter;
 import com.leo.remote.ui.activity.HomeActivity;
 import com.leo.remote.ui.dialog.common.MessageDialog;
-import com.leo.remote.ui.reader.common.InventoryMaskPanelController;
-import com.leo.remote.ui.reader.common.ReaderFragment;
-import com.leo.remote.ui.reader.singletag.TagKillDialog;
-import com.leo.remote.ui.reader.singletag.TagLockDialog;
-import com.leo.remote.ui.reader.singletag.TagWriteDialog;
+import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
+import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
+import com.leo.remote.rfid.demo.ui.singletag.TagKillDialog;
+import com.leo.remote.rfid.demo.ui.singletag.TagLockDialog;
+import com.leo.remote.rfid.demo.ui.singletag.TagWriteDialog;
 import com.leo.remote.util.ThrowableUtils;
 import java.util.concurrent.CompletableFuture;
 

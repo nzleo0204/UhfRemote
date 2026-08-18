@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.config;
+package com.leo.remote.rfid.demo.ui.config;
 
 import android.annotation.SuppressLint;
 import android.graphics.Rect;
@@ -36,13 +36,13 @@ import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.rfid.sdk.model.TransportType;
 import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.reader.config.BleDeviceSheet;
-import com.leo.remote.ui.reader.config.ReaderDeviceInfoDialog;
+import com.leo.remote.rfid.demo.ui.config.BleDeviceSheet;
+import com.leo.remote.rfid.demo.ui.config.ReaderDeviceInfoDialog;
 import com.leo.remote.ui.dialog.common.MessageDialog;
-import com.leo.remote.ui.reader.config.InventoryRangeDialog;
-import com.leo.remote.ui.reader.config.ReaderConnectionDialogController;
-import com.leo.remote.ui.reader.config.ReaderSettingDialogController;
-import com.leo.remote.ui.reader.common.ReaderFragment;
+import com.leo.remote.rfid.demo.ui.config.InventoryRangeDialog;
+import com.leo.remote.rfid.demo.ui.config.ReaderConnectionDialogController;
+import com.leo.remote.rfid.demo.ui.config.ReaderSettingDialogController;
+import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
 import com.leo.remote.ui.view.IpAddressInputView;
 import com.leo.remote.util.ThrowableUtils;
 import com.leo.remote.util.ViewUtils;

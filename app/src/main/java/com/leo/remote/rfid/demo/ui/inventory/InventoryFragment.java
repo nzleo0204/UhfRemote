@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.inventory;
+package com.leo.remote.rfid.demo.ui.inventory;
 
 import android.annotation.SuppressLint;
 import android.net.Uri;
@@ -27,16 +27,16 @@ import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.rfid.sdk.model.ReaderState;
 import com.leo.remote.rfid.sdk.model.TagProtocol;
 import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.reader.inventory.InventoryAdapter;
-import com.leo.remote.ui.reader.inventory.InventoryDetailSheet;
+import com.leo.remote.rfid.demo.ui.inventory.InventoryAdapter;
+import com.leo.remote.rfid.demo.ui.inventory.InventoryDetailSheet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import com.leo.remote.ui.reader.common.InventoryMaskPanelController;
-import com.leo.remote.ui.reader.common.ReaderFragment;
-import com.leo.remote.ui.reader.inventory.InventoryCsvExporter;
+import com.leo.remote.rfid.demo.ui.common.InventoryMaskPanelController;
+import com.leo.remote.rfid.demo.ui.common.ReaderFragment;
+import com.leo.remote.rfid.demo.ui.inventory.InventoryCsvExporter;
 import com.leo.remote.util.ThrowableUtils;
 
 /**

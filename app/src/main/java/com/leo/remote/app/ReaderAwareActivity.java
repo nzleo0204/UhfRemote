@@ -11,7 +11,7 @@ import com.leo.remote.rfid.sdk.model.ReaderConnectionStatus;
 import com.leo.remote.rfid.sdk.connection.ReaderObserver;
 import com.leo.remote.rfid.sdk.connection.ReaderSessionManager;
 import com.leo.remote.ui.activity.HomeActivity;
-import com.leo.remote.ui.reader.config.ReaderConfigFragment;
+import com.leo.remote.rfid.demo.ui.config.ReaderConfigFragment;
 import com.leo.remote.ui.dialog.common.MessageDialog;
 import java.lang.ref.WeakReference;
 

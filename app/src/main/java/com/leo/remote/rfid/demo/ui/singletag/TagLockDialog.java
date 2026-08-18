@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.singletag;
+package com.leo.remote.rfid.demo.ui.singletag;
 
 import android.view.LayoutInflater;
 import android.view.View;

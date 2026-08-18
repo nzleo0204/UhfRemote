@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.config;
+package com.leo.remote.rfid.demo.ui.config;
 
 import android.text.Spannable;
 import android.text.SpannableString;

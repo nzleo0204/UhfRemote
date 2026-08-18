@@ -1,4 +1,4 @@
-package com.leo.remote.ui.reader.inventory;
+package com.leo.remote.rfid.demo.ui.inventory;
 
 import com.leo.remote.rfid.sdk.model.InventoryItem;
 import java.io.BufferedWriter;

@@ -142,7 +142,7 @@
         errorLine1="        Log.i(TAG, &quot;scan start generation=&quot; + generation);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="186"
             column="9"/>
     </issue>
@@ -153,7 +153,7 @@
         errorLine1="                Log.i(TAG, &quot;scan stop generation=&quot; + generation + &quot; count=&quot; + devices.size(generation));"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="203"
             column="17"/>
     </issue>
@@ -164,7 +164,7 @@
         errorLine1="                Log.e(TAG, &quot;scan error generation=&quot; + generation + &quot; code=&quot; + errorCode"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="218"
             column="17"/>
     </issue>
@@ -175,7 +175,7 @@
         errorLine1="        Log.i(TAG, &quot;device selected name=&quot; + device.getName() + &quot; address=&quot; + device.getAddress()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="251"
             column="9"/>
     </issue>
@@ -186,7 +186,7 @@
         errorLine1="        Log.i(TAG, &quot;scan sheet closed generation=&quot; + activeGeneration);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="258"
             column="9"/>
     </issue>
@@ -417,7 +417,7 @@
         errorLine1="        Log.d(TAG, &quot;更新盘点列表，数量: &quot; + values.size());"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
             line="80"
             column="9"/>
     </issue>
@@ -428,7 +428,7 @@
         errorLine1="        Log.d(TAG, &quot;设置模块类型: &quot; + subtype);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
             line="85"
             column="9"/>
     </issue>
@@ -439,7 +439,7 @@
         errorLine1="        Log.d(TAG, &quot;更新 Mask 配置: &quot; + (config != null ? &quot;已启用&quot; : &quot;未启用&quot;));"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
             line="109"
             column="9"/>
     </issue>
@@ -3073,7 +3073,7 @@
         errorLine1="        if (statusView != null) { statusView.setText(&quot;已发现 &quot; + rows.size() + &quot; 个设备&quot;); }"
         errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
             line="64"
             column="54"/>
     </issue>
@@ -3084,7 +3084,7 @@
         errorLine1="        readPasswordView.setText(&quot;00000000&quot;);"
         errorLine2="                                 ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/SingleTagFragment.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
             line="213"
             column="34"/>
     </issue>
@@ -3095,7 +3095,7 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/SingleTagFragment.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
             line="362"
             column="29"/>
     </issue>
@@ -3106,7 +3106,7 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/SingleTagFragment.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
             line="362"
             column="29"/>
     </issue>
@@ -3117,7 +3117,7 @@
         errorLine1="        accessPassword.setText(&quot;00000000&quot;);"
         errorLine2="                               ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/TagKillDialog.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagKillDialog.java"
             line="23"
             column="32"/>
     </issue>
@@ -3128,7 +3128,7 @@
         errorLine1="        killPassword.setText(&quot;00000000&quot;);"
         errorLine2="                             ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/TagKillDialog.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagKillDialog.java"
             line="24"
             column="30"/>
     </issue>
@@ -3139,7 +3139,7 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/TagLockDialog.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagLockDialog.java"
             line="32"
             column="26"/>
     </issue>
@@ -3150,7 +3150,7 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/ui/reader/singletag/TagWriteDialog.java"
+            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagWriteDialog.java"
             line="65"
             column="26"/>
     </issue>
