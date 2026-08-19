@@ -8,7 +8,6 @@ import android.view.ViewGroup;
  *
  * 提供 View 相关的通用工具方法，包括批量设置状态、递归操作等。
  *
- * @author UhfRemote Team
  */
 public final class ViewUtils {
 
