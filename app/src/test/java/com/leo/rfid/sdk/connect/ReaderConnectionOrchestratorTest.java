@@ -16,8 +16,10 @@ import com.leo.rfid.sdk.bridge.InventoryBridge;
 import com.leo.rfid.sdk.bridge.ReaderTagGateway;
 import com.leo.rfid.sdk.bridge.ReaderTransportGateway;
 import com.leo.rfid.sdk.tag.ReaderTagOperations;
-import com.leo.rfid.sdk.connect.transport.ReaderBleTransport;
-import com.leo.rfid.sdk.connect.transport.ReaderWifiMonitor;
+import com.leo.rfid.sdk.connect.bluetooth.ReaderBleTransport;
+import com.leo.rfid.sdk.connect.wifi.ReaderWifiMonitor;
+import com.leo.rfid.sdk.connect.serial.SerialConfig;
+import com.leo.rfid.sdk.connect.serial.SerialPowerController;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -172,6 +174,39 @@ public class ReaderConnectionOrchestratorTest {
                 && "192.168.1.51".equals(state.getAddress())));
     }
 
+    @Test
+    public void serialConnectUsesNativeSerialLifecycleAndPowerDelay() throws Exception {
+        TestPowerController power = new TestPowerController();
+        SerialConfig config = new SerialConfig("/dev/ttyS1", 115200,
+                ModuleSubtype.R2000, 0);
+
+        orchestrator.connectSerial(config, power);
+
+        awaitPhase(ConnectionPhase.CONNECTED);
+        assertEquals(1, gateway.openSerialCalls.get());
+        assertEquals(1, power.powerOnCalls.get());
+        assertEquals(TransportType.SERIAL, connections.getState().getTransport());
+
+        orchestrator.disconnect(DisconnectReason.USER);
+        awaitPhase(ConnectionPhase.DISCONNECTED);
+        assertEquals(1, gateway.closeSerialCalls.get());
+        assertEquals(1, power.powerOffCalls.get());
+    }
+
+    @Test
+    public void serialOpenFailurePublishesReaderFailureAndPowersOff() throws Exception {
+        gateway.serialStatus = 17;
+        TestPowerController power = new TestPowerController();
+        orchestrator.connectSerial(new SerialConfig("/dev/ttyS1", 115200,
+                ModuleSubtype.RM610, 0), power);
+
+        awaitPhase(ConnectionPhase.FAILED);
+        assertEquals(17, connections.getState().getErrorCode());
+        assertEquals(ReaderConnectionFailure.READER,
+                connections.getState().getConnectionFailure());
+        assertEquals(1, power.powerOffCalls.get());
+    }
+
     private long beginBleAttempt(String address) {
         long generation = connections.beginAttempt();
         connections.publish(new ReaderState.Builder().transport(TransportType.BLE)
@@ -219,6 +254,15 @@ public class ReaderConnectionOrchestratorTest {
         @Override public boolean hasWifiNetwork() { return true; }
     }
 
+    private static final class TestPowerController implements SerialPowerController {
+        private final AtomicInteger powerOnCalls = new AtomicInteger();
+        private final AtomicInteger powerOffCalls = new AtomicInteger();
+
+        @Override public void powerOn() { powerOnCalls.incrementAndGet(); }
+        @Override public void powerOff() { powerOffCalls.incrementAndGet(); }
+        @Override public int getDelayAfterPowerOn() { return 0; }
+    }
+
     private static final class TestStore
             implements ReaderConfigurationStore, ReaderConnectionStore {
         private ReaderConfiguration configuration;
@@ -239,12 +283,15 @@ public class ReaderConnectionOrchestratorTest {
     private static final class TestGateway implements ReaderTransportGateway,
             ReaderConfigurationGateway, InventoryBridge, ReaderTagGateway {
         private final AtomicInteger closeNetworkCalls = new AtomicInteger();
+        private final AtomicInteger openSerialCalls = new AtomicInteger();
+        private final AtomicInteger closeSerialCalls = new AtomicInteger();
         private final AtomicInteger failModuleReads = new AtomicInteger();
         private final CountDownLatch moduleReadStarted = new CountDownLatch(1);
         private final CountDownLatch protocolWriteStarted = new CountDownLatch(1);
         private volatile CountDownLatch moduleBlock;
         private volatile CountDownLatch protocolBlock;
         private volatile int networkStatus;
+        private volatile int serialStatus;
 
         @Override public int initialize() { return 0; }
         @Override public void deinitialize() {}
@@ -253,6 +300,14 @@ public class ReaderConnectionOrchestratorTest {
         @Override public int connectNetwork(String address, int port) { return networkStatus; }
         @Override public int closeNetwork() {
             closeNetworkCalls.incrementAndGet();
+            return 0;
+        }
+        @Override public int openSerial(String path) {
+            openSerialCalls.incrementAndGet();
+            return serialStatus;
+        }
+        @Override public int closeSerial() {
+            closeSerialCalls.incrementAndGet();
             return 0;
         }
         @Override public void setOutboundDataListener(OutboundDataListener listener) {}

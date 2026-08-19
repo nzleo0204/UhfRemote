@@ -4,12 +4,7 @@ import com.hjq.core.tools.AndroidVersion;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
-/**
-
-
-
- *    自定义日志打印规则
- */
+/** 自定义日志打印规则 */
 public final class DebugLoggerTree extends Timber.DebugTree {
 
     private static final int MAX_TAG_LENGTH = 23;

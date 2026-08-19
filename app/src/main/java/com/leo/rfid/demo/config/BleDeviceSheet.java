@@ -169,7 +169,7 @@ public final class BleDeviceSheet extends DialogFragment {
             addIfMissing(missing, Manifest.permission.BLUETOOTH_SCAN);
             addIfMissing(missing, Manifest.permission.BLUETOOTH_CONNECT);
         }
-        // EasyBLE 1.5.8 checks fine location on every supported Android version.
+        // EasyBLE 1.5.8 会在所有支持的 Android 版本检查位置权限。
         addIfMissing(missing, Manifest.permission.ACCESS_FINE_LOCATION);
         if (!missing.isEmpty()) {
             statusView.setText("等待蓝牙权限");

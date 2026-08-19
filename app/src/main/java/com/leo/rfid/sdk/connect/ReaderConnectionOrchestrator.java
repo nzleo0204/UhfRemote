@@ -7,8 +7,11 @@ import com.leo.rfid.sdk.storage.ReaderConfigurationStore;
 import com.leo.rfid.sdk.storage.ReaderConnectionStore;
 import com.leo.rfid.sdk.bridge.*;
 import com.leo.rfid.sdk.tag.ReaderTagOperations;
-import com.leo.rfid.sdk.connect.transport.ReaderBleTransport;
-import com.leo.rfid.sdk.connect.transport.ReaderWifiMonitor;
+import com.leo.rfid.sdk.connect.bluetooth.ReaderBleTransport;
+import com.leo.rfid.sdk.connect.wifi.ReaderWifiMonitor;
+import com.leo.rfid.sdk.connect.serial.SerialConfig;
+import com.leo.rfid.sdk.connect.serial.DelayPowerController;
+import com.leo.rfid.sdk.connect.serial.SerialPowerController;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +45,7 @@ final class ReaderConnectionOrchestrator {
     private final ReaderWifiMonitor wifiMonitor;
     private final Runnable startService;
     private final Runnable stopService;
+    private volatile SerialPowerController serialPowerController;
     private final Runnable wifiHeartbeat = this::runWifiHeartbeat;
     private final Object sdkLock = new Object();
     private volatile boolean sdkInitialized;
@@ -209,6 +213,72 @@ final class ReaderConnectionOrchestrator {
         });
     }
 
+    void connectSerial(@NonNull SerialConfig config) {
+        connectSerial(config, new DelayPowerController(config.powerDelayMs));
+    }
+
+    void connectSerial(@NonNull SerialConfig config,
+            @NonNull SerialPowerController powerController) {
+        ReaderState previousState = currentState();
+        long generation = connectionManager.beginAttempt();
+        clearSessionData();
+        publish(new ReaderState.Builder().transport(TransportType.SERIAL)
+                .phase(ConnectionPhase.CONNECTING).device("串口读写器", config.portPath)
+                .moduleSubtype(config.moduleSubtype, config.moduleSubtype.getRawValue())
+                .message("正在连接串口设备").build());
+        startService.run();
+        commandExecutor.execute(() -> {
+            boolean serialOpened = false;
+            try {
+                disconnectTransport(previousState.getTransport(), previousState.isInventoryRunning());
+                if (!isCurrent(generation)) { return; }
+                ensureSdkInitialized();
+                transportGateway.setTransport(TransportType.SERIAL);
+                transportGateway.useRm70xx();
+                powerController.powerOn();
+                waitForSerialPower(powerController);
+                if (!isCurrent(generation)) {
+                    powerController.powerOff();
+                    return;
+                }
+                int status = transportGateway.openSerial(config.portPath);
+                if (status != 0) {
+                    throw new ReaderException("串口打开失败", status);
+                }
+                serialOpened = true;
+                serialPowerController = powerController;
+                if (!isCurrent(generation)) {
+                    disconnectTransport(TransportType.SERIAL, false);
+                    return;
+                }
+                publish(currentState().buildUpon().phase(ConnectionPhase.CONNECTING_DATA_CHANNEL)
+                        .message("串口数据通道已建立").build());
+                performHandshake(generation, TransportType.SERIAL);
+            } catch (ReaderException | java.io.IOException error) {
+                if (serialOpened) { transportGateway.closeSerial(); }
+                powerController.powerOff();
+                if (serialPowerController == powerController) {
+                    serialPowerController = null;
+                }
+                if (isCurrent(generation)) {
+                    publishFailure(TransportType.SERIAL, error.getMessage(),
+                            error instanceof ReaderException reader ? reader.getErrorCode() : -65,
+                            DisconnectReason.SDK_ERROR);
+                }
+            }
+        });
+    }
+
+    private void waitForSerialPower(@NonNull SerialPowerController powerController)
+            throws ReaderException {
+        try {
+            Thread.sleep(powerController.getDelayAfterPowerOn());
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            throw new ReaderException("串口上电等待被中断", -67);
+        }
+    }
+
     void disconnect(@NonNull DisconnectReason reason) {
         ConnectionPhase phase = currentState().getPhase();
         if (phase == ConnectionPhase.DISCONNECTED || phase == ConnectionPhase.FAILED) {
@@ -363,6 +433,12 @@ final class ReaderConnectionOrchestrator {
         if (inventoryRunning) { inventoryGateway.stopInventory(); }
         if (transport == TransportType.WIFI) { transportGateway.closeNetwork(); }
         if (transport == TransportType.BLE) { disconnectBleTransportAndWait(); }
+        if (transport == TransportType.SERIAL) {
+            transportGateway.closeSerial();
+            SerialPowerController powerController = serialPowerController;
+            serialPowerController = null;
+            if (powerController != null) { powerController.powerOff(); }
+        }
         transportGateway.setOutboundDataListener(null);
     }
 

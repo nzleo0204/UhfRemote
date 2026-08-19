@@ -15,12 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
-
-
-
- *    权限转换器（根据权限获取对应的名称和说明）
- */
+/** 权限转换器（根据权限获取对应的名称和说明） */
 public final class PermissionConverter {
 
     /** 权限名称映射（为了适配多语种，这里存储的是 StringId，而不是 String） */

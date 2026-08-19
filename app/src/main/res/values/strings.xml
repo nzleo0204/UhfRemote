@@ -2,8 +2,6 @@
 <!-- https://www.jianshu.com/p/4aecd5d54b4e -->
 <!DOCTYPE resources [
     <!ENTITY app_name "RFID 读写器">
-    <!ENTITY user_agreement "《用户协议》">
-    <!ENTITY privacy_policy "《隐私政策》">
     ]>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="rfid_power_value">%1$d dBm</string>
@@ -14,16 +12,6 @@
     <string name="reader_ble_service_channel">读写器蓝牙连接</string>
     <string name="reader_ble_service_title">RFID 读写器</string>
     <string name="reader_ble_service_running">蓝牙透传服务运行中</string>
-
-    <!-- 用户协议与隐私保护弹窗 -->
-    <string name="privacy_agreement_title">用户协议与隐私保护</string>
-    <string name="privacy_agreement_user_agreement_text">&user_agreement;</string>
-    <string name="privacy_agreement_user_agreement_link">https://github.com/getActivity</string>
-    <string name="privacy_agreement_privacy_policy_text">&privacy_policy;</string>
-    <string name="privacy_agreement_privacy_policy_link">https://github.com/getActivity</string>
-    <string name="privacy_agreement_content">欢迎使用&app_name;，我们将努力为你提供更优秀的用户体验，在使用本应用的过程中，我们将可能联网，并且申请使用部分权限。\n\n在使用前，请认真阅读并同意我们的&user_agreement;和&privacy_policy;，了解你的用户权益及相关使用数据的处理办法。</string>
-    <string name="privacy_agreement_agree">同意</string>
-    <string name="privacy_agreement_disagree">不同意并退出</string>
 
     <!-- 首页 -->
     <string name="home_exit_hint">再按一次退出</string>
@@ -59,6 +47,7 @@
     <string name="device_info_address">地址</string>
     <string name="device_info_ble_address">蓝牙地址</string>
     <string name="device_info_wifi_address">IP 地址</string>
+    <string name="device_info_serial_address">串口路径</string>
     <string name="device_info_serial">序列号</string>
     <string name="device_info_version">版本</string>
     <string name="device_info_model">型号</string>
@@ -77,6 +66,7 @@
     <string name="config_power_max_rm610">20 dBm</string>
     <string name="config_bluetooth">蓝牙</string>
     <string name="config_wifi">WiFi</string>
+    <string name="config_serial">串口</string>
     <string name="config_no_device">未选择设备</string>
     <string name="config_unnamed_device">未命名设备</string>
     <string name="config_scan_device">搜索设备</string>
@@ -84,6 +74,18 @@
     <string name="config_reader_ip_hint">读写器 IP 地址</string>
     <string name="config_reader_ip_invalid">请输入有效的 IPv4 地址</string>
     <string name="config_connect">连接</string>
+    <string name="serial_config_title">串口连接</string>
+    <string name="serial_port_path">串口路径</string>
+    <string name="serial_baud_rate">波特率</string>
+    <string name="serial_module_type">模块型号</string>
+    <string name="serial_power_delay">上电延时（毫秒）</string>
+    <string name="serial_connect">连接</string>
+    <string name="serial_disconnect">断开串口</string>
+    <string name="error_serial_port_not_found">串口设备不存在</string>
+    <string name="error_serial_permission_denied">没有串口访问权限</string>
+    <string name="error_serial_open_failed">串口打开失败</string>
+    <string name="device_info_transport_serial">串口</string>
+    <string name="device_info_name_serial">串口读写器</string>
     <string name="config_disconnect">断开连接</string>
     <string name="config_protocol">射频协议</string>
     <string name="config_protocol_iso_18000_6c">ISO 18000-6C</string>

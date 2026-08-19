@@ -8,12 +8,7 @@ import com.leo.remote.R;
 import com.hjq.smallest.width.SmallestWidthAdaptation;
 import com.hjq.toast.style.BlackToastStyle;
 
-/**
-
-
-
- *    Toast 样式配置
- */
+/** Toast 样式配置 */
 public final class ToastStyle extends BlackToastStyle {
 
     @Override

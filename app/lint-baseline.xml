@@ -2,6 +2,17 @@
 <issues format="6" by="lint 9.3.0" type="baseline" client="gradle" dependencies="false" name="AGP (9.3.0)" variant="all" version="9.3.0">
 
     <issue
+        id="ScopedStorage"
+        message="WRITE_EXTERNAL_STORAGE no longer provides write access when targeting Android 10+"
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; android:maxSdkVersion=&quot;32&quot; />"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="19"
+            column="36"/>
+    </issue>
+
+    <issue
         id="AndroidGradlePluginVersion"
         message="A newer version of Gradle than 9.6.1 is available: 9.7.0"
         errorLine1="distributionUrl=https\://services.gradle.org/distributions/gradle-9.6.1-bin.zip"
@@ -137,13 +148,35 @@
     </issue>
 
     <issue
+        id="Typos"
+        message="Did you mean &quot;ttyS!&quot; instead of &quot;ttyS1&quot;?"
+        errorLine1="        &lt;item>/dev/ttyS1&lt;/item>"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/values/arrays.xml"
+            line="6"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;ttyUSB!&quot; instead of &quot;ttyUSB1&quot;?"
+        errorLine1="        &lt;item>/dev/ttyUSB1&lt;/item>"
+        errorLine2="                   ~~~~~~~">
+        <location
+            file="src/main/res/values/arrays.xml"
+            line="9"
+            column="20"/>
+    </issue>
+
+    <issue
         id="LogNotTimber"
         message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
         errorLine1="        Log.i(TAG, &quot;scan start generation=&quot; + generation);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="186"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="194"
             column="9"/>
     </issue>
 
@@ -153,8 +186,8 @@
         errorLine1="                Log.i(TAG, &quot;scan stop generation=&quot; + generation + &quot; count=&quot; + devices.size(generation));"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="203"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="211"
             column="17"/>
     </issue>
 
@@ -164,8 +197,8 @@
         errorLine1="                Log.e(TAG, &quot;scan error generation=&quot; + generation + &quot; code=&quot; + errorCode"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="218"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="226"
             column="17"/>
     </issue>
 
@@ -175,8 +208,8 @@
         errorLine1="        Log.i(TAG, &quot;device selected name=&quot; + device.getName() + &quot; address=&quot; + device.getAddress()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="251"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="259"
             column="9"/>
     </issue>
 
@@ -186,8 +219,8 @@
         errorLine1="        Log.i(TAG, &quot;scan sheet closed generation=&quot; + activeGeneration);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="258"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="266"
             column="9"/>
     </issue>
 
@@ -197,8 +230,8 @@
         errorLine1="        Log.i(TAG, &quot;connect attempt=&quot; + attemptId + &quot; name=&quot; + target.getName()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="62"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="65"
             column="9"/>
     </issue>
 
@@ -208,8 +241,8 @@
         errorLine1="        Log.d(TAG, &quot;state attempt=&quot; + attemptId + &quot; state=&quot; + state"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="123"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="126"
             column="9"/>
     </issue>
 
@@ -219,8 +252,8 @@
         errorLine1="            Log.d(TAG, &quot;Bluetooth adapter is available; waiting for explicit connection&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="142"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="145"
             column="13"/>
     </issue>
 
@@ -230,8 +263,8 @@
         errorLine1="            Log.e(TAG, &quot;connect failed attempt=&quot; + attemptId + &quot; type=&quot; + failType);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="149"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="152"
             column="13"/>
     </issue>
 
@@ -241,8 +274,8 @@
         errorLine1="            Log.e(TAG, &quot;connect timeout attempt=&quot; + attemptId + &quot; type=&quot; + type);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="157"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="160"
             column="13"/>
     </issue>
 
@@ -252,8 +285,8 @@
         errorLine1="            Log.e(TAG, &quot;connection error attempt=&quot; + attemptId + &quot; gattStatus=&quot; + status);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="165"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="168"
             column="13"/>
     </issue>
 
@@ -263,8 +296,8 @@
         errorLine1="            Log.v(TAG, &quot;receive attempt=&quot; + attemptId + &quot; bytes=&quot; + value.length);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="174"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="177"
             column="13"/>
     </issue>
 
@@ -274,8 +307,8 @@
         errorLine1="        Log.e(TAG, &quot;request failed type=&quot; + request.getType() + &quot; failType=&quot; + failType"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="182"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="185"
             column="9"/>
     </issue>
 
@@ -285,8 +318,8 @@
         errorLine1="            Log.i(TAG, &quot;data channel attempt=&quot; + attemptId + &quot; service=&quot; + serviceUuid"
         errorLine2="            ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="226"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="229"
             column="13"/>
     </issue>
 
@@ -296,8 +329,8 @@
         errorLine1="            Log.i(TAG, &quot;service attempt=&quot; + attemptId + &quot; uuid=&quot; + service.getUuid());"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="310"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="313"
             column="13"/>
     </issue>
 
@@ -307,8 +340,8 @@
         errorLine1="                Log.i(TAG, &quot;characteristic attempt=&quot; + attemptId + &quot; uuid=&quot; + characteristic.getUuid()"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="312"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="315"
             column="17"/>
     </issue>
 
@@ -318,8 +351,8 @@
         errorLine1="                        Log.i(TAG, &quot;MTU negotiated attempt=&quot; + requestAttempt + &quot; mtu=&quot; + mtu"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="332"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="335"
             column="25"/>
     </issue>
 
@@ -329,8 +362,8 @@
         errorLine1="                        Log.w(TAG, &quot;MTU negotiation failed attempt=&quot; + requestAttempt"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="342"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="345"
             column="25"/>
     </issue>
 
@@ -340,8 +373,41 @@
         errorLine1="        Log.i(TAG, &quot;receive channel attempt=&quot; + requestAttempt + &quot; enabled=&quot; + enabled + &quot; service=&quot; + serviceUuid"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="394"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="397"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;更新盘点列表，数量: &quot; + values.size());"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            line="80"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;设置模块类型: &quot; + subtype);"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            line="85"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogNotTimber"
+        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
+        errorLine1="        Log.d(TAG, &quot;更新 Mask 配置: &quot; + (config != null ? &quot;已启用&quot; : &quot;未启用&quot;));"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            line="109"
             column="9"/>
     </issue>
 
@@ -396,7 +462,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/remote/app/MainActivity.java"
-            line="204"
+            line="205"
             column="9"/>
     </issue>
 
@@ -407,40 +473,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/remote/app/MainActivity.java"
-            line="239"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="LogNotTimber"
-        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
-        errorLine1="        Log.d(TAG, &quot;更新盘点列表，数量: &quot; + values.size());"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
-            line="80"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="LogNotTimber"
-        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
-        errorLine1="        Log.d(TAG, &quot;设置模块类型: &quot; + subtype);"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
-            line="85"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="LogNotTimber"
-        message="Using &apos;Log&apos; instead of &apos;Timber&apos;"
-        errorLine1="        Log.d(TAG, &quot;更新 Mask 配置: &quot; + (config != null ? &quot;已启用&quot; : &quot;未启用&quot;));"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/inventory/InventoryAdapter.java"
-            line="109"
+            line="240"
             column="9"/>
     </issue>
 
@@ -450,7 +483,7 @@
         errorLine1="        Log.i(TAG, &quot;创建 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
             line="48"
             column="9"/>
     </issue>
@@ -461,7 +494,7 @@
         errorLine1="        Log.d(TAG, &quot;更新 Reader 状态: phase=&quot; + updated.getPhase()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
             line="72"
             column="9"/>
     </issue>
@@ -472,7 +505,7 @@
         errorLine1="        Log.i(TAG, &quot;销毁 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
             line="82"
             column="9"/>
     </issue>
@@ -483,7 +516,7 @@
         errorLine1="            Log.d(TAG, &quot;释放 Wi-Fi 锁&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
             line="85"
             column="13"/>
     </issue>
@@ -494,8 +527,8 @@
         errorLine1="            Log.e(TAG, &quot;Unable to start reader connection service&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
-            line="30"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            line="32"
             column="13"/>
     </issue>
 
@@ -505,8 +538,8 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service created&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
-            line="51"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            line="53"
             column="9"/>
     </issue>
 
@@ -516,8 +549,8 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service destroyed&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
-            line="58"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            line="60"
             column="9"/>
     </issue>
 
@@ -527,8 +560,8 @@
         errorLine1="            Log.w(TAG, &quot;读取功率失败，使用缓存值 &quot; + power, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
-            line="105"
+            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            line="110"
             column="13"/>
     </issue>
 
@@ -538,8 +571,8 @@
         errorLine1="            Log.w(TAG, &quot;读取盘点区域失败，使用缓存值&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
-            line="120"
+            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            line="125"
             column="13"/>
     </issue>
 
@@ -549,8 +582,8 @@
         errorLine1="            Log.w(TAG, &quot;读取 Session 失败，使用缓存值 S&quot; + session, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
-            line="135"
+            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            line="140"
             column="13"/>
     </issue>
 
@@ -560,8 +593,8 @@
         errorLine1="                Log.w(TAG, &quot;读取 BLF 失败，使用缓存值 &quot; + blf, error);"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
-            line="146"
+            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            line="151"
             column="17"/>
     </issue>
 
@@ -571,8 +604,8 @@
         errorLine1="            Log.w(TAG, &quot;读取 Q 值失败，使用缓存值 Q&quot; + q, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/ReaderHandshake.java"
-            line="171"
+            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            line="176"
             column="13"/>
     </issue>
 
@@ -583,7 +616,7 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="233"
+            line="235"
             column="5"/>
     </issue>
 
@@ -594,7 +627,7 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="234"
+            line="236"
             column="5"/>
     </issue>
 
@@ -604,8 +637,8 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP || currentConnection == null) {"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/transport/BleTransport.java"
-            line="321"
+            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            line="324"
             column="13"/>
     </issue>
 
@@ -615,8 +648,8 @@
         errorLine1="        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M"
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
-            line="149"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            line="150"
             column="16"/>
     </issue>
 
@@ -626,8 +659,8 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.O) { return; }"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/sdk/connection/service/ReaderConnectionService.java"
-            line="155"
+            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            line="163"
             column="13"/>
     </issue>
 
@@ -699,28 +732,6 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `@color/rfid_nav_bg` with a theme that also paints a background (inferred theme is `@style/UhfRemoteTheme`)"
-        errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout-sw600dp-land/main_activity.xml"
-            line="7"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
-        message="Possible overdraw: Root element paints background `@color/rfid_nav_bg` with a theme that also paints a background (inferred theme is `@style/UhfRemoteTheme`)"
-        errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/main_activity.xml"
-            line="8"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
         message="Possible overdraw: Root element paints background `@color/rfid_panel_bg` with a theme that also paints a background (inferred theme is `@style/UhfRemoteTheme`)"
         errorLine1="    android:background=&quot;@color/rfid_panel_bg&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -749,6 +760,28 @@
         <location
             file="src/main/res/layout/inventory_mask_panel.xml"
             line="6"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/rfid_nav_bg` with a theme that also paints a background (inferred theme is `@style/UhfRemoteTheme`)"
+        errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout-sw600dp-land/main_activity.xml"
+            line="7"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/rfid_nav_bg` with a theme that also paints a background (inferred theme is `@style/UhfRemoteTheme`)"
+        errorLine1="    android:background=&quot;@color/rfid_nav_bg&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/main_activity.xml"
+            line="8"
             column="5"/>
     </issue>
 
@@ -1509,11 +1542,33 @@
 
     <issue
         id="UnusedResources"
+        message="The resource `R.string.reader_ble_service_channel` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reader_ble_service_channel&quot;>读写器蓝牙连接&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
         message="The resource `R.string.common_month` appears to be unused"
         errorLine1="    &lt;string name=&quot;common_month&quot;>月&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res-common/values/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reader_ble_service_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reader_ble_service_title&quot;>RFID 读写器&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
             line="13"
             column="13"/>
     </issue>
@@ -1531,23 +1586,12 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.reader_ble_service_channel` appears to be unused"
-        errorLine1="    &lt;string name=&quot;reader_ble_service_channel&quot;>读写器蓝牙连接&lt;/string>"
+        message="The resource `R.string.reader_ble_service_running` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reader_ble_service_running&quot;>蓝牙透传服务运行中&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
             line="14"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.reader_ble_service_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;reader_ble_service_title&quot;>RFID 读写器&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="15"
             column="13"/>
     </issue>
 
@@ -1558,17 +1602,6 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res-common/values/strings.xml"
-            line="16"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.reader_ble_service_running` appears to be unused"
-        errorLine1="    &lt;string name=&quot;reader_ble_service_running&quot;>蓝牙透传服务运行中&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
             line="16"
             column="13"/>
     </issue>
@@ -1603,6 +1636,17 @@
         <location
             file="src/main/res-common/values/strings.xml"
             line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.stock_query_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;stock_query_title&quot;>实时库存查询&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="23"
             column="13"/>
     </issue>
 
@@ -1707,17 +1751,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.stock_query_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;stock_query_title&quot;>实时库存查询&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="35"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.string.common_step_complete` appears to be unused"
         errorLine1="    &lt;string name=&quot;common_step_complete&quot;>完成&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -1735,6 +1768,83 @@
         <location
             file="src/main/res-common/values/strings.xml"
             line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_title&quot;>设备信息&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_connected` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_connected&quot;>已连接&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_group_connection` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_group_connection&quot;>连接&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_group_board` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_group_board&quot;>板卡&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_group_module` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_group_module&quot;>射频模块&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_transport` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_transport&quot;>传输方式&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_address` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_address&quot;>地址&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="47"
             column="13"/>
     </issue>
 
@@ -1762,56 +1872,34 @@
 
     <issue
         id="UnusedResources"
+        message="The resource `R.string.device_info_serial` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_serial&quot;>序列号&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="51"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_info_version` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_version&quot;>版本&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
         message="The resource `R.string.date_title` appears to be unused"
         errorLine1="    &lt;string name=&quot;date_title&quot;>请选择日期&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res-common/values/strings.xml"
             line="53"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_title&quot;>设备信息&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="53"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_connected` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_connected&quot;>已连接&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="54"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_group_connection` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_group_connection&quot;>连接&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="55"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_group_board` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_group_board&quot;>板卡&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="56"
             column="13"/>
     </issue>
 
@@ -1828,9 +1916,9 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.device_info_group_module` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_group_module&quot;>射频模块&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="The resource `R.string.device_info_close` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_info_close&quot;>关闭&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
             line="57"
@@ -1839,23 +1927,12 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.device_info_transport` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_transport&quot;>传输方式&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="58"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_address` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_address&quot;>地址&lt;/string>"
+        message="The resource `R.string.config_initializing` appears to be unused"
+        errorLine1="    &lt;string name=&quot;config_initializing&quot;>正在初始化设备&amp;#8230;&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="59"
+            line="58"
             column="13"/>
     </issue>
 
@@ -1883,28 +1960,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.device_info_serial` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_serial&quot;>序列号&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="62"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_version` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_version&quot;>版本&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="63"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.string.share_platform_copy_hint` appears to be unused"
         errorLine1="    &lt;string name=&quot;share_platform_copy_hint&quot;>已复制到剪贴板&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -1922,28 +1977,6 @@
         <location
             file="src/main/res-common/values/strings.xml"
             line="66"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.device_info_close` appears to be unused"
-        errorLine1="    &lt;string name=&quot;device_info_close&quot;>关闭&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="68"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.config_initializing` appears to be unused"
-        errorLine1="    &lt;string name=&quot;config_initializing&quot;>正在初始化设备&amp;#8230;&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="69"
             column="13"/>
     </issue>
 
@@ -2004,12 +2037,34 @@
 
     <issue
         id="UnusedResources"
+        message="The resource `R.string.serial_disconnect` appears to be unused"
+        errorLine1="    &lt;string name=&quot;serial_disconnect&quot;>断开串口&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="83"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_serial_port_not_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_serial_port_not_found&quot;>串口设备不存在&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
         message="The resource `R.string.config_inventory_area_summary` appears to be unused"
         errorLine1="    &lt;string name=&quot;config_inventory_area_summary&quot;>%1$s · 地址 %2$d · %3$d 字&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="97"
+            line="99"
             column="13"/>
     </issue>
 
@@ -2020,7 +2075,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="101"
+            line="103"
             column="13"/>
     </issue>
 
@@ -2031,7 +2086,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="102"
+            line="104"
             column="13"/>
     </issue>
 
@@ -2042,7 +2097,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="103"
+            line="105"
             column="13"/>
     </issue>
 
@@ -2053,7 +2108,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="105"
+            line="107"
             column="13"/>
     </issue>
 
@@ -2064,7 +2119,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="106"
+            line="108"
             column="13"/>
     </issue>
 
@@ -2075,7 +2130,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="117"
+            line="119"
             column="13"/>
     </issue>
 
@@ -2086,7 +2141,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="118"
+            line="120"
             column="13"/>
     </issue>
 
@@ -2097,7 +2152,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="119"
+            line="121"
             column="13"/>
     </issue>
 
@@ -2108,7 +2163,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="120"
+            line="122"
             column="13"/>
     </issue>
 
@@ -2119,7 +2174,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="121"
+            line="123"
             column="13"/>
     </issue>
 
@@ -2130,7 +2185,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="122"
+            line="124"
             column="13"/>
     </issue>
 
@@ -2141,7 +2196,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="123"
+            line="125"
             column="13"/>
     </issue>
 
@@ -2152,7 +2207,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="124"
+            line="126"
             column="13"/>
     </issue>
 
@@ -2163,7 +2218,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="125"
+            line="127"
             column="13"/>
     </issue>
 
@@ -2174,7 +2229,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="126"
+            line="128"
             column="13"/>
     </issue>
 
@@ -2185,7 +2240,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="127"
+            line="129"
             column="13"/>
     </issue>
 
@@ -2196,7 +2251,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="128"
+            line="130"
             column="13"/>
     </issue>
 
@@ -2207,7 +2262,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="129"
+            line="131"
             column="13"/>
     </issue>
 
@@ -2218,7 +2273,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="130"
+            line="132"
             column="13"/>
     </issue>
 
@@ -2229,7 +2284,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="135"
+            line="137"
             column="13"/>
     </issue>
 
@@ -2240,7 +2295,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="139"
+            line="141"
             column="13"/>
     </issue>
 
@@ -2251,7 +2306,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="140"
+            line="142"
             column="13"/>
     </issue>
 
@@ -2262,7 +2317,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="145"
+            line="147"
             column="13"/>
     </issue>
 
@@ -2273,7 +2328,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="190"
+            line="192"
             column="13"/>
     </issue>
 
@@ -2284,7 +2339,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="191"
+            line="193"
             column="13"/>
     </issue>
 
@@ -2295,7 +2350,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="192"
+            line="194"
             column="13"/>
     </issue>
 
@@ -2306,7 +2361,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="196"
+            line="198"
             column="13"/>
     </issue>
 
@@ -2317,7 +2372,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="201"
+            line="203"
             column="13"/>
     </issue>
 
@@ -2328,7 +2383,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="273"
+            line="275"
             column="13"/>
     </issue>
 
@@ -2339,7 +2394,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="274"
+            line="276"
             column="13"/>
     </issue>
 
@@ -2350,7 +2405,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="275"
+            line="277"
             column="13"/>
     </issue>
 
@@ -2361,7 +2416,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="276"
+            line="278"
             column="13"/>
     </issue>
 
@@ -2372,7 +2427,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="277"
+            line="279"
             column="13"/>
     </issue>
 
@@ -2383,7 +2438,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="279"
+            line="281"
             column="13"/>
     </issue>
 
@@ -2394,7 +2449,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="282"
+            line="284"
             column="13"/>
     </issue>
 
@@ -2405,7 +2460,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="283"
+            line="285"
             column="13"/>
     </issue>
 
@@ -2416,7 +2471,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="315"
+            line="317"
             column="13"/>
     </issue>
 
@@ -2427,7 +2482,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="316"
+            line="318"
             column="13"/>
     </issue>
 
@@ -2438,7 +2493,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="318"
+            line="320"
             column="13"/>
     </issue>
 
@@ -2702,7 +2757,7 @@
         errorLine2="                                                ~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="89"
+            line="91"
             column="49"/>
     </issue>
 
@@ -2713,7 +2768,7 @@
         errorLine2="                                      ~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="123"
+            line="125"
             column="39"/>
     </issue>
 
@@ -2724,7 +2779,7 @@
         errorLine2="                                      ~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="124"
+            line="126"
             column="39"/>
     </issue>
 
@@ -2735,7 +2790,7 @@
         errorLine2="                                        ~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="125"
+            line="127"
             column="41"/>
     </issue>
 
@@ -2746,7 +2801,7 @@
         errorLine2="                                      ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="126"
+            line="128"
             column="39"/>
     </issue>
 
@@ -2757,7 +2812,7 @@
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="128"
+            line="130"
             column="43"/>
     </issue>
 
@@ -2768,7 +2823,7 @@
         errorLine2="                                          ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="129"
+            line="131"
             column="43"/>
     </issue>
 
@@ -2779,7 +2834,7 @@
         errorLine2="                                              ~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="130"
+            line="132"
             column="47"/>
     </issue>
 
@@ -2790,7 +2845,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="289"
+            line="291"
             column="46"/>
     </issue>
 
@@ -2801,7 +2856,7 @@
         errorLine2="                                           ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="299"
+            line="301"
             column="44"/>
     </issue>
 
@@ -2812,7 +2867,7 @@
         errorLine2="                                            ~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="300"
+            line="302"
             column="45"/>
     </issue>
 
@@ -2960,6 +3015,17 @@
     <issue
         id="Autofill"
         message="Missing `autofillHints` attribute"
+        errorLine1="    &lt;EditText"
+        errorLine2="     ~~~~~~~~">
+        <location
+            file="src/main/res/layout/serial_config_dialog.xml"
+            line="63"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
         errorLine1="            &lt;EditText"
         errorLine2="             ~~~~~~~~">
         <location
@@ -3026,6 +3092,28 @@
     <issue
         id="LabelFor"
         message="Missing accessibility label: provide either a view with an `android:labelFor` that references this view or provide an `android:hint`"
+        errorLine1="    &lt;AutoCompleteTextView"
+        errorLine2="     ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/serial_config_dialog.xml"
+            line="15"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="LabelFor"
+        message="Missing accessibility label: provide either a view with an `android:labelFor` that references this view or provide an `android:hint`"
+        errorLine1="    &lt;EditText"
+        errorLine2="     ~~~~~~~~">
+        <location
+            file="src/main/res/layout/serial_config_dialog.xml"
+            line="63"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="LabelFor"
+        message="Missing accessibility label: provide either a view with an `android:labelFor` that references this view or provide an `android:hint`"
         errorLine1="            &lt;EditText"
         errorLine2="             ~~~~~~~~">
         <location
@@ -3073,8 +3161,8 @@
         errorLine1="        if (statusView != null) { statusView.setText(&quot;已发现 &quot; + rows.size() + &quot; 个设备&quot;); }"
         errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/config/BleDeviceSheet.java"
-            line="64"
+            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            line="67"
             column="54"/>
     </issue>
 
@@ -3084,8 +3172,8 @@
         errorLine1="        readPasswordView.setText(&quot;00000000&quot;);"
         errorLine2="                                 ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
-            line="213"
+            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            line="210"
             column="34"/>
     </issue>
 
@@ -3095,8 +3183,8 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
-            line="362"
+            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            line="359"
             column="29"/>
     </issue>
 
@@ -3106,8 +3194,8 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/SingleTagFragment.java"
-            line="362"
+            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            line="359"
             column="29"/>
     </issue>
 
@@ -3117,8 +3205,8 @@
         errorLine1="        accessPassword.setText(&quot;00000000&quot;);"
         errorLine2="                               ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagKillDialog.java"
-            line="23"
+            file="src/main/java/com/leo/rfid/demo/tag/TagKillDialog.java"
+            line="28"
             column="32"/>
     </issue>
 
@@ -3128,8 +3216,8 @@
         errorLine1="        killPassword.setText(&quot;00000000&quot;);"
         errorLine2="                             ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagKillDialog.java"
-            line="24"
+            file="src/main/java/com/leo/rfid/demo/tag/TagKillDialog.java"
+            line="29"
             column="30"/>
     </issue>
 
@@ -3139,8 +3227,8 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagLockDialog.java"
-            line="32"
+            file="src/main/java/com/leo/rfid/demo/tag/TagLockDialog.java"
+            line="37"
             column="26"/>
     </issue>
 
@@ -3150,8 +3238,8 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/rfid/demo/ui/singletag/TagWriteDialog.java"
-            line="65"
+            file="src/main/java/com/leo/rfid/demo/tag/TagWriteDialog.java"
+            line="70"
             column="26"/>
     </issue>
 

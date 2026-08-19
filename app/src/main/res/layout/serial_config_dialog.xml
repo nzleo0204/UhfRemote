@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/dialog_padding">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/serial_port_path"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/dialog_label_text_size" />
+
+    <AutoCompleteTextView
+        android:id="@+id/et_serial_port_path"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginTop="@dimen/dp_6"
+        android:background="@drawable/dialog_input_bg"
+        android:inputType="text"
+        android:paddingHorizontal="@dimen/dp_12"
+        android:singleLine="true"
+        android:text="/dev/ttyS1"
+        android:textColor="@color/rfid_text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_row_spacing"
+        android:text="@string/serial_baud_rate"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/dialog_label_text_size" />
+
+    <Spinner
+        android:id="@+id/sp_serial_baud_rate"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:entries="@array/serial_baud_rates" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_row_spacing"
+        android:text="@string/serial_module_type"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/dialog_label_text_size" />
+
+    <Spinner
+        android:id="@+id/sp_serial_module_type"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:entries="@array/serial_module_types" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_row_spacing"
+        android:text="@string/serial_power_delay"
+        android:textColor="@color/rfid_text"
+        android:textSize="@dimen/dialog_label_text_size" />
+
+    <EditText
+        android:id="@+id/et_serial_power_delay"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:background="@drawable/dialog_input_bg"
+        android:gravity="center"
+        android:inputType="number"
+        android:singleLine="true"
+        android:text="500"
+        android:textColor="@color/rfid_text" />
+</LinearLayout>

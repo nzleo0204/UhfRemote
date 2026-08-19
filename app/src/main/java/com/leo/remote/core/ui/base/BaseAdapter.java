@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
-
-
-
- *    RecyclerView 适配器业务基类
- */
+/** RecyclerView 适配器业务基类 */
 public abstract class BaseAdapter<T>
         extends com.hjq.base.BaseAdapter<BaseAdapter<T>.AppViewHolder> {
 
@@ -234,7 +229,7 @@ public abstract class BaseAdapter<T>
 
         @Override
         public void onBindView(int position) {
-            // default implementation ignored
+            // 默认实现不处理。
         }
     }
 }

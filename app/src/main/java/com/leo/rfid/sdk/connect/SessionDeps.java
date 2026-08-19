@@ -5,10 +5,10 @@ import com.leo.rfid.sdk.storage.MmkvReaderConnectionStore;
 import com.leo.rfid.sdk.storage.ReaderConfigCache;
 import com.leo.rfid.sdk.storage.ReaderConfigurationStore;
 import com.leo.rfid.sdk.storage.ReaderConnectionStore;
-import com.leo.rfid.sdk.connect.transport.BleTransport;
-import com.leo.rfid.sdk.connect.transport.ReaderBleTransport;
-import com.leo.rfid.sdk.connect.transport.ReaderWifiMonitor;
-import com.leo.rfid.sdk.connect.transport.WifiNetworkMonitor;
+import com.leo.rfid.sdk.connect.bluetooth.BleTransport;
+import com.leo.rfid.sdk.connect.bluetooth.ReaderBleTransport;
+import com.leo.rfid.sdk.connect.wifi.ReaderWifiMonitor;
+import com.leo.rfid.sdk.connect.wifi.WifiNetworkMonitor;
 
 import android.app.Application;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +31,6 @@ final class SessionDeps {
     final ReaderConnectionStore connectionStore;
     final ReaderConfigurationStore configurationStore;
     final Function<ReaderProgress, String> messageResolver;
-
     SessionDeps(Supplier<ExecutorService> sdkExecutorFactory,
             MainThreadDispatcher mainThread,
             Function<ReaderBleTransport.Listener, ReaderBleTransport> bleTransportFactory,

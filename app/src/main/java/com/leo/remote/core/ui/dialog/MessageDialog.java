@@ -12,12 +12,7 @@ import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 import com.leo.remote.core.aop.SingleClick;
 
-/**
-
-
-
- *    消息对话框
- */
+/** 消息对话框 */
 public final class MessageDialog {
 
     public static class Builder
@@ -96,7 +91,7 @@ public final class MessageDialog {
          * 点击取消时回调
          */
         default void onCancel(@NonNull BaseDialog dialog) {
-            // default implementation ignored
+            // 默认实现不处理。
         }
     }
 }

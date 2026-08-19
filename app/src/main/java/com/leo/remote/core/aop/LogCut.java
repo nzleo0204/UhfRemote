@@ -9,12 +9,7 @@ import com.flyjingfish.android_aop_annotation.base.BasePointCut;
 import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
 
-/**
-
-
-
- *    日志切面
- */
+/** 日志切面 */
 public class LogCut implements BasePointCut<Log> {
 
     @Override

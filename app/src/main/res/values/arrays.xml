@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 常见 Android 串口设备节点。客户平台可以在配置界面手动输入其他路径。 -->
+    <string-array name="serial_port_paths">
+        <item>/dev/ttyS0</item>
+        <item>/dev/ttyS1</item>
+        <item>/dev/ttyS2</item>
+        <item>/dev/ttyUSB0</item>
+        <item>/dev/ttyUSB1</item>
+    </string-array>
+
+    <string-array name="serial_baud_rates">
+        <item>9600</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+    </string-array>
+
+    <string-array name="serial_module_types">
+        <item>R2000</item>
+        <item>R2000Plus</item>
+        <item>RM610</item>
+        <item>RM8011</item>
+    </string-array>
+</resources>

@@ -18,12 +18,7 @@ import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
 import com.scwang.smart.refresh.layout.simple.SimpleComponent;
 
-/**
-
-
-
- *    球脉冲底部加载组件
- */
+/** 球脉冲底部加载组件 */
 public final class SmartBallPulseFooter extends SimpleComponent implements RefreshFooter {
 
     private final TimeInterpolator interpolator = new AccelerateDecelerateInterpolator();

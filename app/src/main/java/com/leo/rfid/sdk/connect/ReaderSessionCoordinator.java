@@ -6,6 +6,8 @@ import com.leo.rfid.sdk.model.*;
 import com.leo.rfid.sdk.storage.ReaderConfigurationStore;
 import com.leo.rfid.sdk.bridge.*;
 import com.leo.rfid.sdk.tag.ReaderTagOperations;
+import com.leo.rfid.sdk.connect.serial.SerialConfig;
+import com.leo.rfid.sdk.connect.serial.SerialPowerController;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -119,6 +121,17 @@ final class ReaderSessionCoordinator {
 
     public void connectBle(@NonNull cn.wandersnail.ble.Device device) {
         connectionOrchestrator.connectBle(device);
+    }
+
+    /** 连接串口读写器，端口打开后复用现有 Reader 握手流程。 */
+    public void connectSerial(@NonNull SerialConfig config) {
+        connectionOrchestrator.connectSerial(config);
+    }
+
+    /** 使用客户提供的上电控制器连接串口读写器。 */
+    public void connectSerial(@NonNull SerialConfig config,
+            @NonNull SerialPowerController powerController) {
+        connectionOrchestrator.connectSerial(config, powerController);
     }
 
     public void disconnect() {

@@ -18,12 +18,7 @@ import com.hjq.permissions.permission.base.IPermission;
 import com.hjq.toast.Toaster;
 import java.util.List;
 
-/**
-
-
-
- *    权限申请拦截器
- */
+/** 权限申请拦截器 */
 public final class PermissionInterceptor implements OnPermissionInterceptor {
 
     @Override

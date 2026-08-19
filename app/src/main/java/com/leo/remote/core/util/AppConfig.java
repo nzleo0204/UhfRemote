@@ -2,12 +2,7 @@ package com.leo.remote.core.util;
 
 import com.leo.remote.BuildConfig;
 
-/**
-
-
-
- *    App 配置管理类
- */
+/** App 配置管理类 */
 public final class AppConfig {
 
     /**

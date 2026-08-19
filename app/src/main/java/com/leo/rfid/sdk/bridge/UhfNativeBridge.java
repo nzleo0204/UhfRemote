@@ -43,7 +43,10 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
 
     @Override
     public void setTransport(TransportType transport) {
-        linkage.setRFConnectMode(transport == TransportType.WIFI ? 1 : 2);
+        // Linkage: 0=串口，1=Wi-Fi，2=蓝牙透传。
+        int mode = transport == TransportType.SERIAL ? 0
+                : transport == TransportType.WIFI ? 1 : 2;
+        linkage.setRFConnectMode(mode);
     }
 
     @Override
@@ -51,6 +54,12 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
 
     @Override
     public int closeNetwork() { return linkage.closeNetwork(); }
+
+    @Override
+    public int openSerial(String path) { return linkage.open_serial(path); }
+
+    @Override
+    public int closeSerial() { return linkage.close_serial(); }
 
     @Override
     public void setOutboundDataListener(OutboundDataListener listener) {

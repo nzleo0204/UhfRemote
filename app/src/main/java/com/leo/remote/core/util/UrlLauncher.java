@@ -8,12 +8,7 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import com.hjq.toast.Toaster;
 
-/**
-
-
-
- *    外部链接跳转
- */
+/** 外部链接跳转 */
 public final class UrlLauncher {
 
     private UrlLauncher() {}

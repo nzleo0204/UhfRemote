@@ -6,12 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.leo.remote.core.action.ToastAction;
 
-/**
-
-
-
- *    Fragment 业务基类
- */
+/** Fragment 业务基类 */
 public abstract class BaseFragment<A extends BaseActivity>
         extends com.hjq.base.BaseFragment<A> implements ToastAction {
 

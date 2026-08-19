@@ -154,7 +154,7 @@ public final class ReaderConnectionService extends Service {
 
     @SuppressWarnings("deprecation")
     private static WifiManager.WifiLock createWifiLock(WifiManager wifiManager) {
-        // Keep the API 26 background Wi-Fi behavior; newer Android versions remap this mode.
+        // 保持 API 26 的后台 Wi-Fi 行为；更高版本会自动映射该模式。
         return wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
                 "UhfRemote:reader-connection");
     }

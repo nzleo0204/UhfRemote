@@ -9,12 +9,7 @@ import androidx.annotation.StringRes;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 
-/**
-
-
-
- *    等待加载对话框
- */
+/** 等待加载对话框 */
 public final class WaitDialog {
 
     public static final class Builder

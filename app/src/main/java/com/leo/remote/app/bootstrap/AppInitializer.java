@@ -2,7 +2,6 @@ package com.leo.remote.app.bootstrap;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import cn.wandersnail.ble.EasyBLE;
@@ -40,24 +39,9 @@ import com.tencent.mmkv.MMKV;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
-/** Application composition and third-party SDK initialization. */
+/** 负责应用依赖装配和第三方 SDK 初始化。 */
 public final class AppInitializer {
-    private static final String AGREE_PRIVACY_NAME = "agree_privacy_config";
-    private static final String KEY_AGREE_PRIVACY_RESULT = "key_agree_privacy_result";
-
     private AppInitializer() {}
-
-    public static boolean isAgreePrivacy(@NonNull Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(
-                AGREE_PRIVACY_NAME, Context.MODE_PRIVATE);
-        return preferences.getBoolean(KEY_AGREE_PRIVACY_RESULT, false);
-    }
-
-    public static void setAgreePrivacy(@NonNull Context context, boolean result) {
-        SharedPreferences preferences = context.getSharedPreferences(
-                AGREE_PRIVACY_NAME, Context.MODE_PRIVATE);
-        preferences.edit().putBoolean(KEY_AGREE_PRIVACY_RESULT, result).apply();
-    }
 
     public static void initializeApplication(@NonNull Application application) {
         MMKV.initialize(application);

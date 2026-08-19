@@ -20,12 +20,7 @@ import com.leo.remote.core.action.ToastAction;
 import com.leo.remote.core.ui.dialog.WaitDialog;
 import com.leo.remote.core.util.ThemeModeManager;
 
-/**
-
-
-
- *    Activity 业务基类
- */
+/** Activity 业务基类 */
 public abstract class BaseActivity extends com.hjq.base.BaseActivity
     implements ToastAction, TitleBarAction, ImmersionAction {
 

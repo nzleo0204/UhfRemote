@@ -14,6 +14,10 @@ public interface ReaderTransportGateway {
     void setTransport(TransportType transport);
     int connectNetwork(String address, int port);
     int closeNetwork();
+    /** 打开由原生 Linkage 管理的串口设备节点。 */
+    int openSerial(String path);
+    /** 关闭当前原生串口设备节点。 */
+    int closeSerial();
     void setOutboundDataListener(OutboundDataListener listener);
     void pushRemoteData(byte[] data);
     ReaderModuleInfo readModuleInfo() throws ReaderException;

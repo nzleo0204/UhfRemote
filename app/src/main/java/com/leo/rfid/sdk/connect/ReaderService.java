@@ -2,7 +2,7 @@ package com.leo.rfid.sdk.connect;
 
 import com.leo.rfid.sdk.model.ReaderState;
 
-/** Android service boundary used by the platform-neutral reader session. */
+/** 为与 Android 服务交互定义的读写器会话边界。 */
 public interface ReaderService {
     void start();
     void stop();

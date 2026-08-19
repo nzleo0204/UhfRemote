@@ -6,5 +6,6 @@ package com.leo.rfid.sdk.model;
 public enum TransportType {
     NONE,
     BLE,
-    WIFI
+    WIFI,
+    SERIAL
 }

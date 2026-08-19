@@ -6,12 +6,7 @@ import com.flyjingfish.android_aop_annotation.base.BasePointCut;
 import org.jetbrains.annotations.Nullable;
 import timber.log.Timber;
 
-/**
-
-
-
- *    防重复点击切面
- */
+/** 防重复点击切面 */
 public class SingleClickCut implements BasePointCut<SingleClick> {
 
     private static long lastTime;

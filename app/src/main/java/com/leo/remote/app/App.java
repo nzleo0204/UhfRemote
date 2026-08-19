@@ -6,12 +6,7 @@ import com.leo.remote.core.aop.Log;
 import com.leo.remote.app.bootstrap.AppInitializer;
 import com.leo.remote.core.manager.OrientationManager;
 
-/**
-
-
-
- *    应用入口
- */
+/** 应用入口 */
 public final class App extends Application {
     private static volatile App instance;
 

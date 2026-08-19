@@ -10,12 +10,7 @@ import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.app.MainActivity;
 import com.leo.remote.app.splash.SplashActivity;
 
-/**
-
-
-
- *    重启应用
- */
+/** 重启应用 */
 public final class RestartActivity extends BaseActivity {
 
     public static void start(@NonNull Context context) {

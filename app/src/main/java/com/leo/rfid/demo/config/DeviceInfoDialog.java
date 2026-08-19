@@ -64,15 +64,19 @@ public final class DeviceInfoDialog extends DialogFragment implements ReaderObse
 
     private void bind(View view, ReaderState state) {
         boolean ble = state.getTransport() == TransportType.BLE;
+        boolean serial = state.getTransport() == TransportType.SERIAL;
         ((ImageView) view.findViewById(R.id.iv_device_info_icon)).setImageResource(
                 ble ? R.drawable.rfid_bluetooth_ic : R.drawable.rfid_wifi_ic);
         set(view, R.id.tv_device_info_name,
-                ble ? state.getDeviceName() : getString(R.string.device_info_name_wifi));
+                ble ? state.getDeviceName() : getString(serial
+                        ? R.string.device_info_name_serial : R.string.device_info_name_wifi));
         set(view, R.id.tv_device_info_protocol, state.getProtocol().getDisplayName());
         set(view, R.id.tv_device_info_transport, getString(ble
-                ? R.string.device_info_transport_ble : R.string.device_info_transport_wifi));
+                ? R.string.device_info_transport_ble : serial
+                        ? R.string.device_info_transport_serial : R.string.device_info_transport_wifi));
         ((TextView) view.findViewById(R.id.tv_device_info_address_label)).setText(getString(ble
-                ? R.string.device_info_ble_address : R.string.device_info_wifi_address));
+                ? R.string.device_info_ble_address : serial
+                        ? R.string.device_info_serial_address : R.string.device_info_wifi_address));
         set(view, R.id.tv_device_info_address, state.getAddress());
         set(view, R.id.tv_device_info_board_serial, state.getBoardSerial());
         set(view, R.id.tv_device_info_board_version, state.getBoardVersion());

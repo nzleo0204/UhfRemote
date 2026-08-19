@@ -11,12 +11,7 @@ import com.hjq.core.manager.ActivityManager;
 import com.leo.remote.R;
 import com.hjq.toast.Toaster;
 
-/**
-
-
-
- *    网络检测切面
- */
+/** 网络检测切面 */
 public class CheckNetCut implements BasePointCut<CheckNet> {
 
     @SuppressWarnings("deprecation")

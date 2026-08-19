@@ -12,12 +12,7 @@ import androidx.annotation.StringRes;
 import com.hjq.base.BaseDialog;
 import com.leo.remote.R;
 
-/**
-
-
-
- *    项目通用样式 Dialog 布局封装
- */
+/** 项目通用样式 Dialog 布局封装 */
 public final class StyleDialog {
 
     @SuppressWarnings("unchecked")

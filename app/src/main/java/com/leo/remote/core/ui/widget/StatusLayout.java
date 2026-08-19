@@ -19,12 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.airbnb.lottie.LottieAnimationView;
 import com.leo.remote.R;
 
-/**
-
-
-
- *    状态布局（网络错误，异常错误，空数据）
- */
+/** 状态布局（网络错误，异常错误，空数据） */
 public final class StatusLayout extends FrameLayout {
 
     /** 主布局 */

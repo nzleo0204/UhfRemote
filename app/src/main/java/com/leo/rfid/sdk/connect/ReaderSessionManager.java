@@ -5,6 +5,8 @@ import com.leo.rfid.sdk.connect.service.ReaderConnectionServiceController;
 import com.leo.rfid.sdk.connect.service.ReaderServiceNotificationConfig;
 import com.leo.rfid.sdk.model.*;
 import com.leo.rfid.sdk.bridge.UhfNativeBridge;
+import com.leo.rfid.sdk.connect.serial.SerialConfig;
+import com.leo.rfid.sdk.connect.serial.SerialPowerController;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -122,6 +124,15 @@ public final class ReaderSessionManager {
 
     /** 连接扫描结果中选定的 BLE 读写器。 */
     public void connectBle(@NonNull Device device) { coordinator.connectBle(device); }
+
+    /** 连接用户配置的串口读写器。 */
+    public void connectSerial(@NonNull SerialConfig config) { coordinator.connectSerial(config); }
+
+    /** 使用客户提供的上电控制器连接串口读写器。 */
+    public void connectSerial(@NonNull SerialConfig config,
+            @NonNull SerialPowerController powerController) {
+        coordinator.connectSerial(config, powerController);
+    }
 
     /** 按用户主动操作断开当前读写器。 */
     public void disconnect() { coordinator.disconnect(); }

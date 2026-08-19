@@ -12,12 +12,7 @@ import androidx.core.content.ContextCompat;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.widget.StatusLayout;
 
-/**
-
-
-
- *    状态布局意图
- */
+/** 状态布局意图 */
 public interface StatusAction {
 
     /**

@@ -27,5 +27,7 @@ public final class ReaderConnectionFailureTest {
                         ConnectionPhase.UPDATING_PARAMETERS));
         assertEquals(ReaderConnectionFailure.READER,
                 ReaderConnectionFailure.from(TransportType.WIFI, ConnectionPhase.CONNECTING));
+        assertEquals(ReaderConnectionFailure.READER,
+                ReaderConnectionFailure.from(TransportType.SERIAL, ConnectionPhase.CONNECTING));
     }
 }

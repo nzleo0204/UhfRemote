@@ -1,4 +1,4 @@
-package com.leo.rfid.sdk.connect.transport;
+package com.leo.rfid.sdk.connect.wifi;
 
 import com.leo.rfid.sdk.model.*;
 

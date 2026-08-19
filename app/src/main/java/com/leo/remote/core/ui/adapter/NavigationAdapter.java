@@ -17,12 +17,7 @@ import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseAdapter;
 import com.leo.remote.core.ui.adapter.NavigationAdapter.NavigationItem;
 
-/**
-
-
-
- *    导航栏适配器
- */
+/** 导航栏适配器 */
 public final class NavigationAdapter extends BaseAdapter<NavigationItem>
         implements com.hjq.base.BaseAdapter.OnItemClickListener {
 

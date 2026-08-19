@@ -34,6 +34,7 @@ import com.leo.rfid.sdk.connect.ReaderSessionManager;
 import com.leo.rfid.sdk.model.ReaderState;
 import com.leo.rfid.sdk.model.TagProtocol;
 import com.leo.rfid.sdk.model.TransportType;
+import com.leo.rfid.sdk.connect.serial.SerialConfig;
 import com.leo.rfid.demo.config.BleDeviceSheet;
 import com.leo.rfid.demo.config.DeviceInfoDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
@@ -41,6 +42,7 @@ import com.leo.remote.core.ui.dialog.SelectDialog;
 import com.leo.rfid.demo.config.InventoryRangeDialog;
 import com.leo.rfid.demo.config.ReaderConnectionDialogController;
 import com.leo.rfid.demo.config.ReaderSettingDialogController;
+import com.leo.rfid.demo.connection.SerialConfigDialog;
 import com.leo.rfid.demo.common.ReaderFragment;
 import com.leo.remote.core.ui.widget.IpAddressInputView;
 import com.leo.remote.core.util.ThrowableUtils;
@@ -52,7 +54,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-/** RFID reader connection and parameter configuration page. */
+/** RFID 读写器连接与参数配置页面。 */
 @SuppressLint({"LogNotTimber", "ClickableViewAccessibility"})
 public final class ReaderConfigFragment extends ReaderFragment implements ReaderObserver {
     private static final String TAG = "UhfReader/Config";
@@ -78,6 +80,7 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
     private View rateSection;
     private View bleActions;
     private View wifiActions;
+    private View serialActions;
     private View disconnectRow;
     private TextView connectedTargetView;
     private View workModeRow;
@@ -88,6 +91,7 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
     private View inputGuardBottom;
     private SwitchMaterial bleSwitch;
     private SwitchMaterial wifiSwitch;
+    private SwitchMaterial serialSwitch;
     private ReaderConfiguration configuration;
     private ReaderState readerState = ReaderState.disconnected();
     private boolean bindingUi;
@@ -126,6 +130,7 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
         rateSection = findViewById(R.id.ll_config_rate);
         bleActions = findViewById(R.id.ll_config_ble_actions);
         wifiActions = findViewById(R.id.ll_config_wifi_actions);
+        serialActions = findViewById(R.id.ll_config_serial_actions);
         disconnectRow = findViewById(R.id.ll_config_disconnect);
         connectedTargetView = findViewById(R.id.tv_config_connected_target);
         workModeRow = findViewById(R.id.row_config_work_mode);
@@ -136,42 +141,61 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
         inputGuardBottom = findViewById(R.id.v_config_input_guard_bottom);
         bleSwitch = findViewById(R.id.sw_config_ble);
         wifiSwitch = findViewById(R.id.sw_config_wifi);
+        serialSwitch = findViewById(R.id.sw_config_serial);
 
         bindingUi = true;
         bleSwitch.setChecked(true);
         wifiSwitch.setChecked(false);
+        serialSwitch.setChecked(false);
         bindingUi = false;
-        bindTransportRows(true, false);
+        bindTransportRows(TransportType.BLE, false);
         setHardwareEnabled(false);
 
         bleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (bindingUi) { return; }
-            if (!isChecked && !wifiSwitch.isChecked()) {
+            if (!isChecked && !wifiSwitch.isChecked() && !serialSwitch.isChecked()) {
                 buttonView.setChecked(true);
                 return;
             }
             if (!isChecked) { return; }
             bindingUi = true;
             wifiSwitch.setChecked(false);
+            serialSwitch.setChecked(false);
             bindingUi = false;
             dismissWifiKeyboard();
-            bindTransportRows(true, readerState.hasTransportLink());
+            bindTransportRows(TransportType.BLE, readerState.hasTransportLink());
         });
         wifiSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (bindingUi) { return; }
-            if (!isChecked && !bleSwitch.isChecked()) {
+            if (!isChecked && !bleSwitch.isChecked() && !serialSwitch.isChecked()) {
                 buttonView.setChecked(true);
                 return;
             }
             if (!isChecked) { return; }
             bindingUi = true;
             bleSwitch.setChecked(false);
+            serialSwitch.setChecked(false);
             bindingUi = false;
-            bindTransportRows(false, readerState.hasTransportLink());
+            bindTransportRows(TransportType.WIFI, readerState.hasTransportLink());
+        });
+        serialSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (bindingUi) { return; }
+            if (!isChecked && !bleSwitch.isChecked() && !wifiSwitch.isChecked()) {
+                buttonView.setChecked(true);
+                return;
+            }
+            if (!isChecked) { return; }
+            bindingUi = true;
+            bleSwitch.setChecked(false);
+            wifiSwitch.setChecked(false);
+            bindingUi = false;
+            dismissWifiKeyboard();
+            bindTransportRows(TransportType.SERIAL, readerState.hasTransportLink());
         });
         deviceInfoButton.setOnClickListener(view -> showDeviceInfo());
         findViewById(R.id.btn_config_ble_scan).setOnClickListener(view -> showBleDevices());
         findViewById(R.id.btn_config_wifi_connect).setOnClickListener(view -> connectWifi());
+        findViewById(R.id.btn_config_serial_connect).setOnClickListener(view -> showSerialConfig());
         findViewById(R.id.btn_config_disconnect).setOnClickListener(view -> disconnectDevice());
         wifiAddressView.setOnDoneAction(this::connectWifi);
         wifiAddressView.setOnEditingChangedListener(editing -> {
@@ -307,8 +331,18 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
             bleSwitch.setChecked(false);
             wifiSwitch.setChecked(true);
             bindingUi = false;
+        } else if (state.getTransport() == TransportType.SERIAL) {
+            bindingUi = true;
+            bleSwitch.setChecked(false);
+            wifiSwitch.setChecked(false);
+            serialSwitch.setChecked(true);
+            bindingUi = false;
         }
-        bindTransportRows(bleSwitch.isChecked(), state.hasTransportLink());
+        TransportType selected = state.getTransport() == TransportType.NONE
+                ? (bleSwitch.isChecked() ? TransportType.BLE
+                : wifiSwitch.isChecked() ? TransportType.WIFI : TransportType.SERIAL)
+                : state.getTransport();
+        bindTransportRows(selected, state.hasTransportLink());
         setHardwareEnabled(connected);
         if (state.getTransport() == TransportType.BLE && !state.getAddress().isEmpty()) {
             bleDeviceView.setText(bleDisplayName(state.getDeviceName()));
@@ -316,7 +350,7 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
 
         connectionDialogs.render(state, session);
         applyModuleUi(state.getModuleSubtype());
-        // The connection dialog ends before the parameter initialization dialog starts.
+        // 连接弹窗结束后，再启动参数初始化弹窗。
     }
 
     @Override
@@ -346,12 +380,14 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
         bindingUi = false;
     }
 
-    private void bindTransportRows(boolean ble, boolean connected) {
-        bleActions.setVisibility(!connected && ble ? View.VISIBLE : View.GONE);
-        wifiActions.setVisibility(!connected && !ble ? View.VISIBLE : View.GONE);
+    private void bindTransportRows(TransportType transport, boolean connected) {
+        bleActions.setVisibility(!connected && transport == TransportType.BLE ? View.VISIBLE : View.GONE);
+        wifiActions.setVisibility(!connected && transport == TransportType.WIFI ? View.VISIBLE : View.GONE);
+        serialActions.setVisibility(!connected && transport == TransportType.SERIAL ? View.VISIBLE : View.GONE);
         disconnectRow.setVisibility(connected ? View.VISIBLE : View.GONE);
         bleSwitch.setEnabled(!connected);
         wifiSwitch.setEnabled(!connected);
+        serialSwitch.setEnabled(!connected);
         if (connected) {
             String target = readerState.getTransport() == TransportType.BLE
                     ? bleDisplayName(readerState.getDeviceName()) : readerState.getAddress();
@@ -394,6 +430,21 @@ public final class ReaderConfigFragment extends ReaderFragment implements Reader
         wifiAddressView.clearError();
         dismissWifiKeyboard();
         requestNotificationPermission(() -> session.connectWifi(address));
+    }
+
+    private void showSerialConfig() {
+        new SerialConfigDialog.Builder(requireContext())
+                .setListener(new SerialConfigDialog.Builder.OnListener() {
+                    @Override
+                    public void onConfirm(@NonNull BaseDialog dialog, @NonNull SerialConfig config) {
+                        session.connectSerial(config);
+                    }
+
+                    @Override
+                    public void onInvalid(@NonNull BaseDialog dialog, String message) {
+                        toast(message == null ? getString(R.string.error_serial_open_failed) : message);
+                    }
+                }).show();
     }
 
     private void requestNotificationPermission(Runnable connectAction) {

@@ -13,12 +13,7 @@ import com.hjq.custom.widget.view.PressAlphaTextView;
 import com.leo.remote.R;
 import com.hjq.smallest.width.SmallestWidthAdaptation;
 
-/**
-
-
-
- *    标题栏初始器
- */
+/** 标题栏初始器 */
 public final class TitleBarStyle extends LightBarStyle {
 
     @Override

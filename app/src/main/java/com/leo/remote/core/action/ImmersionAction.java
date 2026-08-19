@@ -4,12 +4,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import com.hjq.bar.OnTitleBarListener;
 
-/**
-
-
-
- *    沉浸式意图
- */
+/** 沉浸式意图 */
 public interface ImmersionAction extends OnTitleBarListener {
 
     /**

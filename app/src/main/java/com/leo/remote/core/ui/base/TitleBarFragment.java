@@ -14,12 +14,7 @@ import com.leo.remote.R;
 import com.leo.remote.core.action.ImmersionAction;
 import com.leo.remote.core.action.TitleBarAction;
 
-/**
-
-
-
- *    带标题栏的 Fragment 业务基类
- */
+/** 带标题栏的 Fragment 业务基类 */
 public abstract class TitleBarFragment<A extends BaseActivity>
         extends BaseFragment<A> implements TitleBarAction, ImmersionAction {
 

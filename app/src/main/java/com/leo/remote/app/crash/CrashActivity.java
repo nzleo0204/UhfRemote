@@ -46,12 +46,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
-
-
-
- *    崩溃捕捉界面
- */
+/** 崩溃捕捉界面 */
 public final class CrashActivity extends BaseActivity {
 
     private static final String INTENT_KEY_IN_THROWABLE = "throwable";

@@ -234,6 +234,22 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/row_config_serial"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_44"
+                android:gravity="center_vertical">
+                <TextView
+                    style="@style/RfidRowLabel"
+                    android:text="@string/config_serial" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_config_serial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/rfid_switch_thumb_selector"
+                    app:trackTint="@color/rfid_switch_track_selector" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/ll_config_ble_actions"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_48"
@@ -270,6 +286,27 @@
                     android:paddingHorizontal="@dimen/dp_8" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_config_wifi_connect"
+                    style="@style/RfidTextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/config_connect" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_config_serial_actions"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_48"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/serial_config_title"
+                    android:textColor="@color/rfid_text"
+                    android:textSize="@dimen/sp_15" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_config_serial_connect"
                     style="@style/RfidTextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -26,12 +26,7 @@ import com.scwang.smart.refresh.layout.constant.RefreshState;
 import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
 import com.scwang.smart.refresh.layout.simple.SimpleComponent;
 
-/**
-
-
-
- *    Material 风格的刷新球，参考 {@link com.scwang.smart.refresh.header.MaterialHeader}
- */
+/** Material 风格的刷新球，参考 {@link com.scwang.smart.refresh.header.MaterialHeader} */
 public final class MaterialHeader extends SimpleComponent implements RefreshHeader {
 
     /** 刷新球大样式 */

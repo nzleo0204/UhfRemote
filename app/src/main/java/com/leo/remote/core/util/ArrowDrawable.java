@@ -21,12 +21,7 @@ import androidx.core.content.ContextCompat;
 import com.leo.remote.R;
 import com.hjq.smallest.width.SmallestWidthAdaptation;
 
-/**
-
-
-
- *    带箭头背景的 Drawable
- */
+/** 带箭头背景的 Drawable */
 @SuppressLint("RtlHardcoded")
 public final class ArrowDrawable extends Drawable {
 

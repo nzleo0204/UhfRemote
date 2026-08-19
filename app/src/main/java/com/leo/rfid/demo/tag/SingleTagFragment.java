@@ -262,19 +262,19 @@ public final class SingleTagFragment extends ReaderFragment implements ReaderObs
         }
 
         switch (bankPosition) {
-            case 0:  // Reserved
+            case 0:  // 保留区
                 readAddressView.setText("0");
                 readLengthView.setText("2");
                 break;
-            case 1:  // EPC
+            case 1:  // EPC 区
                 readAddressView.setText("2");
                 readLengthView.setText("6");
                 break;
-            case 2:  // TID
+            case 2:  // TID 区
                 readAddressView.setText("0");
                 readLengthView.setText("6");
                 break;
-            case 3:  // USER
+            case 3:  // USER 区
                 readAddressView.setText("0");
                 readLengthView.setText("8");
                 break;

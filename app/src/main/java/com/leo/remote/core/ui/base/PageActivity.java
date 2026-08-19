@@ -18,7 +18,7 @@ public abstract class PageActivity extends BaseActivity {
     }
 
     protected void initPageView() {
-        // Optional for subclasses.
+        // 子类按需重写。
     }
 
     @Nullable

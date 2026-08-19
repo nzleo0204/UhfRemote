@@ -10,24 +10,15 @@ import androidx.annotation.NonNull;
 import com.airbnb.lottie.LottieAnimationView;
 import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
-import com.hjq.base.BaseDialog;
-import com.hjq.core.manager.ActivityManager;
 import com.hjq.custom.widget.view.SlantedTextView;
 import com.leo.remote.R;
 import com.leo.remote.core.ui.base.BaseActivity;
 import com.leo.remote.app.MainActivity;
 import com.leo.remote.app.bootstrap.AppInitializer;
 import com.leo.remote.core.util.AppConfig;
-import com.leo.remote.core.ui.dialog.PrivacyAgreementDialog;
-import com.leo.remote.core.ui.dialog.MessageDialog;
 import java.util.Locale;
 
-/**
-
-
-
- *    闪屏界面
- */
+/** 闪屏界面。 */
 @SuppressLint("CustomSplashScreen")
 public final class SplashActivity extends BaseActivity {
 
@@ -60,27 +51,9 @@ public final class SplashActivity extends BaseActivity {
             public void onAnimationEnd(Animator animation) {
                 lottieView.removeAnimatorListener(this);
 
-                if (AppInitializer.isAgreePrivacy(SplashActivity.this)) {
-                    agreePrivacyAfter();
-                    return;
-                }
-
-                // 弹窗用户协议与隐私政策对话框
-                new PrivacyAgreementDialog.Builder(SplashActivity.this)
-                        .setListener(new MessageDialog.OnListener() {
-
-                            @Override
-                            public void onConfirm(@NonNull BaseDialog dialog) {
-                                AppInitializer.setAgreePrivacy(SplashActivity.this, true);
-                                agreePrivacyAfter();
-                            }
-
-                            @Override
-                            public void onCancel(@NonNull BaseDialog dialog) {
-                                ActivityManager.getInstance().finishAllActivities();
-                            }
-                        })
-                        .show();
+                AppInitializer.initializeReader(getApplication());
+                MainActivity.start(SplashActivity.this);
+                finish();
             }
         });
     }
@@ -127,12 +100,4 @@ public final class SplashActivity extends BaseActivity {
         super.onDestroy();
     }
 
-    /**
-     * 同意隐私后需要做的事情
-     */
-    private void agreePrivacyAfter() {
-        AppInitializer.initializeReader(getApplication());
-        MainActivity.start(this);
-        finish();
-    }
 }

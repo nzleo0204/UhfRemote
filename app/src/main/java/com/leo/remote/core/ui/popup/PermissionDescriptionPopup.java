@@ -7,12 +7,7 @@ import androidx.annotation.NonNull;
 import com.hjq.base.BasePopupWindow;
 import com.leo.remote.R;
 
-/**
-
-
-
- *    权限说明弹窗
- */
+/** 权限说明弹窗 */
 public final class PermissionDescriptionPopup {
 
     public static final class Builder
