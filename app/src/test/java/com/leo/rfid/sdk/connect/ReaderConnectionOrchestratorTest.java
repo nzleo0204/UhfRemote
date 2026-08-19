@@ -184,8 +184,10 @@ public class ReaderConnectionOrchestratorTest {
 
         awaitPhase(ConnectionPhase.CONNECTED);
         assertEquals(1, gateway.openSerialCalls.get());
+        assertEquals(115200, gateway.serialBaudRate);
         assertEquals(1, power.powerOnCalls.get());
         assertEquals(TransportType.SERIAL, connections.getState().getTransport());
+        assertEquals(ModuleSubtype.R2000, connections.getState().getModuleSubtype());
 
         orchestrator.disconnect(DisconnectReason.USER);
         awaitPhase(ConnectionPhase.DISCONNECTED);
@@ -292,18 +294,24 @@ public class ReaderConnectionOrchestratorTest {
         private volatile CountDownLatch protocolBlock;
         private volatile int networkStatus;
         private volatile int serialStatus;
+        private volatile int serialBaudRate;
+        private volatile ModuleSubtype serialModuleSubtype;
 
         @Override public int initialize() { return 0; }
         @Override public void deinitialize() {}
         @Override public void useRm70xx() {}
+        @Override public void setModuleSubtype(ModuleSubtype subtype) {
+            serialModuleSubtype = subtype;
+        }
         @Override public void setTransport(TransportType transport) {}
         @Override public int connectNetwork(String address, int port) { return networkStatus; }
         @Override public int closeNetwork() {
             closeNetworkCalls.incrementAndGet();
             return 0;
         }
-        @Override public int openSerial(String path) {
+        @Override public int openSerial(String path, int baudRate) {
             openSerialCalls.incrementAndGet();
+            serialBaudRate = baudRate;
             return serialStatus;
         }
         @Override public int closeSerial() {
@@ -317,6 +325,10 @@ public class ReaderConnectionOrchestratorTest {
             await(moduleBlock);
             if (failModuleReads.getAndUpdate(value -> Math.max(0, value - 1)) > 0) {
                 throw new ReaderException("module failure", 12);
+            }
+            if (serialModuleSubtype != null) {
+                return new ReaderModuleInfo(serialModuleSubtype,
+                        serialModuleSubtype.getRawValue(), "", "", "module-sn", "module-version");
             }
             return new ReaderModuleInfo(ModuleSubtype.RM610, 6,
                     "board-sn", "board-version", "module-sn", "module-version");

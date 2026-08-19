@@ -5,6 +5,7 @@ import com.leo.rfid.sdk.storage.ReaderConfigCache;
 import com.leo.rfid.sdk.storage.ReaderConfigurationStore;
 import com.leo.rfid.sdk.bridge.*;
 
+import androidx.annotation.Nullable;
 import android.util.Log;
 import java.util.function.Consumer;
 
@@ -35,11 +36,12 @@ final class ReaderHandshake {
             throws ReaderException {
         ReaderModuleInfo info = readModuleInfoAfterStoppingInventory(transport, inventory);
         if (info.subtype == ModuleSubtype.UNKNOWN) {
-            throw new ReaderException("Unknown RM70XX subtype: " + info.rawSubtype, info.rawSubtype);
+            throw new ReaderException("Unknown reader module subtype: " + info.rawSubtype,
+                    info.rawSubtype);
         }
         if (isBlank(info.boardSerial) || isBlank(info.boardVersion)
                 || isBlank(info.moduleSerial) || isBlank(info.moduleVersion)) {
-            throw new ReaderException("RM70XX device information is incomplete", -7);
+            throw new ReaderException("Reader device information is incomplete", -7);
         }
         int status = configuration.setProtocol(TagProtocol.ISO_18000_6C);
         if (status != 0) {
@@ -59,8 +61,19 @@ final class ReaderHandshake {
             ReaderConfigurationGateway configuration, InventoryBridge inventory,
             ReaderConfigurationStore cache, Consumer<ReaderProgress> progress)
             throws ReaderException {
+        return perform(transport, configuration, inventory, cache, progress, null);
+    }
+
+    /**
+     * 执行完整握手；串口直连模块不调用 RM70xx 专用板卡信息接口。
+     */
+    static Result perform(ReaderTransportGateway transport,
+            ReaderConfigurationGateway configuration, InventoryBridge inventory,
+            ReaderConfigurationStore cache, Consumer<ReaderProgress> progress,
+            @Nullable TransportType transportType)
+            throws ReaderException {
         ReaderModuleInfo info = readModuleInfoAfterStoppingInventory(transport, inventory);
-        validateModuleInfo(info);
+        validateModuleInfo(info, transportType == TransportType.SERIAL);
 
         progress.accept(ReaderProgress.UPDATING_PARAMETERS);
         int status = configuration.setProtocol(TagProtocol.ISO_18000_6C);
@@ -183,14 +196,15 @@ final class ReaderHandshake {
         return result;
     }
 
-    private static void validateModuleInfo(ReaderModuleInfo info) throws ReaderException {
+    private static void validateModuleInfo(ReaderModuleInfo info, boolean directModule)
+            throws ReaderException {
         if (info == null || info.subtype == ModuleSubtype.UNKNOWN) {
             int raw = info == null ? Integer.MIN_VALUE : info.rawSubtype;
-            throw new ReaderException("Unknown RM70XX subtype: " + raw, raw);
+            throw new ReaderException("Unknown reader module subtype: " + raw, raw);
         }
-        if (isBlank(info.boardSerial) || isBlank(info.boardVersion)
-                || isBlank(info.moduleSerial) || isBlank(info.moduleVersion)) {
-            throw new ReaderException("RM70XX device information is incomplete", -7);
+        if (isBlank(info.moduleSerial) || isBlank(info.moduleVersion)
+                || (!directModule && (isBlank(info.boardSerial) || isBlank(info.boardVersion)))) {
+            throw new ReaderException("Reader device information is incomplete", -7);
         }
     }
 

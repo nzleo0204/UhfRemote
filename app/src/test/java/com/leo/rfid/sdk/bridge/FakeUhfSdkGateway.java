@@ -37,7 +37,7 @@ public final class FakeUhfSdkGateway implements ReaderTransportGateway,
     @Override public void setTransport(TransportType transport) {}
     @Override public int connectNetwork(String address, int port) { return 0; }
     @Override public int closeNetwork() { return 0; }
-    @Override public int openSerial(String path) { return 0; }
+    @Override public int openSerial(String path, int baudRate) { return 0; }
     @Override public int closeSerial() { return 0; }
     @Override public void setOutboundDataListener(OutboundDataListener listener) {}
     @Override public void pushRemoteData(byte[] data) {}

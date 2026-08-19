@@ -30,7 +30,9 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
         ReaderConfigurationGateway, InventoryBridge, ReaderTagGateway {
     private static final String TAG = "UhfReader";
     private static final int STATUS_OK = 0;
+    private static final int UNSUPPORTED_SERIAL_BAUD_RATE = -68;
     private final Linkage linkage = new Linkage();
+    private volatile ModuleSubtype configuredModuleSubtype;
 
     @Override
     public int initialize() { return linkage.initRFID(); }
@@ -39,7 +41,19 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
     public void deinitialize() { linkage.deinitRFID(); }
 
     @Override
-    public void useRm70xx() { linkage.setRFModuleType(2); }
+    public void useRm70xx() {
+        configuredModuleSubtype = null;
+        linkage.setRFModuleType(2);
+    }
+
+    @Override
+    public void setModuleSubtype(ModuleSubtype subtype) {
+        if (subtype == null || subtype == ModuleSubtype.UNKNOWN) {
+            throw new IllegalArgumentException("串口模块型号无效");
+        }
+        configuredModuleSubtype = subtype;
+        linkage.setRFModuleType(subtype.getRawValue());
+    }
 
     @Override
     public void setTransport(TransportType transport) {
@@ -56,7 +70,11 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
     public int closeNetwork() { return linkage.closeNetwork(); }
 
     @Override
-    public int openSerial(String path) { return linkage.open_serial(path); }
+    public int openSerial(String path, int baudRate) {
+        // Linkage 当前只暴露 open_serial(String)，其串口参数固定为 115200。
+        if (baudRate != 115200) { return UNSUPPORTED_SERIAL_BAUD_RATE; }
+        return linkage.open_serial(path);
+    }
 
     @Override
     public int closeSerial() { return linkage.close_serial(); }
@@ -75,6 +93,13 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
 
     @Override
     public ReaderModuleInfo readModuleInfo() throws ReaderException {
+        ModuleSubtype directSubtype = configuredModuleSubtype;
+        if (directSubtype != null) {
+            String moduleSerial = readString(linkage::getSerialNumber, "getSerialNumber");
+            String moduleVersion = readString(linkage::getVersion, "getVersion");
+            return new ReaderModuleInfo(directSubtype, directSubtype.getRawValue(), "", "",
+                    moduleSerial, moduleVersion);
+        }
         String boardSerial = readString(linkage::getBoardSerialNumber, "getBoardSerialNumber");
         String boardVersion = readString(linkage::getBoardSoftVersion, "getBoardSoftVersion");
         String moduleSerial = readString(linkage::getSerialNumber, "getSerialNumber");

@@ -84,6 +84,18 @@ public class ReaderHandshakeTest {
                 < gateway.eventLog.indexOf("setProtocol"));
     }
 
+    @Test
+    public void serialHandshakeAcceptsDirectModuleWithoutBoardInformation() throws Exception {
+        FakeGateway gateway = new FakeGateway();
+        gateway.moduleInfo = new ReaderModuleInfo(
+                ModuleSubtype.R2000, 0, "", "", "direct-sn", "direct-version");
+
+        ReaderHandshake.Result result = ReaderHandshake.perform(gateway, gateway, gateway,
+                new InMemoryConfigurationStore(), ignored -> {}, TransportType.SERIAL);
+
+        assertEquals(ModuleSubtype.R2000, result.moduleInfo.subtype);
+    }
+
     private static final class InMemoryConfigurationStore implements ReaderConfigurationStore {
         private ReaderConfiguration configuration;
         private int selected;
@@ -130,7 +142,7 @@ public class ReaderHandshakeTest {
         @Override public void setTransport(TransportType transport) {}
         @Override public int connectNetwork(String address, int port) { return 0; }
         @Override public int closeNetwork() { return 0; }
-        @Override public int openSerial(String path) { return 0; }
+        @Override public int openSerial(String path, int baudRate) { return 0; }
         @Override public int closeSerial() { return 0; }
         @Override public void setOutboundDataListener(OutboundDataListener listener) {}
         @Override public void pushRemoteData(byte[] data) {}

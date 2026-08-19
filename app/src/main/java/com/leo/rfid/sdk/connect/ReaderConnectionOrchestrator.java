@@ -234,14 +234,14 @@ final class ReaderConnectionOrchestrator {
                 if (!isCurrent(generation)) { return; }
                 ensureSdkInitialized();
                 transportGateway.setTransport(TransportType.SERIAL);
-                transportGateway.useRm70xx();
+                transportGateway.setModuleSubtype(config.moduleSubtype);
                 powerController.powerOn();
                 waitForSerialPower(powerController);
                 if (!isCurrent(generation)) {
                     powerController.powerOff();
                     return;
                 }
-                int status = transportGateway.openSerial(config.portPath);
+                int status = transportGateway.openSerial(config.portPath, config.baudRate);
                 if (status != 0) {
                     throw new ReaderException("串口打开失败", status);
                 }
@@ -356,7 +356,7 @@ final class ReaderConnectionOrchestrator {
             disconnectTransport(attemptTransport, false);
             return;
         }
-        LOGGER.info("RM70XX handshake started generation=" + generation
+        LOGGER.info("Reader handshake started generation=" + generation
                 + " transport=" + attemptTransport + " address=" + currentState().getAddress());
         if (!connectionManager.publishIfCurrent(generation, currentState().buildUpon()
                 .phase(ConnectionPhase.VERIFYING_MODULE)
@@ -374,7 +374,7 @@ final class ReaderConnectionOrchestrator {
                                 : ConnectionPhase.VERIFYING_MODULE;
                         connectionManager.publishIfCurrent(generation, currentState().buildUpon()
                                 .phase(phase).message(resolveMessage(resourceId)).build());
-                    });
+                    }, attemptTransport);
             if (!isCurrent(generation)) {
                 disconnectTransport(attemptTransport, false);
                 return;
@@ -406,7 +406,7 @@ final class ReaderConnectionOrchestrator {
             configurationManager.publishCurrent();
             if (attemptTransport == TransportType.WIFI) { scheduleWifiHeartbeat(generation); }
         } catch (ReaderException error) {
-            LOGGER.log(Level.SEVERE, "RM70XX handshake failed code=" + error.getErrorCode()
+            LOGGER.log(Level.SEVERE, "Reader handshake failed code=" + error.getErrorCode()
                     + " message=" + error.getMessage(), error);
             disconnectTransport(attemptTransport, false);
             if (isCurrent(generation)) {

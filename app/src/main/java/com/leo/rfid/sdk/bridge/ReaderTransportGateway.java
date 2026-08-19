@@ -11,11 +11,13 @@ public interface ReaderTransportGateway {
     int initialize();
     void deinitialize();
     void useRm70xx();
+    /** 设置直连串口模块的 SDK 解析类型。 */
+    default void setModuleSubtype(ModuleSubtype subtype) { }
     void setTransport(TransportType transport);
     int connectNetwork(String address, int port);
     int closeNetwork();
     /** 打开由原生 Linkage 管理的串口设备节点。 */
-    int openSerial(String path);
+    int openSerial(String path, int baudRate);
     /** 关闭当前原生串口设备节点。 */
     int closeSerial();
     void setOutboundDataListener(OutboundDataListener listener);

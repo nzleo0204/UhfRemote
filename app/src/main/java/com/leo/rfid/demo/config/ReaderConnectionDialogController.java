@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import com.leo.rfid.sdk.model.ConnectionPhase;
 import com.leo.rfid.sdk.connect.ReaderSessionManager;
 import com.leo.rfid.sdk.model.ReaderState;
-import com.leo.rfid.demo.common.ConnectionDialog;
+import com.leo.rfid.demo.connection.ConnectionDialog;
 import com.leo.remote.core.ui.dialog.WaitDialog;
 
 /**

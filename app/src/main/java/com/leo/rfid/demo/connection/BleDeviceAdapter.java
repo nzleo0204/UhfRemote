@@ -1,4 +1,4 @@
-package com.leo.rfid.demo.config;
+package com.leo.rfid.demo.connection;
 
 import android.view.LayoutInflater;
 import android.view.View;

@@ -3,9 +3,10 @@ package com.leo.rfid.sdk.connect.serial;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import com.leo.rfid.sdk.connect.Transport;
 
 /** 串口物理层传输，负责端口打开、收发数据和异常断开通知。 */
-public final class SerialTransport {
+public final class SerialTransport implements Transport {
     public interface Listener {
         void onInboundData(byte[] data);
         void onDisconnected(String message, int errorCode);
@@ -31,6 +32,7 @@ public final class SerialTransport {
         this.listener = listener;
     }
 
+    @Override
     public void connect() throws IOException {
         synchronized (lock) {
             if (connected) { return; }
@@ -49,8 +51,10 @@ public final class SerialTransport {
         }
     }
 
+    @Override
     public boolean isConnected() { return connected; }
 
+    @Override
     public void write(byte[] data) throws IOException {
         if (data == null) { throw new NullPointerException("data"); }
         SerialPortManager.Port current;
@@ -63,6 +67,7 @@ public final class SerialTransport {
         output.flush();
     }
 
+    @Override
     public void disconnect() {
         SerialPortManager.Port current;
         synchronized (lock) {

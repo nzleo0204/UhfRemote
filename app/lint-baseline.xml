@@ -175,7 +175,7 @@
         errorLine1="        Log.i(TAG, &quot;scan start generation=&quot; + generation);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="194"
             column="9"/>
     </issue>
@@ -186,7 +186,7 @@
         errorLine1="                Log.i(TAG, &quot;scan stop generation=&quot; + generation + &quot; count=&quot; + devices.size(generation));"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="211"
             column="17"/>
     </issue>
@@ -197,7 +197,7 @@
         errorLine1="                Log.e(TAG, &quot;scan error generation=&quot; + generation + &quot; code=&quot; + errorCode"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="226"
             column="17"/>
     </issue>
@@ -208,7 +208,7 @@
         errorLine1="        Log.i(TAG, &quot;device selected name=&quot; + device.getName() + &quot; address=&quot; + device.getAddress()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="259"
             column="9"/>
     </issue>
@@ -219,7 +219,7 @@
         errorLine1="        Log.i(TAG, &quot;scan sheet closed generation=&quot; + activeGeneration);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="266"
             column="9"/>
     </issue>
@@ -561,7 +561,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
-            line="110"
+            line="123"
             column="13"/>
     </issue>
 
@@ -572,7 +572,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
-            line="125"
+            line="138"
             column="13"/>
     </issue>
 
@@ -583,7 +583,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
-            line="140"
+            line="153"
             column="13"/>
     </issue>
 
@@ -594,7 +594,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
-            line="151"
+            line="164"
             column="17"/>
     </issue>
 
@@ -605,7 +605,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
-            line="176"
+            line="189"
             column="13"/>
     </issue>
 
@@ -3161,7 +3161,7 @@
         errorLine1="        if (statusView != null) { statusView.setText(&quot;已发现 &quot; + rows.size() + &quot; 个设备&quot;); }"
         errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/config/BleDeviceSheet.java"
+            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
             line="67"
             column="54"/>
     </issue>

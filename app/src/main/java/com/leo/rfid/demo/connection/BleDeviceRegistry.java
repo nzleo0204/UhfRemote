@@ -1,4 +1,4 @@
-package com.leo.rfid.demo.config;
+package com.leo.rfid.demo.connection;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

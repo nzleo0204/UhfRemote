@@ -1,4 +1,4 @@
-package com.leo.rfid.demo.config;
+package com.leo.rfid.demo.connection;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -27,7 +27,7 @@ import cn.wandersnail.ble.callback.ScanListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.hjq.base.BottomSheetDialog;
 import com.leo.remote.R;
-import com.leo.rfid.demo.config.BleDeviceAdapter;
+import com.leo.rfid.demo.connection.BleDeviceAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

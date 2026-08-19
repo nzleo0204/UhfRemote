@@ -1,4 +1,4 @@
-package com.leo.rfid.demo.config;
+package com.leo.rfid.demo.connection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

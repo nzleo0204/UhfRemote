@@ -35,7 +35,7 @@ import com.leo.rfid.sdk.model.ReaderState;
 import com.leo.rfid.sdk.model.TagProtocol;
 import com.leo.rfid.sdk.model.TransportType;
 import com.leo.rfid.sdk.connect.serial.SerialConfig;
-import com.leo.rfid.demo.config.BleDeviceSheet;
+import com.leo.rfid.demo.connection.BleDeviceSheet;
 import com.leo.rfid.demo.config.DeviceInfoDialog;
 import com.leo.remote.core.ui.dialog.MessageDialog;
 import com.leo.remote.core.ui.dialog.SelectDialog;

@@ -54,6 +54,9 @@ public final class SerialPortManager {
     }
 
     private static Port openFilePort(String path, int baudRate) throws IOException {
+        if (baudRate != SerialConfig.DEFAULT_BAUD_RATE) {
+            throw new IOException("默认串口实现仅支持 115200 波特率");
+        }
         File file = new File(path);
         if (!file.exists()) {
             throw new FileNotFoundException("串口不存在: " + path);

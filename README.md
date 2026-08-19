@@ -9,8 +9,11 @@ UhfRemote/
 ├── app/                        # 主应用模块
 │   ├── src/main/java/
 │   │   └── com/leo/
-│   │       ├── remote/         # 应用壳、业务模块和基础组件
-│   │       └── rfid/           # 可复用 RFID 演示、SDK 和 Native 桥接
+│   │       └── uhf/            # 应用根包
+│   │           ├── app/        # 应用壳、启动与崩溃处理
+│   │           ├── business/   # 库存、订单、发货和认证业务
+│   │           ├── core/       # 通用框架核心
+│   │           └── rfid/       # 可复用 RFID 演示、SDK 和 Native 桥接
 │   └── src/main/res/           # 资源文件
 ├── library/                    # 基础库模块
 └── docs/                       # 文档

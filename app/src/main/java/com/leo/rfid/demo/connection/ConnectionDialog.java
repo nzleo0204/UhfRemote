@@ -1,4 +1,4 @@
-package com.leo.rfid.demo.common;
+package com.leo.rfid.demo.connection;
 
 import android.app.Dialog;
 import android.os.Bundle;
