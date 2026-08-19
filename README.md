@@ -9,8 +9,8 @@ UhfRemote/
 ├── app/                        # 主应用模块
 │   ├── src/main/java/
 │   │   └── com/leo/
-│   │       ├── rfid/           # 可复用 RFID 演示、SDK 和 Native 桥接
-│   │       └── remote/         # 应用壳、业务模块和基础组件
+│   │       ├── remote/         # 应用壳、业务模块和基础组件
+│   │       └── rfid/           # 可复用 RFID 演示、SDK 和 Native 桥接
 │   └── src/main/res/           # 资源文件
 ├── library/                    # 基础库模块
 └── docs/                       # 文档
