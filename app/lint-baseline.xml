@@ -175,7 +175,7 @@
         errorLine1="        Log.i(TAG, &quot;scan start generation=&quot; + generation);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="194"
             column="9"/>
     </issue>
@@ -186,7 +186,7 @@
         errorLine1="                Log.i(TAG, &quot;scan stop generation=&quot; + generation + &quot; count=&quot; + devices.size(generation));"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="211"
             column="17"/>
     </issue>
@@ -197,7 +197,7 @@
         errorLine1="                Log.e(TAG, &quot;scan error generation=&quot; + generation + &quot; code=&quot; + errorCode"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="226"
             column="17"/>
     </issue>
@@ -208,7 +208,7 @@
         errorLine1="        Log.i(TAG, &quot;device selected name=&quot; + device.getName() + &quot; address=&quot; + device.getAddress()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="259"
             column="9"/>
     </issue>
@@ -219,7 +219,7 @@
         errorLine1="        Log.i(TAG, &quot;scan sheet closed generation=&quot; + activeGeneration);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="266"
             column="9"/>
     </issue>
@@ -230,7 +230,7 @@
         errorLine1="        Log.i(TAG, &quot;connect attempt=&quot; + attemptId + &quot; name=&quot; + target.getName()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="65"
             column="9"/>
     </issue>
@@ -241,7 +241,7 @@
         errorLine1="        Log.d(TAG, &quot;state attempt=&quot; + attemptId + &quot; state=&quot; + state"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="126"
             column="9"/>
     </issue>
@@ -252,7 +252,7 @@
         errorLine1="            Log.d(TAG, &quot;Bluetooth adapter is available; waiting for explicit connection&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="145"
             column="13"/>
     </issue>
@@ -263,7 +263,7 @@
         errorLine1="            Log.e(TAG, &quot;connect failed attempt=&quot; + attemptId + &quot; type=&quot; + failType);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="152"
             column="13"/>
     </issue>
@@ -274,7 +274,7 @@
         errorLine1="            Log.e(TAG, &quot;connect timeout attempt=&quot; + attemptId + &quot; type=&quot; + type);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="160"
             column="13"/>
     </issue>
@@ -285,7 +285,7 @@
         errorLine1="            Log.e(TAG, &quot;connection error attempt=&quot; + attemptId + &quot; gattStatus=&quot; + status);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="168"
             column="13"/>
     </issue>
@@ -296,7 +296,7 @@
         errorLine1="            Log.v(TAG, &quot;receive attempt=&quot; + attemptId + &quot; bytes=&quot; + value.length);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="177"
             column="13"/>
     </issue>
@@ -307,7 +307,7 @@
         errorLine1="        Log.e(TAG, &quot;request failed type=&quot; + request.getType() + &quot; failType=&quot; + failType"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="185"
             column="9"/>
     </issue>
@@ -318,7 +318,7 @@
         errorLine1="            Log.i(TAG, &quot;data channel attempt=&quot; + attemptId + &quot; service=&quot; + serviceUuid"
         errorLine2="            ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="229"
             column="13"/>
     </issue>
@@ -329,7 +329,7 @@
         errorLine1="            Log.i(TAG, &quot;service attempt=&quot; + attemptId + &quot; uuid=&quot; + service.getUuid());"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="313"
             column="13"/>
     </issue>
@@ -340,7 +340,7 @@
         errorLine1="                Log.i(TAG, &quot;characteristic attempt=&quot; + attemptId + &quot; uuid=&quot; + characteristic.getUuid()"
         errorLine2="                ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="315"
             column="17"/>
     </issue>
@@ -351,7 +351,7 @@
         errorLine1="                        Log.i(TAG, &quot;MTU negotiated attempt=&quot; + requestAttempt + &quot; mtu=&quot; + mtu"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="335"
             column="25"/>
     </issue>
@@ -362,7 +362,7 @@
         errorLine1="                        Log.w(TAG, &quot;MTU negotiation failed attempt=&quot; + requestAttempt"
         errorLine2="                        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="345"
             column="25"/>
     </issue>
@@ -373,7 +373,7 @@
         errorLine1="        Log.i(TAG, &quot;receive channel attempt=&quot; + requestAttempt + &quot; enabled=&quot; + enabled + &quot; service=&quot; + serviceUuid"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="397"
             column="9"/>
     </issue>
@@ -384,7 +384,7 @@
         errorLine1="        Log.d(TAG, &quot;更新盘点列表，数量: &quot; + values.size());"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/inventory/InventoryAdapter.java"
             line="80"
             column="9"/>
     </issue>
@@ -395,7 +395,7 @@
         errorLine1="        Log.d(TAG, &quot;设置模块类型: &quot; + subtype);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/inventory/InventoryAdapter.java"
             line="85"
             column="9"/>
     </issue>
@@ -406,7 +406,7 @@
         errorLine1="        Log.d(TAG, &quot;更新 Mask 配置: &quot; + (config != null ? &quot;已启用&quot; : &quot;未启用&quot;));"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/inventory/InventoryAdapter.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/inventory/InventoryAdapter.java"
             line="109"
             column="9"/>
     </issue>
@@ -417,7 +417,7 @@
         errorLine1="                    Log.d(TAG, &quot;切换页面: &quot; + position);"
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="65"
             column="21"/>
     </issue>
@@ -428,7 +428,7 @@
         errorLine1="                        Log.i(TAG, &quot;离开盘点页面，自动停止盘点&quot;);"
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="68"
             column="25"/>
     </issue>
@@ -439,7 +439,7 @@
         errorLine1="        Log.d(TAG, &quot;初始化主界面视图&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="95"
             column="9"/>
     </issue>
@@ -450,7 +450,7 @@
         errorLine1="        Log.d(TAG, &quot;初始化主界面数据，加载 Fragment&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="124"
             column="9"/>
     </issue>
@@ -461,7 +461,7 @@
         errorLine1="        Log.d(TAG, &quot;导航栏点击: &quot; + position);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="205"
             column="9"/>
     </issue>
@@ -472,7 +472,7 @@
         errorLine1="        Log.d(TAG, &quot;销毁主界面，清理资源&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/remote/app/MainActivity.java"
+            file="src/main/java/com/leo/uhf/app/MainActivity.java"
             line="240"
             column="9"/>
     </issue>
@@ -483,7 +483,7 @@
         errorLine1="        Log.i(TAG, &quot;创建 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="48"
             column="9"/>
     </issue>
@@ -494,7 +494,7 @@
         errorLine1="        Log.d(TAG, &quot;更新 Reader 状态: phase=&quot; + updated.getPhase()"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="72"
             column="9"/>
     </issue>
@@ -505,7 +505,7 @@
         errorLine1="        Log.i(TAG, &quot;销毁 Reader 连接服务&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="82"
             column="9"/>
     </issue>
@@ -516,7 +516,7 @@
         errorLine1="            Log.d(TAG, &quot;释放 Wi-Fi 锁&quot;);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="85"
             column="13"/>
     </issue>
@@ -527,7 +527,7 @@
         errorLine1="            Log.e(TAG, &quot;Unable to start reader connection service&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="32"
             column="13"/>
     </issue>
@@ -538,7 +538,7 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service created&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="53"
             column="9"/>
     </issue>
@@ -549,7 +549,7 @@
         errorLine1="        Log.i(TAG, &quot;reader connection foreground service destroyed&quot;);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionServiceController.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionServiceController.java"
             line="60"
             column="9"/>
     </issue>
@@ -560,7 +560,7 @@
         errorLine1="            Log.w(TAG, &quot;读取功率失败，使用缓存值 &quot; + power, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/ReaderHandshake.java"
             line="123"
             column="13"/>
     </issue>
@@ -571,7 +571,7 @@
         errorLine1="            Log.w(TAG, &quot;读取盘点区域失败，使用缓存值&quot;, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/ReaderHandshake.java"
             line="138"
             column="13"/>
     </issue>
@@ -582,7 +582,7 @@
         errorLine1="            Log.w(TAG, &quot;读取 Session 失败，使用缓存值 S&quot; + session, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/ReaderHandshake.java"
             line="153"
             column="13"/>
     </issue>
@@ -593,7 +593,7 @@
         errorLine1="                Log.w(TAG, &quot;读取 BLF 失败，使用缓存值 &quot; + blf, error);"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/ReaderHandshake.java"
             line="164"
             column="17"/>
     </issue>
@@ -604,7 +604,7 @@
         errorLine1="            Log.w(TAG, &quot;读取 Q 值失败，使用缓存值 Q&quot; + q, error);"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/ReaderHandshake.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/ReaderHandshake.java"
             line="189"
             column="13"/>
     </issue>
@@ -637,7 +637,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP || currentConnection == null) {"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/bluetooth/BleTransport.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/bluetooth/BleTransport.java"
             line="324"
             column="13"/>
     </issue>
@@ -648,7 +648,7 @@
         errorLine1="        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M"
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="150"
             column="16"/>
     </issue>
@@ -659,7 +659,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.O) { return; }"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/sdk/connect/service/ReaderConnectionService.java"
+            file="src/main/java/com/leo/uhf/rfid/sdk/connection/service/ReaderConnectionService.java"
             line="163"
             column="13"/>
     </issue>
@@ -3161,7 +3161,7 @@
         errorLine1="        if (statusView != null) { statusView.setText(&quot;已发现 &quot; + rows.size() + &quot; 个设备&quot;); }"
         errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/connection/BleDeviceSheet.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/connection/BleDeviceSheet.java"
             line="67"
             column="54"/>
     </issue>
@@ -3172,7 +3172,7 @@
         errorLine1="        readPasswordView.setText(&quot;00000000&quot;);"
         errorLine2="                                 ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/SingleTagFragment.java"
             line="210"
             column="34"/>
     </issue>
@@ -3183,7 +3183,7 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/SingleTagFragment.java"
             line="359"
             column="29"/>
     </issue>
@@ -3194,7 +3194,7 @@
         errorLine1="            epcView.setText(&quot;标签epc全值：&quot; + presentation.fullEpcHex);"
         errorLine2="                            ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/SingleTagFragment.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/SingleTagFragment.java"
             line="359"
             column="29"/>
     </issue>
@@ -3205,7 +3205,7 @@
         errorLine1="        accessPassword.setText(&quot;00000000&quot;);"
         errorLine2="                               ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/TagKillDialog.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/TagKillDialog.java"
             line="28"
             column="32"/>
     </issue>
@@ -3216,7 +3216,7 @@
         errorLine1="        killPassword.setText(&quot;00000000&quot;);"
         errorLine2="                             ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/TagKillDialog.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/TagKillDialog.java"
             line="29"
             column="30"/>
     </issue>
@@ -3227,7 +3227,7 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/TagLockDialog.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/TagLockDialog.java"
             line="37"
             column="26"/>
     </issue>
@@ -3238,7 +3238,7 @@
         errorLine1="        password.setText(&quot;00000000&quot;);"
         errorLine2="                         ~~~~~~~~~~">
         <location
-            file="src/main/java/com/leo/rfid/demo/tag/TagWriteDialog.java"
+            file="src/main/java/com/leo/uhf/rfid/ui/tag/TagWriteDialog.java"
             line="70"
             column="26"/>
     </issue>

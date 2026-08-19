@@ -19,7 +19,7 @@ UhfRemote/
 └── docs/                       # 文档
 ```
 
-RFID 公共能力位于 `com.leo.rfid`，应用壳、业务模块和基础组件位于 `com.leo.remote`。
+RFID 公共能力位于 `com.leo.uhf.rfid`，应用壳、业务模块和基础组件位于 `com.leo.uhf`。
 
 ## 支持的连接方式
 

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/rfid_page_bg"
-    tools:context="com.leo.rfid.demo.config.ReaderConfigFragment">
+    tools:context="com.leo.uhf.rfid.ui.config.ReaderConfigFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -276,7 +276,7 @@
                 android:layout_height="@dimen/dp_48"
                 android:gravity="center_vertical"
                 android:visibility="gone">
-                <com.leo.remote.core.ui.widget.IpAddressInputView
+                <com.leo.uhf.core.ui.widget.IpAddressInputView
                     android:id="@+id/et_config_wifi_ip"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/dp_44"

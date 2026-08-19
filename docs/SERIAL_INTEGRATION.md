@@ -1,6 +1,6 @@
 # 串口读写器集成说明
 
-RFID 会话通过 `com.leo.rfid.sdk.connect.serial` 提供串口连接抽象，支持 R2000、R2000Plus、RM610 和 RM8011。
+RFID 会话通过 `com.leo.uhf.rfid.sdk.connection.serial` 提供串口连接抽象，支持 R2000、R2000Plus、RM610 和 RM8011。
 
 ## 配置
 
@@ -12,7 +12,7 @@ RFID 会话通过 `com.leo.rfid.sdk.connect.serial` 提供串口连接抽象，�
 
 ## 端口实现
 
-`SerialPortManager` 使用可替换的 `Factory`。默认文件流实现只接受 `115200`，并用于 JVM/Fake 或具备标准文件串口接口的设备。生产 RFID 会话使用当前 `uhf.jar` 中已验证的 `Linkage.open_serial(String)` / `close_serial()`；串口连接会先设置用户选择的 R2000、R2000Plus、RM610 或 RM8011 解析类型。直连握手只读取模块序列号和版本，不调用 RM70xx 专用板卡接口。参考工程的 `serial.aar` 使用另一套 GPIO/端口实现，不能假定适用于所有客户平台。若客户平台使用其他串口 JNI，实现 `Factory` 和 `SerialPortManager.Port`，不要把 JNI 类型泄漏到 RFID 会话或 UI。
+`SerialPortManager` 使用可替换的 `Factory`。默认文件流实现只接受 `115200`，并用于 JVM/Fake 或具备标准文件串口接口的设备。生产 RFID 会话使用当前 `uhf.jar` 中已验证的 `Linkage.open_serial(String)` / `close_serial()`；串口连接会先设置用户选择的 R2000、R2000Plus、RM610 或 RM8011 解析类型。直连握手只读取模块序列号和版本，不调用 RM70xx 专用板卡接口。参考工程的 `serial.aar` 使用另一套 GPIO/端口实现，不能假定适用于所有客户平台。若客户平台使用其他串口 JNI，实现 `Factory` 返回 `com.leo.uhf.rfid.sdk.connection.serial.jni.SerialPort`，不要把 JNI 类型泄漏到 RFID 会话或 UI。
 
 ## 配置保存与权限
 

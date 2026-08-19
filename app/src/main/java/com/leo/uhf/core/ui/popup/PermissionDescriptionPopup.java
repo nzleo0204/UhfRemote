@@ -1,0 +1,40 @@
+package com.leo.uhf.core.ui.popup;
+
+import android.content.Context;
+import android.view.WindowManager;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import com.hjq.base.BasePopupWindow;
+import com.leo.uhf.R;
+
+/** 权限说明弹窗 */
+public final class PermissionDescriptionPopup {
+
+    public static final class Builder
+            extends BasePopupWindow.Builder<Builder> {
+
+        private final TextView descriptionView;
+
+        public Builder(@NonNull Context context) {
+            super(context);
+
+            setContentView(R.layout.permission_description_popup);
+            setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+            setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+            setAnimStyle(android.R.style.Animation_Dialog);
+            setBackgroundDimAmount(0.1f);
+            setTouchable(true);
+            setOutsideTouchable(true);
+
+            descriptionView = findViewById(R.id.tv_permission_description_message);
+        }
+
+        /**
+         * 设置权限说明文案
+         */
+        public Builder setDescription(CharSequence text) {
+            descriptionView.setText(text);
+            return this;
+        }
+    }
+}

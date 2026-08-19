@@ -1,0 +1,68 @@
+package com.leo.uhf.business.shipment.ui;
+
+import android.content.Context;
+import android.content.Intent;
+import androidx.recyclerview.widget.RecyclerView;
+import com.leo.uhf.R;
+import com.leo.uhf.core.data.DataCallback;
+import com.leo.uhf.business.shipment.data.model.Shipment;
+import com.leo.uhf.business.common.data.BusinessRepositories;
+import com.leo.uhf.business.common.ui.PagedQueryActivity;
+import java.util.List;
+
+/**
+ * 提供发运单查询与详情入口页面。
+ */
+public final class ShipmentQueryActivity extends PagedQueryActivity<Shipment> {
+    private ShipmentAdapter adapter;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, ShipmentQueryActivity.class));
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.shipment_query_activity;
+    }
+
+    @Override
+    protected int getRecyclerViewId() {
+        return R.id.rv_shipment;
+    }
+
+    @Override
+    protected int getStateViewId() {
+        return R.id.tv_shipment_state;
+    }
+
+    @Override
+    protected int getRefreshLayoutId() {
+        return R.id.srl_shipment;
+    }
+
+    @Override
+    protected RecyclerView.Adapter<?> createAdapter() {
+        adapter = new ShipmentAdapter();
+        return adapter;
+    }
+
+    @Override
+    protected void queryData(DataCallback<List<Shipment>> callback) {
+        BusinessRepositories.shipment().queryShipments("", null, callback);
+    }
+
+    @Override
+    protected void submitPage(List<Shipment> page) {
+        adapter.submit(page);
+    }
+
+    @Override
+    protected String emptyMessage() {
+        return getString(R.string.shipment_empty);
+    }
+
+    @Override
+    protected String errorMessage() {
+        return getString(R.string.shipment_load_failed);
+    }
+}

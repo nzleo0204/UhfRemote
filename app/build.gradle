@@ -10,7 +10,7 @@ def rootConfig = rootProject.ext
 
 // Android 代码规范文档：https://github.com/getActivity/AndroidCodeStandard
 android {
-    namespace = 'com.leo.remote'
+    namespace = 'com.leo.uhf'
 
     lint {
         baseline = file('lint-baseline.xml')
@@ -25,7 +25,7 @@ android {
     defaultConfig {
 
         // 无痛修改包名：https://www.jianshu.com/p/17327e191d2e
-        applicationId = 'com.leo.remote'
+        applicationId = 'com.leo.uhf'
 
         // 仅保留中文语种的资源
         resConfigs 'zh'
