@@ -10,9 +10,6 @@
     </string-array>
 
     <string-array name="serial_baud_rates">
-        <item>9600</item>
-        <item>38400</item>
-        <item>57600</item>
         <item>115200</item>
     </string-array>
 
@@ -20,6 +17,6 @@
         <item>R2000</item>
         <item>R2000Plus</item>
         <item>RM610</item>
-        <item>RM8011</item>
+        <item>旗连（RM8011 / MagicRF）</item>
     </string-array>
 </resources>

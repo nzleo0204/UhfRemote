@@ -15,21 +15,21 @@
 -keep class com.leo.uhf.rfid.** { *; }
 
 # 保留观察者接口的所有方法
--keep interface com.leo.uhf.rfid.sdk.connection.ReaderObserver {
+-keep interface com.leo.uhf.rfid.api.ReaderObserver {
     public <methods>;
 }
 
 # 保留实现 ReaderObserver 的类的回调方法
--keepclassmembers class * implements com.leo.uhf.rfid.sdk.connection.ReaderObserver {
+-keepclassmembers class * implements com.leo.uhf.rfid.api.ReaderObserver {
     public <methods>;
 }
 
 # 保留数据模型类（可能用于序列化）
--keep class com.leo.uhf.rfid.sdk.model.ReaderState { *; }
--keep class com.leo.uhf.rfid.sdk.model.ReaderConfiguration { *; }
--keep class com.leo.uhf.rfid.sdk.model.ReaderTag { *; }
--keep class com.leo.uhf.rfid.sdk.model.InventoryItem { *; }
--keep class com.leo.uhf.rfid.sdk.model.ReaderModuleInfo { *; }
+-keep class com.leo.uhf.rfid.api.model.ReaderState { *; }
+-keep class com.leo.uhf.rfid.api.model.ReaderConfiguration { *; }
+-keep class com.leo.uhf.rfid.api.model.ReaderTag { *; }
+-keep class com.leo.uhf.rfid.api.model.InventoryItem { *; }
+-keep class com.leo.uhf.rfid.api.model.ReaderModuleInfo { *; }
 
 # 保留枚举类
 -keepclassmembers enum com.leo.uhf.rfid.** {

@@ -16,16 +16,16 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BasePagerAdapter;
 import com.hjq.core.tools.DoubleClickHelper;
 import com.leo.uhf.R;
-import com.leo.uhf.rfid.ui.common.ReaderAwareActivity;
+import com.leo.uhf.rfid.demo.common.ReaderAwareActivity;
 import com.leo.uhf.core.ui.base.BaseFragment;
 import com.leo.uhf.core.ui.adapter.NavigationAdapter;
 import com.leo.uhf.core.ui.adapter.NavigationAdapter.NavigationItem;
-import com.leo.uhf.rfid.ui.inventory.InventoryFragment;
+import com.leo.uhf.rfid.demo.inventory.InventoryFragment;
 import com.leo.uhf.business.auth.ui.MineFragment;
-import com.leo.uhf.rfid.ui.config.ReaderConfigFragment;
-import com.leo.uhf.rfid.ui.tag.SingleTagFragment;
+import com.leo.uhf.rfid.demo.config.ReaderConfigFragment;
+import com.leo.uhf.rfid.demo.tag.SingleTagFragment;
 import com.leo.uhf.business.stock.ui.StockListFragment;
-import com.leo.uhf.rfid.sdk.connection.ReaderSessionManager;
+import com.leo.uhf.rfid.api.ReaderSessionManager;
 
 /**
  * 应用主界面

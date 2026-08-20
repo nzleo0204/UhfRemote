@@ -1,0 +1,9 @@
+package com.leo.uhf.rfid.demo.common;
+
+import com.leo.uhf.core.ui.base.PageActivity;
+
+/**
+ * RFID 业务页基类，统一深色沉浸式状态栏和返回按钮。
+ */
+public abstract class RfidPageActivity extends PageActivity {
+}

@@ -82,7 +82,6 @@
     <string name="serial_connect">连接</string>
     <string name="serial_disconnect">断开串口</string>
     <string name="error_serial_port_not_found">串口设备不存在</string>
-    <string name="error_serial_permission_denied">没有串口访问权限</string>
     <string name="error_serial_open_failed">串口打开失败</string>
     <string name="device_info_transport_serial">串口</string>
     <string name="device_info_name_serial">串口读写器</string>
@@ -138,7 +137,7 @@
     <string name="config_setting_confirm_message">是否将「%1$s」修改为「%2$s」？</string>
     <string name="config_setting_wait">正在设置&#8230;</string>
     <string name="config_setting_success">「%1$s」已设为「%2$s」</string>
-    <string name="config_magic_power">RM8011 功率</string>
+    <string name="config_magic_power">旗连（RM8011 / MagicRF）功率</string>
     <string name="config_rm610_power">RM610 功率</string>
     <string name="config_power_set_failed">功率设置失败</string>
     <string name="config_protocol_set_failed">协议切换失败</string>

@@ -69,7 +69,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name="com.leo.uhf.rfid.sdk.connection.service.ReaderConnectionService"
+            android:name="com.leo.uhf.rfid.platform.android.service.ReaderConnectionService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
