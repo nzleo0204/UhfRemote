@@ -28,6 +28,8 @@ public class UhfNativeBridgeTest {
 
     @Test
     public void mapsQilianRm8011ToMagicRfLinkageType() {
+        assertEquals(1, UhfNativeBridge.LINKAGE_TYPE_QILIAN);
+        assertEquals(2, UhfNativeBridge.LINKAGE_TYPE_RM70XX);
         assertEquals(1, UhfNativeBridge.linkageTypeFor(ModuleSubtype.RM8011));
         assertEquals(0, UhfNativeBridge.linkageTypeFor(ModuleSubtype.R2000));
         assertEquals(3, UhfNativeBridge.linkageTypeFor(ModuleSubtype.R2000_PLUS));

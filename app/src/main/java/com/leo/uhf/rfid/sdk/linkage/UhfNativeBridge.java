@@ -33,9 +33,9 @@ public final class UhfNativeBridge implements ReaderTransportGateway,
     private static final int STATUS_OK = 0;
     private static final int UNSUPPORTED_SERIAL_BAUD_RATE = -68;
     /** Linkage 直连模式中，旗连 MagicRF/RM8011 的解析类型值。 */
-    private static final int LINKAGE_TYPE_QILIAN = 1;
+    static final int LINKAGE_TYPE_QILIAN = 1;
     /** Linkage 通过板卡查询模块型号时使用的 RM70XX 解析类型值。 */
-    private static final int LINKAGE_TYPE_RM70XX = 2;
+    static final int LINKAGE_TYPE_RM70XX = 2;
     private final Linkage linkage = new Linkage();
     private volatile ModuleSubtype configuredModuleSubtype;
 
